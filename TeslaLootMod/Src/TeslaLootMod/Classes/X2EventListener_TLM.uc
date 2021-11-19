@@ -19,7 +19,7 @@ static final function CHEventListenerTemplate CreateStrategyListener()
 
     Template.AddCHEvent('OverrideNumUpgradeSlots', OverrideNumUpgradeSlots, ELD_Immediate);
 
-	return Template; 
+    return Template; 
 }
 
 static function EventListenerReturn OverrideNumUpgradeSlots(Object EventData, Object EventSource, XComGameState NewGameState, Name EventID, Object CallbackObject)
