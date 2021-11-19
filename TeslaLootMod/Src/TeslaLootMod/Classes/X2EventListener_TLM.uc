@@ -26,14 +26,14 @@ static function EventListenerReturn OverrideNumUpgradeSlots(Object EventData, Ob
 {
 	local XComLWTuple OverrideTuple;
     local XComGameState_Item ItemState;
-    local XComGameState_TLM Data;
+    local XComGameState_ItemData Data;
 
     OverrideTuple = XComLWTuple(EventData);
     ItemState = XComGameState_Item(EventSource);
 
     if (ItemState == none) return ELR_NoInterrupt;    
 
-    Data = XComGameState_TLM(ItemState.FindComponentObject(class'XComGameState_TLM'));
+    Data = XComGameState_ItemData(ItemState.FindComponentObject(class'XComGameState_ItemData'));
     if (Data == none) return ELR_NoInterrupt;
 
     OverrideTuple.Data[0].i = Data.NumUpgradeSlots; 

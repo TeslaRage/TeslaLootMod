@@ -55,7 +55,7 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 {              
     local XComGameState_Item Weapon;   
     local XComGameState_HeadquartersXCom XComHQ;
-    local XComGameState_TLM Data;
+    local XComGameState_ItemData Data;
 
     XComHQ = `XCOMHQ;	
     
@@ -71,7 +71,7 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
     Weapon.Nickname = "TLM Weapon :D";
     XComHQ.PutItemInInventory(NewGameState, Weapon);
 
-    Data = XComGameState_TLM(NewGameState.CreateNewStateObject(class'XComGameState_TLM'));
+    Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
     Data.NumUpgradeSlots = 0;
     Weapon.AddComponentObject(Data);
 }

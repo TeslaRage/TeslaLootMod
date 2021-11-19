@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # XCOM ModBuddy Solution File, Format Version 11.00
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{5DAE07AF-E217-45C1-8DE7-FF99D6011E8A}") = "TeslaLootMod", "TeslaLootMod\TeslaLootMod.x2proj", "{290AF6CC-F3D7-44C3-AC63-9B2CBBC1426C}"
+Project("{5DAE07AF-E217-45C1-8DE7-FF99D6011E8A}") = "TeslaLootMod", "TeslaLootMod\TeslaLootMod.x2proj", "{5DF35AF4-6A1F-433D-A05B-61B0B0515B23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|XCOM 2 = Default|XCOM 2
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{290AF6CC-F3D7-44C3-AC63-9B2CBBC1426C}.Default|XCOM 2.ActiveCfg = Default|XCOM 2
-		{290AF6CC-F3D7-44C3-AC63-9B2CBBC1426C}.Default|XCOM 2.Build.0 = Default|XCOM 2
+		{5DF35AF4-6A1F-433D-A05B-61B0B0515B23}.Default|XCOM 2.ActiveCfg = Default|XCOM 2
+		{5DF35AF4-6A1F-433D-A05B-61B0B0515B23}.Default|XCOM 2.Build.0 = Default|XCOM 2
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

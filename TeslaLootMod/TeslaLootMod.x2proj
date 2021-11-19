@@ -35,7 +35,7 @@
     <Content Include="Src\TeslaLootMod\Classes\X2StrategyElement_TLM.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\TeslaLootMod\Classes\XComGameState_TLM.uc">
+    <Content Include="Src\TeslaLootMod\Classes\XComGameState_ItemData.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
