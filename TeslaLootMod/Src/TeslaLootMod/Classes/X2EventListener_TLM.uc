@@ -2,20 +2,20 @@ class X2EventListener_TLM extends X2EventListener;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
-	local array<X2DataTemplate> Templates;
+    local array<X2DataTemplate> Templates;
 
-	Templates.AddItem(CreateStrategyListener());
+    Templates.AddItem(CreateStrategyListener());
 
-	return Templates;
+    return Templates;
 }
 
 static final function CHEventListenerTemplate CreateStrategyListener()
 {
-	local CHEventListenerTemplate Template;
+    local CHEventListenerTemplate Template;
 
-	`CREATE_X2TEMPLATE(class'CHEventListenerTemplate', Template, 'X2EventListener_TLM_Strategy');
+    `CREATE_X2TEMPLATE(class'CHEventListenerTemplate', Template, 'X2EventListener_TLM_Strategy');
 
-	Template.RegisterInStrategy = true;
+    Template.RegisterInStrategy = true;
 
     Template.AddCHEvent('OverrideNumUpgradeSlots', OverrideNumUpgradeSlots, ELD_Immediate);
 
@@ -24,7 +24,7 @@ static final function CHEventListenerTemplate CreateStrategyListener()
 
 static function EventListenerReturn OverrideNumUpgradeSlots(Object EventData, Object EventSource, XComGameState NewGameState, Name EventID, Object CallbackObject)
 {
-	local XComLWTuple OverrideTuple;
+    local XComLWTuple OverrideTuple;
     local XComGameState_Item ItemState;
     local XComGameState_ItemData Data;
 
