@@ -1,0 +1,1 @@
+class X2DownloadableContentInfo_TeslaLootMod extends X2DownloadableContentInfo;

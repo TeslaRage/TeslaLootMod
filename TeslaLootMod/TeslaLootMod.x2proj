@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Guid>cbeeb1b5-87cf-4221-963d-07634cc76f66</Guid>
+    <Name>TeslaLootMod</Name>
+    <Description>Description of My XCOM 2 Mod.</Description>
+    <SteamPublishID>0</SteamPublishID>
+    <AssemblyName>TeslaLootMod</AssemblyName>
+    <RootNamespace>TeslaLootMod</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
+    <Folder Include="Localization\" />
+    <Folder Include="Src\" />
+    <Folder Include="Src\TeslaLootMod\" />
+    <Folder Include="Src\TeslaLootMod\Classes\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ReadMe.txt" />
+    <Content Include="ModPreview.jpg" />
+    <Content Include="Config\XComEditor.ini" />
+    <Content Include="Config\XComEngine.ini" />
+    <Content Include="Config\XComGame.ini" />
+    <Content Include="Localization\XComGame.int" />
+    <Content Include="Src\TeslaLootMod\Classes\X2DownloadableContentInfo_TeslaLootMod.uc" />
+    <Content Include="Src\TeslaLootMod\Classes\X2Item_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2StrategyElement_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
+</Project>
