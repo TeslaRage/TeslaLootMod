@@ -19,12 +19,21 @@
     <Content Include="Config\XComTLM.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Localization\TeslaLootMod.int">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
     <Content Include="Config\XComEditor.ini" />
     <Content Include="Config\XComEngine.ini" />
     <Content Include="Config\XComGame.ini" />
     <Content Include="Localization\XComGame.int" />
+    <Content Include="Src\TeslaLootMod\Classes\UIAlert_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2Ability_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2DownloadableContentInfo_TeslaLootMod.uc" />
     <Content Include="Src\TeslaLootMod\Classes\X2Effect_TLMEffects.uc">
       <SubType>Content</SubType>
@@ -35,7 +44,13 @@
     <Content Include="Src\TeslaLootMod\Classes\X2Item_TLM.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2Item_TLMUpgrades.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2StrategyElement_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2WeaponUpgradeTemplate_TLMAmmo.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\XComGameState_ItemData.uc">
