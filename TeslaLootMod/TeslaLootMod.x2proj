@@ -16,6 +16,9 @@
     <Folder Include="Src\TeslaLootMod\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\XComGameCore.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComTLM.ini">
       <SubType>Content</SubType>
     </Content>

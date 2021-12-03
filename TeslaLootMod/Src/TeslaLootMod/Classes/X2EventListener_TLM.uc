@@ -1,5 +1,7 @@
 class X2EventListener_TLM extends X2EventListener;
 
+var localized string strSlotLocked;
+
 static function array<X2DataTemplate> CreateTemplates()
 {
     local array<X2DataTemplate> Templates;
@@ -34,6 +36,7 @@ static function EventListenerReturn OverrideNumUpgradeSlots(Object EventData, Ob
 
     if (ItemState == none) return ELR_NoInterrupt;    
 
+    // Check if this is our weapon
     Data = XComGameState_ItemData(ItemState.FindComponentObject(class'XComGameState_ItemData'));
     if (Data == none) return ELR_NoInterrupt;
 
@@ -47,6 +50,9 @@ static function EventListenerReturn UIArmory_WeaponUpgrade_SlotsUpdated(Object E
     local XComGameState_Item Item;
     local XComGameState_ItemData Data;
     local UIArmory_WeaponUpgrade Screen;
+    local array<X2WeaponUpgradeTemplate> EquippedUpgrades;
+    local UIList SlotsList;
+    local int i, NumUpgradeSlots;
 
     Screen = UIArmory_WeaponUpgrade(EventSource);
     if (Screen == none) return ELR_NoInterrupt;
@@ -57,7 +63,23 @@ static function EventListenerReturn UIArmory_WeaponUpgrade_SlotsUpdated(Object E
     Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
     if (Data == none) return ELR_NoInterrupt;
 
-    Screen.GetCustomizeItem(0).bDisabled = true; 
+    // Disable nickname change/update
+    // Screen.GetCustomizeItem(0).bDisabled = true; 
+    Screen.GetCustomizeItem(0).SetDisabled(true, "Disabled");
+
+    // Override error message "REQUIRES CONTINENT BONUS"
+    SlotsList = UIList(EventData);
+    EquippedUpgrades = Item.GetMyWeaponUpgradeTemplates();
+    NumUpgradeSlots = Item.GetNumUpgradeSlots();
+
+    for (i = 0; i < EquippedUpgrades.Length; ++i)
+	{
+        if (i > NumUpgradeSlots - 1)
+        {
+            UIArmory_WeaponUpgradeItem(SlotsList.GetItem(i)).SetDisabled(false);
+            UIArmory_WeaponUpgradeItem(SlotsList.GetItem(i)).SetDisabled(true, class'UIUtilities_Text'.static.GetColoredText(default.strSlotLocked, eUIState_Bad));
+        }
+	}
 
     return ELR_NoInterrupt;
 }

@@ -1,3 +1,5 @@
+// This class is meant to house basic weapon altering effects
+// All Refinement Upgrades' abilities are using this effect
 class X2Effect_TLMEffects extends X2Effect_Persistent;
 
 var float DamageMultiplier;
@@ -10,20 +12,26 @@ var int CritDamage;
 function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData, const int CurrentDamage, optional XComGameState NewGameState)
 {
 	local float ExtraDamage;
+	local XComGameState_Item SourceWeapon;
 
-	if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && DamageMultiplier > 0)
+	SourceWeapon = AbilityState.GetSourceWeapon();
+	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
 	{
-		ExtraDamage = CurrentDamage * DamageMultiplier;
-	}
 
-    if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && FlatBonusDamage > 0)
-    {
-        ExtraDamage += FlatBonusDamage;
-    }
+		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && DamageMultiplier != 0)
+		{
+			ExtraDamage = CurrentDamage * DamageMultiplier;
+		}
 
-    if (AppliedData.AbilityResultContext.HitResult == eHit_Crit && CritDamage > 0)
-	{		
-        ExtraDamage += CritDamage;		
+		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && FlatBonusDamage != 0)
+		{
+			ExtraDamage += FlatBonusDamage;
+		}
+
+		if (AppliedData.AbilityResultContext.HitResult == eHit_Crit && CritDamage != 0)
+		{		
+			ExtraDamage += CritDamage;		
+		}
 	}
 
 	return int(ExtraDamage);
@@ -31,23 +39,42 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 
 function int GetExtraArmorPiercing(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData)
 {	
-    return Pierce;
+	local XComGameState_Item SourceWeapon;
+
+	SourceWeapon = AbilityState.GetSourceWeapon();
+	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
+	{
+		return Pierce;
+	}
+	return 0;
 }
 
 function int GetExtraShredValue(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData)
 {
-    return Shred;
+	local XComGameState_Item SourceWeapon;
+
+	SourceWeapon = AbilityState.GetSourceWeapon();
+	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
+	{
+		return Shred;
+	}
+	return 0;
 }
 
 function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, class<X2AbilityToHitCalc> ToHitType, bool bMelee, bool bFlanking, bool bIndirectFire, out array<ShotModifierInfo> ShotModifiers)
 {
 	local ShotModifierInfo ModInfo;	
-	
-	if (CritChance > 0)
+	local XComGameState_Item SourceWeapon;
+
+	SourceWeapon = AbilityState.GetSourceWeapon();
+	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
 	{
-		ModInfo.ModType = eHit_Crit;
-		ModInfo.Reason = FriendlyName;
-		ModInfo.Value = CritChance;
-		ShotModifiers.AddItem(ModInfo);
+		if (CritChance != 0)
+		{
+			ModInfo.ModType = eHit_Crit;
+			ModInfo.Reason = FriendlyName;
+			ModInfo.Value = CritChance;
+			ShotModifiers.AddItem(ModInfo);
+		}
 	}
 }

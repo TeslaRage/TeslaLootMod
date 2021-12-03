@@ -16,6 +16,8 @@ struct RarityData
 	var string Color;
 };
 
+var config int ChanceForAdjustmentUpgrade;
+var config array<name> RandomAdjustmentUpgrades;
 var config array<name> RandomBaseUpgrades;
 var config array<name> RandomAmmoUpgrades;
 var config array<RarityData> Rarity;
@@ -24,6 +26,7 @@ var config array<BaseWeaponDeckData> DeckedBaseWeapons;
 
 var localized array<String> RandomNickNames;
 var localized string strRounds;
+var localized string strPlus;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -72,7 +75,7 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 	local XComGameState_ItemData Data;
 	local RarityData SelectedRarity;
 	local int Idx;
-	local string NickAmmo;
+	local string NickAmmo, NickAdjustment;
 
 	XComHQ = `XCOMHQ;	
 	
@@ -84,8 +87,8 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 		`LOG("Failed to get base weapon");		
 	}
 
-	ApplyWeaponUpgrades(Weapon, SelectedRarity, NickAmmo);
-	GenerateNickName(Weapon, SelectedRarity, NickAmmo);
+	ApplyWeaponUpgrades(Weapon, SelectedRarity, NickAmmo, NickAdjustment);
+	GenerateNickName(Weapon, SelectedRarity, NickAmmo, NickAdjustment);
 	
 	XComHQ.PutItemInInventory(NewGameState, Weapon);
 
@@ -152,7 +155,7 @@ static function X2WeaponTemplate GetBaseWeapon()
 	return X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(name(strWeapon)));
 }
 
-static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityData SelectedRarity, out string NickAmmo)
+static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityData SelectedRarity, out string NickAmmo, out string NickAdjustment)
 {
 	local X2ItemTemplateManager ItemTemplateMan;
 	local X2WeaponUpgradeTemplate WUTemplate;
@@ -181,6 +184,17 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	}
 
 	SelectedRarity = ItemRarity;
+
+	if (`SYNC_RAND_STATIC(100) < default.ChanceForAdjustmentUpgrade)
+	{
+		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomAdjustmentUpgrades[`SYNC_RAND_STATIC(default.RandomAdjustmentUpgrades.Length)]));
+
+		if (WUTemplate != none)
+		{
+			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
+			NickAdjustment = default.strPlus;
+		}
+	}
 
 	Applied = 0;
 	Safety = 0;
@@ -219,9 +233,9 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	}
 }
 
-static function GenerateNickName(out XComGameState_Item Weapon, RarityData SelectedRarity, string NickAmmo)
+static function GenerateNickName(out XComGameState_Item Weapon, RarityData SelectedRarity, string NickAmmo, string NickAdjustment)
 {
-	Weapon.Nickname = "<font color='" $SelectedRarity.Color $"'>" $NickAmmo $default.RandomNickNames[`SYNC_RAND_STATIC(default.RandomNickNames.Length)] $"</font>";
+	Weapon.Nickname = "<font color='" $SelectedRarity.Color $"'>" $NickAmmo $default.RandomNickNames[`SYNC_RAND_STATIC(default.RandomNickNames.Length)] $NickAdjustment $"</font>";
 }
 
 function int SortByChanceDesc(RarityData RarityA, RarityData RarityB)
