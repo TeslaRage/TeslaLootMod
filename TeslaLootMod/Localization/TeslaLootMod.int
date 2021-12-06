@@ -37,6 +37,14 @@ TinySummary="+Ammo Bonus, -Clip size"
 [X2EventListener_TLM]
 strSlotLocked = "LOCKED"
 
+[X2DownloadableContentInfo_TeslaLootMod]
+
+strHasAmmoAlreadyEquipped = "AMMO EQUIPPED"
+strWeaponHasAmmoUpgrade = "WEAPON HAS AMMO UPGRADE"
+strTier0Color = "#FFFF00"
+strTier1Color = "#FFA500"
+strTier2Color = "#3ABD23"
+
 [X2StrategyElement_TLM]
 
 strRounds = "Rounds"

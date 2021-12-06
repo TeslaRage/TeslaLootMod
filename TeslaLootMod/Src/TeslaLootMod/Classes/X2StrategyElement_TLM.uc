@@ -16,10 +16,12 @@ struct RarityData
 	var string Color;
 };
 
+var config int NumOfTimesToForceInstant;
 var config int ChanceForAdjustmentUpgrade;
 var config array<name> RandomAdjustmentUpgrades;
 var config array<name> RandomBaseUpgrades;
 var config array<name> RandomAmmoUpgrades;
+var config array<name> RandomBaseMeleeUpgrades;
 var config array<RarityData> Rarity;
 var config array<ForceLevelDeckData> BaseWeaponDecks;
 var config array<BaseWeaponDeckData> DeckedBaseWeapons;
@@ -44,21 +46,16 @@ static function X2DataTemplate CreateUnlockLockboxTemplate()
 
 	`CREATE_X2TEMPLATE(class'X2TechTemplate', Template, 'UnlockLockbox');
 	Template.PointsToComplete = 360;
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";
-	Template.bAutopsy = true;	
-	Template.bCheckForceInstant = true;
-	Template.bRepeatable = true;
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";	
 	Template.SortingTier = 2;
 	Template.ResearchCompletedFn = UnlockLockboxCompleted;
 
 	Template.Requirements.RequiredItems.AddItem('LockBox');
-	Template.Requirements.RequiredScienceScore = 10;
+	Template.Requirements.RequiredEngineeringScore = 10;
 	Template.Requirements.bVisibleIfPersonnelGatesNotMet = true;
 
-	// Instant Requirements. Will become the Cost if the tech is forced to Instant.
-	Artifacts.ItemTemplateName = 'LockboxKey';
-	Artifacts.Quantity = 3;
-	Template.InstantRequirements.RequiredItemQuantities.AddItem(Artifacts);
+	Template.bRepeatable = true;
+	Template.bProvingGround = true;
 
 	// Cost
 	Artifacts.ItemTemplateName = 'LockboxKey';
@@ -74,7 +71,6 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 	local XComGameState_HeadquartersXCom XComHQ;
 	local XComGameState_ItemData Data;
 	local RarityData SelectedRarity;
-	local int Idx;
 	local string NickAmmo, NickAdjustment;
 
 	XComHQ = `XCOMHQ;	
@@ -89,16 +85,24 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 
 	ApplyWeaponUpgrades(Weapon, SelectedRarity, NickAmmo, NickAdjustment);
 	GenerateNickName(Weapon, SelectedRarity, NickAmmo, NickAdjustment);
-	
-	XComHQ.PutItemInInventory(NewGameState, Weapon);
 
 	Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
 	Data.NumUpgradeSlots = 0;
-	Weapon.AddComponentObject(Data);
+	Weapon.AddComponentObject(Data);	
+	
+	XComHQ.PutItemInInventory(NewGameState, Weapon);
+	`XEVENTMGR.TriggerEvent('ItemConstructionCompleted', Weapon, Weapon, NewGameState);
 
-	Idx = default.DeckedBaseWeapons.Find('BaseWeapon', Weapon.GetMyTemplate().DataName);
-	`LOG("default.DeckedBaseWeapons[Idx].Image: " $default.DeckedBaseWeapons[Idx].Image);
-	UIItemReceived(Weapon.GetMyTemplate(), Weapon.ObjectID, default.DeckedBaseWeapons[Idx].Image);
+	TechState.ItemRewards.Length = 0; 						// Reset the item rewards array in case the tech is repeatable
+	TechState.ItemRewards.AddItem(Weapon.GetMyTemplate());  // Needed for UI Alert display info
+	TechState.bSeenResearchCompleteScreen = false; 			// Reset the research report for techs that are repeatable
+
+	if (!TechState.IsInstant() && TechState.TimesResearched >= default.NumOfTimesToForceInstant)
+	{
+		TechState.bForceInstant = true; 
+	}
+
+	UIItemReceived(NewGameState, Weapon);
 }
 
 static function X2WeaponTemplate GetBaseWeapon()
@@ -114,8 +118,9 @@ static function X2WeaponTemplate GetBaseWeapon()
 	local ForceLevelDeckData BaseWeaponDeck;
 	local BaseWeaponDeckData DeckedBaseWeapon;
 	local name DeckToUse;
-	local int Weight;
-	local string strWeapon;
+	local int Weight, Idx;
+	local string strWeapon, CardLabel;
+	local array<string> CardLabels;
 
 	XComHQ = `XCOMHQ;
 	History = `XCOMHISTORY;
@@ -128,7 +133,9 @@ static function X2WeaponTemplate GetBaseWeapon()
 		if (AlienHQ.ForceLevel < BaseWeaponDeck.MinFL || AlienHQ.ForceLevel > BaseWeaponDeck.MaxFL) continue;
 
 		DeckToUse = BaseWeaponDeck.Deck;
-	}
+	}	
+
+	CardMan.GetAllCardsInDeck(DeckToUse, CardLabels);
 
 	foreach default.DeckedBaseWeapons(DeckedBaseWeapon)
 	{
@@ -146,11 +153,33 @@ static function X2WeaponTemplate GetBaseWeapon()
 			if (Unit.GetSoldierClassTemplate().IsWeaponAllowedByClass(WTemplate)) Weight++;
 		}
 
-		if (Weight == 0) Weight = 1;		
-		CardMan.AddCardToDeck(DeckToUse, string(WTemplate.DataName), float(Weight));
+		if (Weight == 0) Weight = 1;
+
+		if (CardLabels.Find(string(WTemplate.DataName)) == INDEX_NONE)
+		{
+			CardMan.AddCardToDeck(DeckToUse, string(WTemplate.DataName), float(Weight));
+		}
+	}
+
+	CardLabels.Length = 0;
+	CardMan.GetAllCardsInDeck(DeckToUse, CardLabels);
+	
+	foreach CardLabels(CardLabel)
+	{
+		Idx = default.DeckedBaseWeapons.Find('BaseWeapon', name(CardLabel));
+		if (Idx != INDEX_NONE)
+		{
+			if (default.DeckedBaseWeapons[Idx].Deck != DeckToUse)
+				CardMan.RemoveCardFromDeck(DeckToUse, CardLabel);
+		}
+		else
+		{
+			CardMan.RemoveCardFromDeck(DeckToUse, CardLabel);
+		}
 	}
 
 	CardMan.SelectNextCardFromDeck(DeckToUse, strWeapon);
+	CardMan.MarkCardUsed(DeckToUse, strWeapon);
 
 	return X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(name(strWeapon)));
 }
@@ -198,13 +227,14 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	Applied = 0;
 	Safety = 0;
-	while (Applied < ItemRarity.NumOfBaseUpgrades && Safety <= ItemRarity.NumOfBaseUpgrades + 10)
+	while (Applied < ItemRarity.NumOfBaseUpgrades && Safety <= ItemRarity.NumOfBaseUpgrades + 100)
 	{
 		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomBaseUpgrades[`SYNC_RAND_STATIC(default.RandomBaseUpgrades.Length)]));
 		if (WUTemplate == none) continue;
 
 		// Using GetMyWeaponUpgradeCount() to get next "empty" slot
-		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount()))
+		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
+			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
 		{
 			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
 			Applied++;
@@ -215,13 +245,14 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	Applied = 0;
 	Safety = 0;
-	while (Applied < ItemRarity.NumOfAmmoUpgrades && Safety <= ItemRarity.NumOfAmmoUpgrades + 10)
+	while (Applied < ItemRarity.NumOfAmmoUpgrades && Safety <= ItemRarity.NumOfAmmoUpgrades + 100)
 	{
 		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomAmmoUpgrades[`SYNC_RAND_STATIC(default.RandomAmmoUpgrades.Length)]));
 		if (WUTemplate == none) continue;
 
 		// Using GetMyWeaponUpgradeCount() to get next "empty" slot
-		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount()))
+		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
+			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
 		{
 			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
 			Applied++;
@@ -231,6 +262,24 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 		
 		Safety++;		
 	}
+
+	Applied = 0;
+	Safety = 0;
+	while (Applied < ItemRarity.NumOfBaseUpgrades && Safety <= ItemRarity.NumOfBaseUpgrades + 100)
+	{
+		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomBaseMeleeUpgrades[`SYNC_RAND_STATIC(default.RandomBaseMeleeUpgrades.Length)]));
+		if (WUTemplate == none) continue;
+
+		// Using GetMyWeaponUpgradeCount() to get next "empty" slot
+		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
+			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
+		{
+			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
+			Applied++;
+		}
+		
+		Safety++;		
+	}	
 }
 
 static function GenerateNickName(out XComGameState_Item Weapon, RarityData SelectedRarity, string NickAmmo, string NickAdjustment)
@@ -259,15 +308,30 @@ function int SortByChanceDesc(RarityData RarityA, RarityData RarityB)
 	}
 }
 
-static function UIItemReceived(X2ItemTemplate ItemTemplate, int ItemObjectID, string ImageUponResearchCompletion)
+static function UIItemReceived(XComGameState NewGameState, XComGameState_Item Item)
 {
 	local DynamicPropertySet PropertySet;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local string WeaponInfo;
+	local int Idx;
+
+	Idx = default.DeckedBaseWeapons.Find('BaseWeapon', Item.GetMyTemplate().DataName);
+	WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+
+	WeaponInfo = Item.Nickname $"\n";
+	foreach WUTemplates(WUTemplate)
+	{
+		WeaponInfo $= WUTemplate.GetItemFriendlyName() $"\n";
+		WeaponInfo $= WUTemplate.GetItemBriefSummary() $"\n";
+	}
 
 	BuildUIAlert(PropertySet, 'eAlert_TLMItemRewarded', None, '', "Geoscape_ItemComplete");
-	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicNameProperty(PropertySet, 'ItemTemplate', ItemTemplate.DataName);
-	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicIntProperty(PropertySet, 'ItemObjectID', ItemObjectID);
-	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicStringProperty(PropertySet, 'ImageUponResearchCompletion', ImageUponResearchCompletion);
-	QueueDynamicPopup(PropertySet);
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicNameProperty(PropertySet, 'ItemTemplate', Item.GetMyTemplate().DataName);	
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicStringProperty(PropertySet, 'ImageUponResearchCompletion', default.DeckedBaseWeapons[Idx].Image);
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicStringProperty(PropertySet, 'WeaponInfo', WeaponInfo);
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicStringProperty(PropertySet, 'Nickname', Item.Nickname);
+	QueueDynamicPopup(PropertySet, NewGameState);
 }
 
 static function BuildUIAlert(

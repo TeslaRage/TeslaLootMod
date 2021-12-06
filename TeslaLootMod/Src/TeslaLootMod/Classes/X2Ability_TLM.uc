@@ -1,5 +1,14 @@
 class X2Ability_TLM extends X2Ability config(TLM);
 
+enum ETRPoolType
+{
+	ePool_Refinement,
+	ePool_Base,
+	ePool_Ammo,
+	ePool_Melee,
+	ePool_Gremlin,
+};
+
 struct AmmoConversionData
 {
 	var name Ammo;
@@ -16,7 +25,8 @@ struct BaseWeaponDeckData
 
 struct WeaponAdjustmentData
 {
-	var name AdjustmentName;	
+	var name AdjustmentName;
+	var int Tier;
 	var int Damage;
 	var int Crit;
 	var int Pierce;

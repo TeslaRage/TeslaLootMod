@@ -49,6 +49,7 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AmmoTemp
 	Template.CanBeBuilt = false;
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = 2; // This influences the color in the popup
 
 	if (MEWithClipSizeMods)
 		Template.MutuallyExclusiveUpgrades = default.ClipSizeModifyingUpgrades;
@@ -85,6 +86,7 @@ static function X2DataTemplate AdjustmentUpgrade(name WeaponUpgradeName, WeaponA
 	Template.CanBeBuilt = false;
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = Adjustment.Tier;
 
 	SetUpgradeIcons_AdjustmentUpgrade(Template);
 	

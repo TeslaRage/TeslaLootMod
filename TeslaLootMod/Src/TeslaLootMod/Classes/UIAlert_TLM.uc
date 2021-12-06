@@ -25,34 +25,19 @@ simulated function BuildTLMItemRewardedAlert()
 {
 	local TAlertAvailableInfo kInfo;
 	local X2ItemTemplate ItemTemplate;	
-	local XComGameState_Item Item;
 	local X2ItemTemplateManager TemplateManager;
-	local array<X2WeaponUpgradeTemplate> WUTemplates;
-	local X2WeaponUpgradeTemplate WUTemplate;
-	local int ItemObjectID;
 	local string ImageUponResearchCompletion;
 
 	TemplateManager = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
 	ItemTemplate = TemplateManager.FindItemTemplate(
 		class'X2StrategyGameRulesetDataStructures'.static.GetDynamicNameProperty(DisplayPropertySet, 'ItemTemplate'));
-
-	ItemObjectID = class'X2StrategyGameRulesetDataStructures'.static.GetDynamicIntProperty(DisplayPropertySet, 'ItemObjectID');
-	ImageUponResearchCompletion = class'X2StrategyGameRulesetDataStructures'.static.GetDynamicStringProperty(DisplayPropertySet, 'ImageUponResearchCompletion');
-
-	Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemObjectID));
+	
+	ImageUponResearchCompletion = class'X2StrategyGameRulesetDataStructures'.static.GetDynamicStringProperty(DisplayPropertySet, 'ImageUponResearchCompletion');	
 
 	kInfo.strTitle = m_strNewItemReceived;
-	kInfo.strName = Item.Nickname;
-	
-	WUTemplates = Item.GetMyWeaponUpgradeTemplates();
-	
-	foreach WUTemplates(WUTemplate)
-	{
-		kInfo.strBody $= WUTemplate.GetItemFriendlyName() $"\n";
-		kInfo.strBody $= WUTemplate.GetItemBriefSummary() $"\n\n";
-	}	
-	
+	kInfo.strName = class'X2StrategyGameRulesetDataStructures'.static.GetDynamicStringProperty(DisplayPropertySet, 'Nickname');
+	kInfo.strBody = class'X2StrategyGameRulesetDataStructures'.static.GetDynamicStringProperty(DisplayPropertySet, 'WeaponInfo');	
 	kInfo.strConfirm = m_strAccept;
 	kInfo.strImage = ItemTemplate.strImage;
 	

@@ -32,7 +32,7 @@ static function X2DataTemplate CreateLockBox()
 	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'LockBox');
 
 	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.AdventDatapad';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Advent_Datapad";
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";
 	Template.ItemCat = 'utility';
 	Template.CanBeBuilt = false;
 	Template.HideInInventory = false;
