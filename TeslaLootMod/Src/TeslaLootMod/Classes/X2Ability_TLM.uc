@@ -46,6 +46,8 @@ var config int RapidFireAimPenalty;
 var config int RapidFireCooldown;
 var config int HailOfBulletsCharges;
 var config int HailOfBulletsCooldown;
+var config int KillZoneCharges;
+var config int KillZoneCooldown;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -71,6 +73,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TLMRapidFire());
 	Templates.AddItem(TLMRapidFire2());
 	Templates.AddItem(TLMHailOfBullets());
+	Templates.AddItem(TLMKillZone());
 
 	return Templates;
 }
@@ -414,5 +417,113 @@ static function X2AbilityTemplate TLMHailOfBullets()
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
 	Template.bFrameEvenWhenUnitIsHidden = true;
 
+	return Template;
+}
+
+static function X2AbilityTemplate TLMKillZone(bool bDisplayZone=false)
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityCooldown Cooldown;
+	local X2AbilityCost_Ammo AmmoCost;
+	local X2AbilityCost_ActionPoints ActionPointCost;
+	local X2AbilityTarget_Cursor CursorTarget;
+	local X2AbilityMultiTarget_Cone ConeMultiTarget;
+	local X2Effect_ReserveActionPoints ReservePointsEffect;
+	local X2Effect_MarkValidActivationTiles MarkTilesEffect;
+	local X2Condition_UnitEffects SuppressedCondition;
+	local X2Effect_Persistent KillZoneEffect;
+	local X2AbilityCharges Charges;
+	local X2AbilityCost_Charges ChargeCost;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'TLMAbility_KillZone');
+
+	AmmoCost = new class'X2AbilityCost_Ammo';
+	AmmoCost.iAmmo = 1;
+	AmmoCost.bFreeCost = true;
+	Template.AbilityCosts.AddItem(AmmoCost);
+
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.bAddWeaponTypicalCost = true;
+	ActionPointCost.bConsumeAllPoints = true;   //  this will guarantee the unit has at least 1 action point
+	ActionPointCost.bFreeCost = true;           //  ReserveActionPoints effect will take all action points away
+	ActionPointCost.DoNotConsumeAllEffects.Length = 0;
+	ActionPointCost.DoNotConsumeAllSoldierAbilities.Length = 0;
+	ActionPointCost.AllowedTypes.RemoveItem(class'X2CharacterTemplateManager'.default.SkirmisherInterruptActionPoint);
+	Template.AbilityCosts.AddItem(ActionPointCost);
+
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+	SuppressedCondition = new class'X2Condition_UnitEffects';
+	SuppressedCondition.AddExcludeEffect(class'X2Effect_Suppression'.default.EffectName, 'AA_UnitIsSuppressed');
+	SuppressedCondition.AddExcludeEffect(class'X2Effect_SkirmisherInterrupt'.default.EffectName, 'AA_AbilityUnavailable');
+	Template.AbilityShooterConditions.AddItem(SuppressedCondition);
+
+	Cooldown = new class'X2AbilityCooldown';
+	Cooldown.iNumTurns = default.KillZoneCooldown;
+	Template.AbilityCooldown = Cooldown;
+
+	Charges = new class'X2AbilityCharges';
+	Charges.InitialCharges = default.KillZoneCharges;
+	Template.AbilityCharges = Charges;
+
+	ChargeCost = new class'X2AbilityCost_Charges';
+	ChargeCost.NumCharges = 1;
+	Template.AbilityCosts.AddItem(ChargeCost);
+
+	CursorTarget = new class'X2AbilityTarget_Cursor';
+	CursorTarget.bRestrictToWeaponRange = true;
+	Template.AbilityTargetStyle = CursorTarget;
+
+	ConeMultiTarget = new class'X2AbilityMultiTarget_Cone';
+	ConeMultiTarget.bUseWeaponRadius = true;
+	ConeMultiTarget.ConeEndDiameter = 32 * class'XComWorldData'.const.WORLD_StepSize;
+	ConeMultiTarget.ConeLength = 60 * class'XComWorldData'.const.WORLD_StepSize;
+	Template.AbilityMultiTargetStyle = ConeMultiTarget;
+
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	ReservePointsEffect = new class'X2Effect_ReserveActionPoints';
+	ReservePointsEffect.ReserveType = class'X2Ability_SharpshooterAbilitySet'.default.KillZoneReserveType;
+	Template.AddShooterEffect(ReservePointsEffect);
+
+	MarkTilesEffect = new class'X2Effect_MarkValidActivationTiles';
+	MarkTilesEffect.AbilityToMark = 'KillZoneShot';
+	MarkTilesEffect.bVisualizeFlagsOnCursor = bDisplayZone;
+	Template.AddShooterEffect(MarkTilesEffect);
+
+	if (bDisplayZone)
+	{
+		// Add persistent effect on shooter to be able to have a callback on load, 
+		// so the pathing pawn is notified to display a flag on Killzone tiles on load.
+		KillZoneEffect = new class'X2Effect_Persistent';
+		KillZoneEffect.EffectName = 'KillZoneSource';
+		KillZoneEffect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnBegin);
+		Template.AddShooterEffect(KillZoneEffect);
+	}
+
+	Template.AdditionalAbilities.AddItem('KillZoneShot');
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.TargetingMethod = class'X2TargetingMethod_Cone';
+	Template.bSkipFireAction = true;
+	Template.bShowActivation = true;
+
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_AlwaysShow;
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_killzone";
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.CLASS_MAJOR_PRIORITY;
+	Template.bDisplayInUITooltip = false;
+	Template.bDisplayInUITacticalText = false;
+	Template.Hostility = eHostility_Defensive;
+	Template.AbilityConfirmSound = "Unreal2DSounds_OverWatch";
+
+	Template.ActivationSpeech = 'KillZone';
+	
+	Template.bCrossClassEligible = false;
+	
+	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
+	
 	return Template;
 }

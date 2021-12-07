@@ -29,6 +29,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	// Legendary upgrades
 	Items.AddItem(Legendary_RapidFire());
 	Items.AddItem(Legendary_HailOfBullets());
+	Items.AddItem(Legendary_KillZone());
 
 	return Items;
 }
@@ -149,6 +150,29 @@ static function X2DataTemplate Legendary_HailOfBullets()
 
 	SetUpLegendaryMutualExclusives(Template);
 	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_hailofbullets"); // Fine to reuse this
+
+	return Template;
+}
+
+static function X2DataTemplate Legendary_KillZone()
+{
+	local X2WeaponUpgradeTemplate Template;	
+
+	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_KillZone');	
+		
+	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
+	
+	Template.BonusAbilities.AddItem('TLMAbility_KillZone');
+
+	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
+	Template.CanBeBuilt = false;
+	Template.MaxQuantity = 1;
+	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = 3;
+
+	SetUpLegendaryMutualExclusives(Template);
+	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_killzone"); // Fine to reuse this
 
 	return Template;
 }
