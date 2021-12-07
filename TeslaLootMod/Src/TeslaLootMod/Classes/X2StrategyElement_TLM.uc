@@ -12,18 +12,17 @@ struct RarityData
 	var name Rarity;
 	var int Chance;
 	var int NumOfBaseUpgrades;
-	var int NumOfAmmoUpgrades;
+	var bool AllowAmmoUpgrade;
 	var bool LegendaryUpgrade;
 	var string Color;
 };
 
 var config int NumOfTimesToForceInstant;
 var config int ChanceForAdjustmentUpgrade;
-var config array<LegendaryUpgradeData> RandomLegendaryUpgrades;
-var config array<name> RandomAdjustmentUpgrades;
-var config array<name> RandomBaseUpgrades;
-var config array<name> RandomAmmoUpgrades;
-var config array<name> RandomBaseMeleeUpgrades;
+var config array<UpgradePoolData> RandomLegendaryUpgrades;
+var config array<UpgradePoolData> RandomAdjustmentUpgrades;
+var config array<UpgradePoolData> RandomBaseUpgrades;
+var config array<UpgradePoolData> RandomAmmoUpgrades;
 var config array<RarityData> Rarity;
 var config array<ForceLevelDeckData> BaseWeaponDecks;
 var config array<BaseWeaponDeckData> DeckedBaseWeapons;
@@ -189,13 +188,12 @@ static function X2WeaponTemplate GetBaseWeapon()
 static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityData SelectedRarity, out string NickAmmo, out string NickAdjustment)
 {
 	local X2ItemTemplateManager ItemTemplateMan;
-	local X2WeaponUpgradeTemplate WUTemplate;	
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
 	local RarityData RarityStruct, ItemRarity;
-	local LegendaryUpgradeData LegendaryUpgrade;
-	local array<name> FilteredUpgrades;
-	local int Applied, Safety, Random, CurrentTotal;
+	local int Applied, RarityRoll, CurrentTotal, Idx;
 
-	Random = `SYNC_RAND_STATIC(100);
+	RarityRoll = `SYNC_RAND_STATIC(100);
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();  
 
 	default.Rarity.Sort(SortByChanceDesc);   
@@ -203,7 +201,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	foreach default.Rarity(RarityStruct)
 	{		
 		CurrentTotal += RarityStruct.Chance;
-		if (Random < CurrentTotal) 
+		if (RarityRoll < CurrentTotal) 
         {
             ItemRarity = RarityStruct;
             break;
@@ -218,90 +216,67 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	SelectedRarity = ItemRarity;
 
+	// If we rolled Legendary, then grab the Legendary Upgrade
 	if (SelectedRarity.LegendaryUpgrade)
-	{		
-		foreach default.RandomLegendaryUpgrades(LegendaryUpgrade)
-		{
-			if (LegendaryUpgrade.AllowedWeaponCats.Find(X2WeaponTemplate(Weapon.GetMyTemplate()).WeaponCat) != INDEX_NONE)
-			{
-				FilteredUpgrades.AddItem(LegendaryUpgrade.UpgradeName);
-			}
-		}		
-		
-		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(FilteredUpgrades[`SYNC_RAND_STATIC(FilteredUpgrades.Length)]));
-
+	{
+		WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomLegendaryUpgrades);
+		WUTemplate = WUTemplates[`SYNC_RAND_STATIC(WUTemplates.Length)];		
 		if (WUTemplate != none)
-		{
 			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
-		}
-	}
+	}	
 
+	// Roll for Refinement Upgrade
 	if (`SYNC_RAND_STATIC(100) < default.ChanceForAdjustmentUpgrade)
 	{
-		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomAdjustmentUpgrades[`SYNC_RAND_STATIC(default.RandomAdjustmentUpgrades.Length)]));
-
+		WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomAdjustmentUpgrades);
+		WUTemplate = WUTemplates[`SYNC_RAND_STATIC(WUTemplates.Length)];
 		if (WUTemplate != none)
-		{
 			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
-			NickAdjustment = default.strPlus;
-		}
+		NickAdjustment = default.strPlus;
 	}
 
-	Applied = 0;
-	Safety = 0;
-	while (Applied < SelectedRarity.NumOfBaseUpgrades && Safety <= SelectedRarity.NumOfBaseUpgrades + 100)
-	{
-		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomBaseUpgrades[`SYNC_RAND_STATIC(default.RandomBaseUpgrades.Length)]));
-		if (WUTemplate == none) continue;
+	// Roll for base upgrades
+	WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomBaseUpgrades);
 
-		// Using GetMyWeaponUpgradeCount() to get next "empty" slot
-		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
+	Applied = 0;
+	while (Applied < SelectedRarity.NumOfBaseUpgrades && WUTemplates.Length > 0)
+	{
+		Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
+		WUTemplate = WUTemplates[Idx];
+
+		if (WUTemplate != none 
+			&& WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
 			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
 		{
 			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
+			WUTemplates.Remove(Idx, 1);
 			Applied++;
 		}
-		
-		Safety++;		
+		else
+		{
+			WUTemplates.Remove(Idx, 1);
+		}
 	}
 
-	Applied = 0;
-	Safety = 0;
-	while (Applied < SelectedRarity.NumOfAmmoUpgrades && Safety <= SelectedRarity.NumOfAmmoUpgrades + 100)
+	// Roll for ammo upgrade
+	if (SelectedRarity.AllowAmmoUpgrade)
 	{
-		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomAmmoUpgrades[`SYNC_RAND_STATIC(default.RandomAmmoUpgrades.Length)]));
-		if (WUTemplate == none) continue;
-
-		// Using GetMyWeaponUpgradeCount() to get next "empty" slot
-		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
-			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
+		WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomAmmoUpgrades);
+		if (WUTemplates.Length > 0)
 		{
-			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
-			Applied++;
-			NickAmmo = WUTemplate.GetItemFriendlyName();
-			NickAmmo -= default.strRounds;
+			Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
+			WUTemplate = WUTemplates[Idx];
+
+			if (WUTemplate != none
+				&& WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
+				&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
+			{
+				Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
+				NickAmmo = WUTemplate.GetItemFriendlyName();
+				NickAmmo -= default.strRounds;
+			}
 		}
-		
-		Safety++;		
 	}
-
-	Applied = 0;
-	Safety = 0;
-	while (Applied < SelectedRarity.NumOfBaseUpgrades && Safety <= SelectedRarity.NumOfBaseUpgrades + 100)
-	{
-		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomBaseMeleeUpgrades[`SYNC_RAND_STATIC(default.RandomBaseMeleeUpgrades.Length)]));
-		if (WUTemplate == none) continue;
-
-		// Using GetMyWeaponUpgradeCount() to get next "empty" slot
-		if (WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
-			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
-		{
-			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
-			Applied++;
-		}
-		
-		Safety++;		
-	}	
 }
 
 static function GenerateNickName(out XComGameState_Item Weapon, RarityData SelectedRarity, string NickAmmo, string NickAdjustment)
@@ -404,4 +379,42 @@ static function QueueDynamicPopup(const out DynamicPropertySet PopupInfo, option
 	{
 		`PRESBASE.DisplayQueuedDynamicPopups();
 	}
+}
+
+static function array<X2WeaponUpgradeTemplate> BuildUpgradePool(XComGameState_Item Weapon, X2ItemTemplateManager ItemTemplateMan, array<UpgradePoolData> ConfiguredPool)
+{
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local UpgradePoolData PoolData;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;	
+
+	foreach ConfiguredPool(PoolData)
+	{
+		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(PoolData.UpgradeName));
+
+		// Maybe because required mod like melee upgrades is not installed
+		if (WUTemplate == none) continue;
+
+		// Go through the basic validation first
+		if (!WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
+			&& !Weapon.CanWeaponApplyUpgrade(WUTemplate))
+			continue;
+
+		// If configured as allowed, then we include into pool
+		if (PoolData.AllowedWeaponCats.Find(X2WeaponTemplate(Weapon.GetMyTemplate()).WeaponCat) != INDEX_NONE)
+		{
+			WUTemplates.AddItem(WUTemplate);
+			continue;
+		}
+		else if (PoolData.AllowedWeaponCats.Length > 0)		
+			continue;
+
+		// If configured as disallowed, then we don't include into pool
+		if (PoolData.DisallowedWeaponCats.Find(X2WeaponTemplate(Weapon.GetMyTemplate()).WeaponCat) != INDEX_NONE)
+			continue;		
+
+		// If we reach here, it means the upgrade is meant for all weapon categories
+		WUTemplates.AddItem(WUTemplate);
+	}
+
+	return WUTemplates;
 }

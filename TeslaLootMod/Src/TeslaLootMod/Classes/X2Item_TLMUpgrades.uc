@@ -15,8 +15,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	foreach class'X2Ability_TLM'.default.ConvertAmmo(AmmoConversion)
 	{
 		ItemName = "TLMUpgrade_" $AmmoConversion.Ammo;
-		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
-		Items.AddItem(AmmoUpgrade(name(ItemName), AmmoConversion.Ammo, name(AbilityName), AmmoConversion.Image, AmmoConversion.MEWithClipSizeMods));
+		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;		
+		Items.AddItem(AmmoUpgrade(name(ItemName), name(AbilityName), AmmoConversion));
 	}
 
 	// Weapon Refinement Upgrades
@@ -35,7 +35,7 @@ static function array<X2DataTemplate> CreateTemplates()
 }
 
 // HELPERS
-static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AmmoTemplateName, name AbilityName, string Image, bool MEWithClipSizeMods)
+static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityName, AmmoConversionData AmmoConversion)
 {
 	local X2WeaponUpgradeTemplate_TLMAmmo Template;	
 
@@ -44,8 +44,8 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AmmoTemp
 	Template.BonusAbilities.AddItem(AbilityName);
 		
 	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = Image;
-	Template.AmmoTemplateName = AmmoTemplateName;
+	Template.strImage = AmmoConversion.Image;
+	Template.AmmoTemplateName = AmmoConversion.Ammo;
 
 	Template.ClipSizeBonus = -default.AmmoUpgradeClipSizePenalty;
 	Template.AdjustClipSizeFn = AmmoUpgradeAdjustClipSize;
@@ -56,7 +56,7 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AmmoTemp
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 2; // This influences the color in the popup
 
-	if (MEWithClipSizeMods)
+	if (AmmoConversion.MEWithClipSizeMods)
 		Template.MutuallyExclusiveUpgrades = default.ClipSizeModifyingUpgrades;
 
 	SetUpgradeIcons(Template);
@@ -179,7 +179,7 @@ static function X2DataTemplate Legendary_KillZone()
 
 static function SetUpLegendaryMutualExclusives(out X2WeaponUpgradeTemplate Template)
 {
-	local LegendaryUpgradeData LegendaryUpgrade;
+	local UpgradePoolData LegendaryUpgrade;
 
 	foreach class'X2StrategyElement_TLM'.default.RandomLegendaryUpgrades(LegendaryUpgrade)
 	{

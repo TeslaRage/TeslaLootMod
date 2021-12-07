@@ -1,14 +1,6 @@
 class X2DownloadableContentInfo_TeslaLootMod extends X2DownloadableContentInfo;
 
-struct PoolRestrictionData
-{
-	var ETRPoolType PoolType;
-	var array<name> AllowedWeaponCats;
-	var array<name> DisallowedWeaponCats;
-};
-
 var config (TLM) array<LootTable> LootEntry;
-var config (TLM) array<PoolRestrictionData> PoolRestrictions;
 
 var localized string strHasAmmoAlreadyEquipped;
 var localized string strWeaponHasAmmoUpgrade;
@@ -34,54 +26,6 @@ static event OnLoadedSavedGameToStrategy()
 static event OnLoadedSavedGameToTactical()
 {
 	CreateTechsMidCampaign();
-}
-
-static function bool CanWeaponApplyUpgrade(XComGameState_Item WeaponState, X2WeaponUpgradeTemplate UpgradeTemplate)
-{
-	local PoolRestrictionData PoolRestriction;
-	local ETRPoolType PoolType;	
-
-	// Determine which pool is this upgrade from
-	if (class'X2StrategyElement_TLM'.default.RandomAdjustmentUpgrades.Find(UpgradeTemplate.DataName) != INDEX_NONE)
-		PoolType = ePool_Refinement;
-	else if(class'X2StrategyElement_TLM'.default.RandomBaseUpgrades.Find(UpgradeTemplate.DataName) != INDEX_NONE)
-		PoolType = ePool_Base;
-	else if(class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades.Find(UpgradeTemplate.DataName) != INDEX_NONE)
-		PoolType = ePool_Ammo;
-	else if(class'X2StrategyElement_TLM'.default.RandomBaseMeleeUpgrades.Find(UpgradeTemplate.DataName) != INDEX_NONE)
-		PoolType = ePool_Melee;	
-
-	foreach default.PoolRestrictions(PoolRestriction)
-	{
-		if (PoolRestriction.PoolType != PoolType) continue;
-
-		switch (PoolRestriction.PoolType)
-		{
-			case ePool_Refinement:
-				return CanWeaponCatApplyUpgrade(X2WeaponTemplate(WeaponState.GetMyTemplate()).WeaponCat,
-												UpgradeTemplate.DataName,
-												PoolRestriction,
-												class'X2StrategyElement_TLM'.default.RandomAdjustmentUpgrades);
-
-				break;
-			case ePool_Base:
-				return CanWeaponCatApplyUpgrade(X2WeaponTemplate(WeaponState.GetMyTemplate()).WeaponCat,
-												UpgradeTemplate.DataName,
-												PoolRestriction,
-												class'X2StrategyElement_TLM'.default.RandomBaseUpgrades);
-
-				break;
-			case ePool_Ammo:
-				return CanWeaponCatApplyUpgrade(X2WeaponTemplate(WeaponState.GetMyTemplate()).WeaponCat,
-												UpgradeTemplate.DataName,
-												PoolRestriction,
-												class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades);
-
-				break;
-		}
-	}
-	
-	return true;
 }
 
 static function bool CanAddItemToInventory_CH_Improved(
@@ -120,7 +64,7 @@ static function bool CanAddItemToInventory_CH_Improved(
 		foreach WUTemplates(WUTemplate)
 		{
 			// Check if this upgrade is an ammo upgrade and unit has Ammo in inventory
-			if (class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades.Find(WUTemplate.DataName) != INDEX_NONE)
+			if (class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades.Find('UpgradeName', WUTemplate.DataName) != INDEX_NONE)
 			{
 				if (UnitState.HasItemOfTemplateClass(class'X2AmmoTemplate'))
 				{
@@ -148,7 +92,7 @@ static function bool CanAddItemToInventory_CH_Improved(
 			foreach WUTemplates(WUTemplate)
 			{
 				// If the upgrade is ammo upgrade
-				if (class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades.Find(WUTemplate.DataName) != INDEX_NONE)
+				if (class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades.Find('UpgradeName', WUTemplate.DataName) != INDEX_NONE)
 				{
 					bFailedAmmoEquip = true;
 					break;
@@ -258,23 +202,6 @@ static function AddLootTables()
 	}
 }
 
-static function bool CanWeaponCatApplyUpgrade(name WeaponCat, name UpgradeName, PoolRestrictionData PoolRestriction, array<name> UpgradePool)
-{
-	if (PoolRestriction.AllowedWeaponCats.Find(WeaponCat) != INDEX_NONE
-		&& UpgradePool.Find(UpgradeName) != INDEX_NONE)
-	{		
-		return true;
-	}
-
-	if (PoolRestriction.DisallowedWeaponCats.Find(WeaponCat) != INDEX_NONE
-		&& UpgradePool.Find(UpgradeName) != INDEX_NONE)
-	{	
-		return false;
-	}
-
-	return true;
-}
-
 static function CreateTechsMidCampaign()
 {
 	local XComGameState_Tech Tech;
@@ -312,8 +239,7 @@ static function UpdateWeaponUpgrade()
 	local X2WeaponUpgradeTemplate WUTemplate;
 	local X2AbilityTemplate AbilityTemplate;
 	local X2Effect Effect;
-	local X2Effect_TLMEffects TLMEffect;
-	local LegendaryUpgradeData LegendaryUpgrade;
+	local X2Effect_TLMEffects TLMEffect;	
 	local array<name> WUNames;
 	local string ItemName, strColor;
 	local name AbilityName, WUName;
@@ -350,15 +276,10 @@ static function UpdateWeaponUpgrade()
 		}
 	}
 
-	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomAdjustmentUpgrades);
-	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomBaseUpgrades);
-	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomBaseMeleeUpgrades);
-	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades);
-
-	foreach class'X2StrategyElement_TLM'.default.RandomLegendaryUpgrades(LegendaryUpgrade)
-	{
-		WUNames.AddItem(LegendaryUpgrade.UpgradeName);
-	}
+	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomAdjustmentUpgrades);
+	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomBaseUpgrades);	
+	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades);		
+	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomLegendaryUpgrades);	
 
 	foreach WUNames(WUName)
 	{		
@@ -398,5 +319,15 @@ static function AppendArrays(out array<name> ArrayA, array<name> ArrayB)
 	foreach ArrayB(ArrayContent)
 	{
 		ArrayA.AddItem(ArrayContent);
+	}
+}
+
+static function CollectUpgradeNames(out array<name> WUNames, array<UpgradePoolData> UpgradePool)
+{
+	local UpgradePoolData UpgradeData;
+
+	foreach UpgradePool(UpgradeData)
+	{
+		WUNames.AddItem(UpgradeData.UpgradeName);
 	}
 }
