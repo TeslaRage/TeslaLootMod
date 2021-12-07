@@ -49,6 +49,8 @@ var config int HailOfBulletsCharges;
 var config int HailOfBulletsCooldown;
 var config int KillZoneCharges;
 var config int KillZoneCooldown;
+var config int FaceoffCharges;
+var config int FaceoffCooldown;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -75,6 +77,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TLMRapidFire2());
 	Templates.AddItem(TLMHailOfBullets());
 	Templates.AddItem(TLMKillZone());
+	Templates.AddItem(TLMFaceoff());
 
 	return Templates;
 }
@@ -526,5 +529,77 @@ static function X2AbilityTemplate TLMKillZone(bool bDisplayZone=false)
 	
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 	
+	return Template;
+}
+
+static function X2AbilityTemplate TLMFaceoff()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityCooldown Cooldown;
+	local X2AbilityCost_ActionPoints ActionPointCost;
+	local X2AbilityToHitCalc_StandardAim ToHitCalc;
+	local X2AbilityMultiTarget_AllUnits MultiTargetUnits;
+	local X2AbilityCharges Charges;
+	local X2AbilityCost_Charges ChargeCost;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'TLMAbility_Faceoff');
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_faceoff";
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	Template.Hostility = eHostility_Offensive;
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY;
+	Template.AbilityConfirmSound = "TacticalUI_ActivateAbility";
+
+	Cooldown = new class'X2AbilityCooldown';
+	Cooldown.iNumTurns = default.FaceoffCooldown;
+	Template.AbilityCooldown = Cooldown;
+
+	Charges = new class'X2AbilityCharges';
+	Charges.InitialCharges = default.FaceoffCharges;
+	Template.AbilityCharges = Charges;
+
+	ChargeCost = new class'X2AbilityCost_Charges';
+	ChargeCost.NumCharges = 1;
+	Template.AbilityCosts.AddItem(ChargeCost);
+
+	ToHitCalc = new class'X2AbilityToHitCalc_StandardAim';
+	ToHitCalc.bOnlyMultiHitWithSuccess = false;
+	Template.AbilityToHitCalc = ToHitCalc;
+
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.iNumPoints = 1;
+	ActionPointCost.bConsumeAllPoints = true;
+	Template.AbilityCosts.AddItem(ActionPointCost);
+
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	MultiTargetUnits = new class'X2AbilityMultiTarget_AllUnits';
+	MultiTargetUnits.bUseAbilitySourceAsPrimaryTarget = true;
+	MultiTargetUnits.bAcceptEnemyUnits = true;
+	Template.AbilityMultiTargetStyle = MultiTargetUnits;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileUnitDisallowMindControlProperty);
+
+	Template.AddTargetEffect(new class'X2Effect_ApplyWeaponDamage');
+	Template.AddMultiTargetEffect(new class'X2Effect_ApplyWeaponDamage');
+
+	Template.bAllowAmmoEffects = true;
+	Template.bAllowBonusWeaponEffects = true;
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = class'X2Ability_SharpshooterAbilitySet'.static.Faceoff_BuildVisualization;
+
+	Template.SuperConcealmentLoss = class'X2AbilityTemplateManager'.default.SuperConcealmentStandardShotLoss;
+	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotChosenActivationIncreasePerUse;
+	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
+
+	Template.bFrameEvenWhenUnitIsHidden = true;
+	Template.ActivationSpeech = 'Faceoff';
+
 	return Template;
 }
