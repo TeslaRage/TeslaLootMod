@@ -15,6 +15,7 @@ var localized string strWeaponHasAmmoUpgrade;
 var localized string strTier0Color;
 var localized string strTier1Color;
 var localized string strTier2Color;
+var localized string strTier3Color;
 
 // =============
 // DLC HOOKS
@@ -169,10 +170,10 @@ static function bool CanAddItemToInventory_CH_Improved(
 		DisabledReason = default.strWeaponHasAmmoUpgrade;
 	}
 
-	//  set the out value for XComGameState_Unit, letting the game know that this armor CANNOT be equipped on this soldier
+	// Override to disallow the item from being equipped
 	bCanAddItem = 0;
 
-	//  return the override value. This will force the game to actually use our out values we have just set.
+	// Return the override value. This will force the game to actually use our out values we have just set.
 	return OverrideNormalBehavior;
 }
 
@@ -184,6 +185,27 @@ static function bool DisplayQueuedDynamicPopup(DynamicPropertySet PropertySet)
 		return true;
 	}
 
+	return false;
+}
+
+static function bool AbilityTagExpandHandler(string InString, out string OutString)
+{
+	local name Type;
+
+	Type = name(InString);
+
+	switch(Type)
+	{
+	case 'RapidFireCharges':
+		OutString = string(class'X2Ability_TLM'.default.RapidFireCharges);
+		return true;
+	case 'RapidFireAimPenalty':
+		OutString = string(class'X2Ability_TLM'.default.RapidFireAimPenalty * -1);
+		return true;
+	case 'RapidFireCooldown':
+		OutString = string(class'X2Ability_TLM'.default.RapidFireCooldown);
+		return true;
+	}
 	return false;
 }
 
@@ -279,8 +301,10 @@ static function UpdateWeaponUpgrade()
 	local X2AbilityTemplate AbilityTemplate;
 	local X2Effect Effect;
 	local X2Effect_TLMEffects TLMEffect;
+	local LegendaryUpgradeData LegendaryUpgrade;
+	local array<name> WUNames;
 	local string ItemName, strColor;
-	local name AbilityName;
+	local name AbilityName, WUName;
 
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
@@ -311,6 +335,27 @@ static function UpdateWeaponUpgrade()
 					WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMSHRED", TLMEffect.Shred < 0 ? TLMEffect.Shred * -1 : TLMEffect.Shred);
 				}
 			}
+		}
+	}
+
+	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomAdjustmentUpgrades);
+	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomBaseUpgrades);
+	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomBaseMeleeUpgrades);
+	AppendArrays(WUNames, class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades);
+
+	foreach class'X2StrategyElement_TLM'.default.RandomLegendaryUpgrades(LegendaryUpgrade)
+	{
+		WUNames.AddItem(LegendaryUpgrade.UpgradeName);
+	}
+
+	foreach WUNames(WUName)
+	{		
+		ItemTemplateMan.FindDataTemplateAllDifficulties(WUName, DataTemplates);
+
+		foreach DataTemplates(DataTemplate)
+		{
+			WUTemplate = X2WeaponUpgradeTemplate(DataTemplate);
+			if (WUTemplate == none) continue;
 
 			switch (WUTemplate.Tier)
 			{
@@ -322,12 +367,24 @@ static function UpdateWeaponUpgrade()
 					break;
 				case 2:
 					strColor = default.strTier2Color;
-					break;	
+					break;
+				case 3:
+					strColor = default.strTier3Color;
+					break;
 			}
 
 			if (strColor != "")
-				WUTemplate.FriendlyName = "<font='" $strColor $"'>" $WUTemplate.FriendlyName $"</font>";
+				WUTemplate.FriendlyName = "<font color='" $strColor $"'>" $WUTemplate.FriendlyName $"</font>";
 		}
-	}	
+	}
+}
 
+static function AppendArrays(out array<name> ArrayA, array<name> ArrayB)
+{
+	local name ArrayContent;
+
+	foreach ArrayB(ArrayContent)
+	{
+		ArrayA.AddItem(ArrayContent);
+	}
 }

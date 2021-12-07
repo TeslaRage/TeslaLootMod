@@ -44,6 +44,7 @@ strWeaponHasAmmoUpgrade = "WEAPON HAS AMMO UPGRADE"
 strTier0Color = "#FFFF00"
 strTier1Color = "#FFA500"
 strTier2Color = "#3ABD23"
+strTier3Color = "#9300FF"
 
 [X2StrategyElement_TLM]
 

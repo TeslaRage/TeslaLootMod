@@ -13,11 +13,13 @@ struct RarityData
 	var int Chance;
 	var int NumOfBaseUpgrades;
 	var int NumOfAmmoUpgrades;
+	var bool LegendaryUpgrade;
 	var string Color;
 };
 
 var config int NumOfTimesToForceInstant;
 var config int ChanceForAdjustmentUpgrade;
+var config array<LegendaryUpgradeData> RandomLegendaryUpgrades;
 var config array<name> RandomAdjustmentUpgrades;
 var config array<name> RandomBaseUpgrades;
 var config array<name> RandomAmmoUpgrades;
@@ -187,8 +189,10 @@ static function X2WeaponTemplate GetBaseWeapon()
 static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityData SelectedRarity, out string NickAmmo, out string NickAdjustment)
 {
 	local X2ItemTemplateManager ItemTemplateMan;
-	local X2WeaponUpgradeTemplate WUTemplate;
-	local RarityData RarityStruct, ItemRarity;	
+	local X2WeaponUpgradeTemplate WUTemplate;	
+	local RarityData RarityStruct, ItemRarity;
+	local LegendaryUpgradeData LegendaryUpgrade;
+	local array<name> FilteredUpgrades;
 	local int Applied, Safety, Random, CurrentTotal;
 
 	Random = `SYNC_RAND_STATIC(100);
@@ -214,6 +218,24 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	SelectedRarity = ItemRarity;
 
+	if (SelectedRarity.LegendaryUpgrade)
+	{		
+		foreach default.RandomLegendaryUpgrades(LegendaryUpgrade)
+		{
+			if (LegendaryUpgrade.AllowedWeaponCats.Find(X2WeaponTemplate(Weapon.GetMyTemplate()).WeaponCat) != INDEX_NONE)
+			{
+				FilteredUpgrades.AddItem(LegendaryUpgrade.UpgradeName);
+			}
+		}		
+		
+		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(FilteredUpgrades[`SYNC_RAND_STATIC(FilteredUpgrades.Length)]));
+
+		if (WUTemplate != none)
+		{
+			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
+		}
+	}
+
 	if (`SYNC_RAND_STATIC(100) < default.ChanceForAdjustmentUpgrade)
 	{
 		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomAdjustmentUpgrades[`SYNC_RAND_STATIC(default.RandomAdjustmentUpgrades.Length)]));
@@ -227,7 +249,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	Applied = 0;
 	Safety = 0;
-	while (Applied < ItemRarity.NumOfBaseUpgrades && Safety <= ItemRarity.NumOfBaseUpgrades + 100)
+	while (Applied < SelectedRarity.NumOfBaseUpgrades && Safety <= SelectedRarity.NumOfBaseUpgrades + 100)
 	{
 		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomBaseUpgrades[`SYNC_RAND_STATIC(default.RandomBaseUpgrades.Length)]));
 		if (WUTemplate == none) continue;
@@ -245,7 +267,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	Applied = 0;
 	Safety = 0;
-	while (Applied < ItemRarity.NumOfAmmoUpgrades && Safety <= ItemRarity.NumOfAmmoUpgrades + 100)
+	while (Applied < SelectedRarity.NumOfAmmoUpgrades && Safety <= SelectedRarity.NumOfAmmoUpgrades + 100)
 	{
 		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomAmmoUpgrades[`SYNC_RAND_STATIC(default.RandomAmmoUpgrades.Length)]));
 		if (WUTemplate == none) continue;
@@ -265,7 +287,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	Applied = 0;
 	Safety = 0;
-	while (Applied < ItemRarity.NumOfBaseUpgrades && Safety <= ItemRarity.NumOfBaseUpgrades + 100)
+	while (Applied < SelectedRarity.NumOfBaseUpgrades && Safety <= SelectedRarity.NumOfBaseUpgrades + 100)
 	{
 		WUTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(default.RandomBaseMeleeUpgrades[`SYNC_RAND_STATIC(default.RandomBaseMeleeUpgrades.Length)]));
 		if (WUTemplate == none) continue;

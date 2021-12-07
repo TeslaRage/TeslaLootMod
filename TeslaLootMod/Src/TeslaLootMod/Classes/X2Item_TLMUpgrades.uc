@@ -26,6 +26,9 @@ static function array<X2DataTemplate> CreateTemplates()
 		Items.AddItem(AdjustmentUpgrade(name(ItemName), Adjustment));
 	}
 
+	// Legendary upgrades
+	Items.AddItem(Legendary_RapidFire());
+
 	return Items;
 }
 
@@ -88,19 +91,41 @@ static function X2DataTemplate AdjustmentUpgrade(name WeaponUpgradeName, WeaponA
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = Adjustment.Tier;
 
-	SetUpgradeIcons_AdjustmentUpgrade(Template);
+	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_heat_sink");
 	
 	return Template;
 }
 
-static function SetUpgradeIcons_AdjustmentUpgrade(out X2WeaponUpgradeTemplate Template)
+static function SetUpgradeIcons_AdjustmentUpgrade(out X2WeaponUpgradeTemplate Template, string Icon)
 {
 	local BaseWeaponDeckData DeckedBaseWeapon;
 
 	foreach class'X2StrategyElement_TLM'.default.DeckedBaseWeapons(DeckedBaseWeapon)
 	{
-		Template.AddUpgradeAttachment('', '', "", "", DeckedBaseWeapon.BaseWeapon, , "", Template.strImage, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_heat_sink");
+		Template.AddUpgradeAttachment('', '', "", "", DeckedBaseWeapon.BaseWeapon, , "", Template.strImage, Icon);
 	}
+}
+
+static function X2DataTemplate Legendary_RapidFire()
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_RapidFire');	
+		
+	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
+	
+	Template.BonusAbilities.AddItem('TLMAbility_RapidFire');	
+
+	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
+	Template.CanBeBuilt = false;
+	Template.MaxQuantity = 1;
+	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = 3;
+
+	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_rapidfire"); // Fine to reuse this
+
+	return Template;
 }
 
 // DELEGATES
