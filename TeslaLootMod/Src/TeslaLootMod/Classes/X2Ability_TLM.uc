@@ -44,6 +44,8 @@ var config array<AmmoConversionData> ConvertAmmo;
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
 var config int RapidFireCooldown;
+var config int HailOfBulletsCharges;
+var config int HailOfBulletsCooldown;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -68,6 +70,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(TLMRapidFire());
 	Templates.AddItem(TLMRapidFire2());
+	Templates.AddItem(TLMHailOfBullets());
 
 	return Templates;
 }
@@ -333,6 +336,78 @@ static function X2AbilityTemplate TLMRapidFire2()
 	Template.MergeVisualizationFn = SequentialShot_MergeVisualization;
 	
 	Template.bShowActivation = true;
+
+	Template.SuperConcealmentLoss = class'X2AbilityTemplateManager'.default.SuperConcealmentStandardShotLoss;
+	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotChosenActivationIncreasePerUse;
+	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
+	Template.bFrameEvenWhenUnitIsHidden = true;
+
+	return Template;
+}
+
+static function X2AbilityTemplate TLMHailOfBullets()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityCost_Ammo AmmoCost;
+	local X2AbilityToHitCalc_StandardAim ToHitCalc;
+	local X2AbilityCooldown Cooldown;
+	local X2AbilityCharges Charges;
+	local X2AbilityCost_Charges ChargeCost;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'TLMAbility_HailOfBullets');
+
+	Template.AbilityCosts.AddItem(default.WeaponActionTurnEnding);
+
+	AmmoCost = new class'X2AbilityCost_Ammo';
+	AmmoCost.iAmmo = 3;
+	Template.AbilityCosts.AddItem(AmmoCost);
+
+	Cooldown = new class'X2AbilityCooldown';
+	Cooldown.iNumTurns = default.HailOfBulletsCooldown;
+	Template.AbilityCooldown = Cooldown;
+
+	Charges = new class'X2AbilityCharges';
+	Charges.InitialCharges = default.HailOfBulletsCharges;
+	Template.AbilityCharges = Charges;
+
+	ChargeCost = new class'X2AbilityCost_Charges';
+	ChargeCost.NumCharges = 1;
+	Template.AbilityCosts.AddItem(ChargeCost);
+
+	ToHitCalc = new class'X2AbilityToHitCalc_StandardAim';
+	ToHitCalc.bGuaranteedHit = true;
+	ToHitCalc.bAllowCrit = false;
+	Template.AbilityToHitCalc = ToHitCalc;
+	Template.AbilityToHitOwnerOnMissCalc = ToHitCalc;
+
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileTargetProperty);
+	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
+
+	Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.HoloTargetEffect());
+	Template.AssociatedPassives.AddItem('HoloTargeting');
+	Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.ShredderDamageEffect());
+	Template.bAllowAmmoEffects = true;
+	Template.bAllowBonusWeaponEffects = true;
+
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.CLASS_MAJOR_PRIORITY;
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_hailofbullets";
+	Template.AbilityConfirmSound = "TacticalUI_ActivateAbility";
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.BuildInterruptGameStateFn = TypicalAbility_BuildInterruptGameState;
+
+	Template.bCrossClassEligible = false;
+	Template.CinescriptCameraType = "StandardGunFiring";
 
 	Template.SuperConcealmentLoss = class'X2AbilityTemplateManager'.default.SuperConcealmentStandardShotLoss;
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotChosenActivationIncreasePerUse;

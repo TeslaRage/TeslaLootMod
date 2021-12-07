@@ -28,6 +28,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	// Legendary upgrades
 	Items.AddItem(Legendary_RapidFire());
+	Items.AddItem(Legendary_HailOfBullets());
 
 	return Items;
 }
@@ -108,14 +109,14 @@ static function SetUpgradeIcons_AdjustmentUpgrade(out X2WeaponUpgradeTemplate Te
 
 static function X2DataTemplate Legendary_RapidFire()
 {
-	local X2WeaponUpgradeTemplate Template;
+	local X2WeaponUpgradeTemplate Template;	
 
 	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_RapidFire');	
 		
 	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
 	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
 	
-	Template.BonusAbilities.AddItem('TLMAbility_RapidFire');	
+	Template.BonusAbilities.AddItem('TLMAbility_RapidFire');
 
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
@@ -123,9 +124,43 @@ static function X2DataTemplate Legendary_RapidFire()
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 3;
 
+	SetUpLegendaryMutualExclusives(Template);
 	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_rapidfire"); // Fine to reuse this
 
 	return Template;
+}
+
+static function X2DataTemplate Legendary_HailOfBullets()
+{
+	local X2WeaponUpgradeTemplate Template;	
+
+	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_HailOfBullets');	
+		
+	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
+	
+	Template.BonusAbilities.AddItem('TLMAbility_HailOfBullets');
+
+	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
+	Template.CanBeBuilt = false;
+	Template.MaxQuantity = 1;
+	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = 3;
+
+	SetUpLegendaryMutualExclusives(Template);
+	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_hailofbullets"); // Fine to reuse this
+
+	return Template;
+}
+
+static function SetUpLegendaryMutualExclusives(out X2WeaponUpgradeTemplate Template)
+{
+	local LegendaryUpgradeData LegendaryUpgrade;
+
+	foreach class'X2StrategyElement_TLM'.default.RandomLegendaryUpgrades(LegendaryUpgrade)
+	{
+		Template.MutuallyExclusiveUpgrades.AddItem(LegendaryUpgrade.UpgradeName);
+	}
 }
 
 // DELEGATES

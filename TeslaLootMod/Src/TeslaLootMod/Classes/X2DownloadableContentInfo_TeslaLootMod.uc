@@ -205,6 +205,12 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'RapidFireCooldown':
 		OutString = string(class'X2Ability_TLM'.default.RapidFireCooldown);
 		return true;
+	case 'HailOfBulletsCharges':
+		OutString = string(class'X2Ability_TLM'.default.HailOfBulletsCharges);
+		return true;
+	case 'HailOfBulletsCooldown':
+		OutString = string(class'X2Ability_TLM'.default.HailOfBulletsCooldown);
+		return true;
 	}
 	return false;
 }
