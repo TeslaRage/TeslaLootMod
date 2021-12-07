@@ -161,6 +161,12 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'KillZoneCooldown':
 		OutString = string(class'X2Ability_TLM'.default.KillZoneCooldown);
 		return true;
+	case 'FaceoffCharges':
+		OutString = string(class'X2Ability_TLM'.default.FaceoffCharges);
+		return true;
+	case 'FaceoffCooldown':
+		OutString = string(class'X2Ability_TLM'.default.FaceoffCooldown);
+		return true;
 	}
 	return false;
 }
