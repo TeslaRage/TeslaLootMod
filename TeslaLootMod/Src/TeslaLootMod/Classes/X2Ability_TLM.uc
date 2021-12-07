@@ -33,10 +33,11 @@ struct WeaponAdjustmentData
 	var int Shred;
 };
 
-struct LegendaryUpgradeData
+struct UpgradePoolData
 {
 	var name UpgradeName;
 	var array<name> AllowedWeaponCats;
+	var array<name> DisallowedWeaponCats;
 };
 
 var config array<AmmoConversionData> ConvertAmmo;
