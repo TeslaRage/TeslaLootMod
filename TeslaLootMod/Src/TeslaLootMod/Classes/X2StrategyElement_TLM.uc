@@ -273,7 +273,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 				&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
 			{
 				Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
-				NickAmmo = WUTemplate.GetItemFriendlyName();
+				NickAmmo = WUTemplate.GetItemFriendlyNamePlural(); // Cheating - the usual GetItemFriendlyName() has been colored
 				NickAmmo -= default.strRounds;
 			}
 		}
