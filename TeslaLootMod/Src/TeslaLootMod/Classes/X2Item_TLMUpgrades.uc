@@ -34,6 +34,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Items.AddItem(Legendary_KillZone());
 	Items.AddItem(Legendary_Faceoff());
 	Items.AddItem(Legendary_AdventSoldierKiller());
+	Items.AddItem(Legendary_AlienKiller());
 
 	return Items;
 }
@@ -222,6 +223,29 @@ static function X2DataTemplate Legendary_AdventSoldierKiller()
 	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
 	
 	Template.BonusAbilities.AddItem('TLMAbility_AdventSoldierKiller');
+
+	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
+	Template.CanBeBuilt = false;
+	Template.MaxQuantity = 1;
+	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = 3;
+
+	SetUpLegendaryMutualExclusives(Template);
+	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_hunter"); // Fine to reuse this
+
+	return Template;
+}
+
+static function X2DataTemplate Legendary_AlienKiller()
+{
+	local X2WeaponUpgradeTemplate Template;	
+
+	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_AlienKiller');	
+		
+	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
+	
+	Template.BonusAbilities.AddItem('TLMAbility_AlienKiller');
 
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;

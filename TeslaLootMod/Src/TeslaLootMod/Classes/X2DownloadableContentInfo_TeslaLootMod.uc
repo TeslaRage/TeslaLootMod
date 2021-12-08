@@ -176,6 +176,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'HailofBulletsClipSizeBonus':
 		OutString = string(class'X2Item_TLMUpgrades'.default.HailofBulletsClipSizeBonus);
 		return true;
+	case 'BonusDamageAlien':
+		OutString = string(class'X2Ability_TLM'.default.BonusDamageAlien);
+		return true;
 	}
 	return false;
 }
