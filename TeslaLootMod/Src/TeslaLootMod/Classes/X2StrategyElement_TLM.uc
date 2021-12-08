@@ -189,9 +189,10 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 {
 	local X2ItemTemplateManager ItemTemplateMan;
 	local X2WeaponUpgradeTemplate WUTemplate;
-	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local array<X2WeaponUpgradeTemplate> WUTemplates, BaseWUTemplates;
 	local RarityData RarityStruct, ItemRarity;
-	local int Applied, RarityRoll, CurrentTotal, Idx, NumOfBaseUpgradesToApply;
+	local int RarityRoll, CurrentTotal, Idx, NumOfMissingUpgrades;
+	local bool bLegendaryUpgradeApplied, bAmmoUpgradeApplied; 
 
 	RarityRoll = `SYNC_RAND_STATIC(100);
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();  
@@ -222,7 +223,10 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 		WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomLegendaryUpgrades);
 		WUTemplate = WUTemplates[`SYNC_RAND_STATIC(WUTemplates.Length)];		
 		if (WUTemplate != none)
+		{
 			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
+			bLegendaryUpgradeApplied = true;
+		}			
 	}	
 
 	// Roll for Refinement Upgrade
@@ -236,28 +240,11 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	}
 
 	// Roll for base upgrades
-	WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomBaseUpgrades);
-	NumOfBaseUpgradesToApply = SelectedRarity.NumOfBaseUpgrades + GetAdditionalCountForBase(Weapon);
-
-	Applied = 0;
-	while (Applied < NumOfBaseUpgradesToApply && WUTemplates.Length > 0)
-	{
-		Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
-		WUTemplate = WUTemplates[Idx];
-
-		if (WUTemplate != none 
-			&& WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
-			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
-		{
-			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
-			WUTemplates.Remove(Idx, 1);
-			Applied++;
-		}
-		else
-		{
-			WUTemplates.Remove(Idx, 1);
-		}
-	}
+	WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomBaseUpgrades);	
+	ApplyBaseUpgrade(WUTemplates, Weapon, SelectedRarity.NumOfBaseUpgrades);
+	
+	// Save the base upgrade pool for later
+	BaseWUTemplates = WUTemplates;
 
 	// Roll for ammo upgrade
 	if (SelectedRarity.AllowAmmoUpgrade)
@@ -275,8 +262,19 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 				Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
 				NickAmmo = WUTemplate.GetItemFriendlyNamePlural(); // Cheating - the usual GetItemFriendlyName() has been colored
 				NickAmmo -= default.strRounds;
+				bAmmoUpgradeApplied = true;
 			}
 		}
+	}
+
+	// Final checks: based on rarity has this item gotten all the upgrades it deserves	
+	NumOfMissingUpgrades += (SelectedRarity.AllowAmmoUpgrade && !bAmmoUpgradeApplied) ? 1 : 0;
+	NumOfMissingUpgrades += (SelectedRarity.LegendaryUpgrade && !bLegendaryUpgradeApplied) ? 1 : 0;
+
+	// If non-satisfactory, we patch up by giving more base upgrades (if we have not run out of any yet)
+	if (NumOfMissingUpgrades > 0)
+	{
+		ApplyBaseUpgrade(BaseWUTemplates, Weapon, NumOfMissingUpgrades);
 	}
 }
 
@@ -420,20 +418,6 @@ static function array<X2WeaponUpgradeTemplate> BuildUpgradePool(XComGameState_It
 	return WUTemplates;
 }
 
-static function int GetAdditionalCountForBase(XComGameState_Item Weapon)
-{
-	local int Idx;
-
-	Idx = default.DeckedBaseWeapons.Find('BaseWeapon', Weapon.GetMyTemplateName());
-
-	if (Idx != INDEX_NONE)
-	{
-		return default.DeckedBaseWeapons[Idx].AdditionalBaseUpgrade;
-	}
-
-	return 0;
-}
-
 // Not used - but sad to delete so leave it here just in case it can be useful later
 // Background: This was initially made to prevent weapons with small clipsize like Hunter Rifles
 // 				from getting Rapid Fire/Hail of Bullets as those abilities need clip > 2.
@@ -465,4 +449,29 @@ static function bool CanWeaponAffordAmmo(X2WeaponUpgradeTemplate WUTemplate, XCo
 	}
 
 	return true;
+}
+
+static function ApplyBaseUpgrade(out array<X2WeaponUpgradeTemplate> WUTemplates, out XComGameState_Item Weapon, int NumOfBaseUpgradesToApply)
+{
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local int Applied, Idx;
+	
+	while (Applied < NumOfBaseUpgradesToApply && WUTemplates.Length > 0)
+	{
+		Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
+		WUTemplate = WUTemplates[Idx];
+
+		if (WUTemplate != none 
+			&& WUTemplate.CanApplyUpgradeToWeapon(Weapon, Weapon.GetMyWeaponUpgradeCount())
+			&& Weapon.CanWeaponApplyUpgrade(WUTemplate))
+		{
+			Weapon.ApplyWeaponUpgradeTemplate(WUTemplate);
+			WUTemplates.Remove(Idx, 1);
+			Applied++;
+		}
+		else
+		{
+			WUTemplates.Remove(Idx, 1);
+		}
+	}
 }

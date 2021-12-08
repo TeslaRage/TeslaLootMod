@@ -19,10 +19,7 @@ struct AmmoConversionData
 struct BaseWeaponDeckData
 {
 	var name Deck;	
-	var name BaseWeapon;
-	// AdditionalBaseUpgrade can be used to give a weapon additional base upgrade in addition to what's configured in Rarity config
-	// Useful when there is no ammo/legendary upgrade for this weapon. For example: swords and gremlins will not get ammo upgrade
-	var int AdditionalBaseUpgrade;
+	var name BaseWeapon;	
 	var string Image;
 };
 
