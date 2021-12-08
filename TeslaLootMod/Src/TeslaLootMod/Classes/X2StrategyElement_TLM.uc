@@ -209,7 +209,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	}
 
 	// Just in case total chance is not 100
-	if (CurrentTotal < 100)
+	if (CurrentTotal < 100 && ItemRarity.Rarity == '')
 	{
 		ItemRarity = default.Rarity[0];
 	}
