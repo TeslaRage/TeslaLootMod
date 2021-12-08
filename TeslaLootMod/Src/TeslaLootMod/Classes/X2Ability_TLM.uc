@@ -51,6 +51,7 @@ var config int KillZoneCharges;
 var config int KillZoneCooldown;
 var config int FaceoffCharges;
 var config int FaceoffCooldown;
+var config int BonusDamageAdventSoldier;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -78,6 +79,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TLMHailOfBullets());
 	Templates.AddItem(TLMKillZone());
 	Templates.AddItem(TLMFaceoff());
+	Templates.AddItem(TLMAdventSoldierKiller());
 
 	return Templates;
 }
@@ -601,5 +603,31 @@ static function X2AbilityTemplate TLMFaceoff()
 	Template.bFrameEvenWhenUnitIsHidden = true;
 	Template.ActivationSpeech = 'Faceoff';
 
+	return Template;
+}
+
+static function X2AbilityTemplate TLMAdventSoldierKiller()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_TLMEffects TLMEffect;
+	
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'TLMAbility_AdventSoldierKiller');	
+
+	Template.AbilitySourceName = 'eAbilitySource_Item';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_hunter";
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);	
+
+	TLMEffect = new class'X2Effect_TLMEffects';
+	TLMEffect.BuildPersistentEffect(1, true, false, false);
+	TLMEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, false,, Template.AbilitySourceName);
+	TLMEffect.BonusDamageAdventSoldier = default.BonusDamageAdventSoldier;
+	Template.AddTargetEffect(TLMEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	return Template;
 }

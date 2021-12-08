@@ -8,11 +8,13 @@ var int Pierce;
 var int Shred;
 var int CritChance;
 var int CritDamage;
+var int BonusDamageAdventSoldier;
 
 function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData, const int CurrentDamage, optional XComGameState NewGameState)
 {
 	local float ExtraDamage;
 	local XComGameState_Item SourceWeapon;
+	local XComGameState_Unit Unit;
 
 	SourceWeapon = AbilityState.GetSourceWeapon();
 	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
@@ -31,6 +33,14 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 		if (AppliedData.AbilityResultContext.HitResult == eHit_Crit && CritDamage != 0)
 		{		
 			ExtraDamage += CritDamage;		
+		}
+
+		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && BonusDamageAdventSoldier != 0)
+		{
+			Unit = XComGameState_Unit(TargetDamageable);
+
+			if (Unit.GetMyTemplate().bIsAdvent && !Unit.GetMyTemplate().bIsRobotic)
+				ExtraDamage += BonusDamageAdventSoldier;
 		}
 	}
 
