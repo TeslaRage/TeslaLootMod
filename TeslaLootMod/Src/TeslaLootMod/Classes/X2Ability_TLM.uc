@@ -19,10 +19,7 @@ struct AmmoConversionData
 struct BaseWeaponDeckData
 {
 	var name Deck;	
-	var name BaseWeapon;
-	// AdditionalBaseUpgrade can be used to give a weapon additional base upgrade in addition to what's configured in Rarity config
-	// Useful when there is no ammo/legendary upgrade for this weapon. For example: swords and gremlins will not get ammo upgrade
-	var int AdditionalBaseUpgrade;
+	var name BaseWeapon;	
 	var string Image;
 };
 
@@ -55,6 +52,7 @@ var config int KillZoneCooldown;
 var config int FaceoffCharges;
 var config int FaceoffCooldown;
 var config int BonusDamageAdventSoldier;
+var config int BonusDamageAlien;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -83,6 +81,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TLMKillZone());
 	Templates.AddItem(TLMFaceoff());
 	Templates.AddItem(TLMAdventSoldierKiller());
+	Templates.AddItem(TLMAlienKiller());
 
 	return Templates;
 }
@@ -629,6 +628,32 @@ static function X2AbilityTemplate TLMAdventSoldierKiller()
 	TLMEffect.BuildPersistentEffect(1, true, false, false);
 	TLMEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, false,, Template.AbilitySourceName);
 	TLMEffect.BonusDamageAdventSoldier = default.BonusDamageAdventSoldier;
+	Template.AddTargetEffect(TLMEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	return Template;
+}
+
+static function X2AbilityTemplate TLMAlienKiller()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_TLMEffects TLMEffect;
+	
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'TLMAbility_AlienKiller');	
+
+	Template.AbilitySourceName = 'eAbilitySource_Item';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_hunter";
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);	
+
+	TLMEffect = new class'X2Effect_TLMEffects';
+	TLMEffect.BuildPersistentEffect(1, true, false, false);
+	TLMEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, false,, Template.AbilitySourceName);
+	TLMEffect.BonusDamageAlien = default.BonusDamageAlien;
 	Template.AddTargetEffect(TLMEffect);
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;

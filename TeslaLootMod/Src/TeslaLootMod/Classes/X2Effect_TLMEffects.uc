@@ -1,5 +1,4 @@
 // This class is meant to house basic weapon altering effects
-// All Refinement Upgrades' abilities are using this effect
 class X2Effect_TLMEffects extends X2Effect_Persistent;
 
 var float DamageMultiplier;
@@ -9,6 +8,7 @@ var int Shred;
 var int CritChance;
 var int CritDamage;
 var int BonusDamageAdventSoldier;
+var int BonusDamageAlien;
 
 function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData, const int CurrentDamage, optional XComGameState NewGameState)
 {
@@ -16,6 +16,7 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 	local XComGameState_Item SourceWeapon;
 	local XComGameState_Unit Unit;
 
+	Unit = XComGameState_Unit(TargetDamageable);
 	SourceWeapon = AbilityState.GetSourceWeapon();
 	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
 	{
@@ -37,10 +38,14 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 
 		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && BonusDamageAdventSoldier != 0)
 		{
-			Unit = XComGameState_Unit(TargetDamageable);
-
 			if (Unit.GetMyTemplate().bIsAdvent && !Unit.GetMyTemplate().bIsRobotic)
 				ExtraDamage += BonusDamageAdventSoldier;
+		}
+
+		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && BonusDamageAlien != 0)
+		{
+			if (Unit.GetMyTemplate().bIsAlien && !Unit.GetMyTemplate().bIsRobotic)
+				ExtraDamage += BonusDamageAlien;
 		}
 	}
 

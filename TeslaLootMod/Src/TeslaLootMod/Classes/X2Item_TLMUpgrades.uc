@@ -3,6 +3,8 @@ class X2Item_TLMUpgrades extends X2Item_DefaultUpgrades config (TLM);
 var config array<name> ClipSizeModifyingUpgrades;
 var config array<WeaponAdjustmentData> WeaponAdjustmentUpgrades;
 var config int AmmoUpgradeClipSizePenalty;
+var config int RapidFireClipSizeBonus;
+var config int HailofBulletsClipSizeBonus;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -32,6 +34,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Items.AddItem(Legendary_KillZone());
 	Items.AddItem(Legendary_Faceoff());
 	Items.AddItem(Legendary_AdventSoldierKiller());
+	Items.AddItem(Legendary_AlienKiller());
 
 	return Items;
 }
@@ -50,7 +53,7 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityN
 	Template.AmmoTemplateName = AmmoConversion.Ammo;
 
 	Template.ClipSizeBonus = -default.AmmoUpgradeClipSizePenalty;
-	Template.AdjustClipSizeFn = AmmoUpgradeAdjustClipSize;
+	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;
 
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
@@ -121,6 +124,10 @@ static function X2DataTemplate Legendary_RapidFire()
 	
 	Template.BonusAbilities.AddItem('TLMAbility_RapidFire');
 
+	// Ability needs 2 ammo so +1 (with ammo upgrade clip size penalty taken into consideration)
+	Template.ClipSizeBonus = default.RapidFireClipSizeBonus;
+	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;
+
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
 	Template.MaxQuantity = 1;
@@ -143,6 +150,10 @@ static function X2DataTemplate Legendary_HailOfBullets()
 	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
 	
 	Template.BonusAbilities.AddItem('TLMAbility_HailOfBullets');
+
+	// Ability needs 3 ammo so +2 (with ammo upgrade clip size penalty taken into consideration)
+	Template.ClipSizeBonus = default.HailofBulletsClipSizeBonus;
+	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;
 
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
@@ -225,6 +236,29 @@ static function X2DataTemplate Legendary_AdventSoldierKiller()
 	return Template;
 }
 
+static function X2DataTemplate Legendary_AlienKiller()
+{
+	local X2WeaponUpgradeTemplate Template;	
+
+	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_AlienKiller');	
+		
+	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
+	
+	Template.BonusAbilities.AddItem('TLMAbility_AlienKiller');
+
+	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
+	Template.CanBeBuilt = false;
+	Template.MaxQuantity = 1;
+	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = 3;
+
+	SetUpLegendaryMutualExclusives(Template);
+	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_hunter"); // Fine to reuse this
+
+	return Template;
+}
+
 static function SetUpLegendaryMutualExclusives(out X2WeaponUpgradeTemplate Template)
 {
 	local UpgradePoolData LegendaryUpgrade;
@@ -237,7 +271,7 @@ static function SetUpLegendaryMutualExclusives(out X2WeaponUpgradeTemplate Templ
 
 // DELEGATES
 // This needs its own custom delegate to prevent it from getting empowered upgrade continent/resistance faction card bonus
-static function bool AmmoUpgradeAdjustClipSize(X2WeaponUpgradeTemplate UpgradeTemplate, XComGameState_Item Weapon, const int CurrentClipSize, out int AdjustedClipSize)
+static function bool TLMUpgradeAdjustClipSize(X2WeaponUpgradeTemplate UpgradeTemplate, XComGameState_Item Weapon, const int CurrentClipSize, out int AdjustedClipSize)
 {
 	AdjustedClipSize = CurrentClipSize + UpgradeTemplate.ClipSizeBonus;
 	return true;

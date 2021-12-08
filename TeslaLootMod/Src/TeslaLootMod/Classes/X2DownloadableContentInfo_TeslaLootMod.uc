@@ -170,6 +170,15 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'BonusDamageAdventSoldier':
 		OutString = string(class'X2Ability_TLM'.default.BonusDamageAdventSoldier);
 		return true;
+	case 'RapidFireClipSizeBonus':
+		OutString = string(class'X2Item_TLMUpgrades'.default.RapidFireClipSizeBonus);
+		return true;
+	case 'HailofBulletsClipSizeBonus':
+		OutString = string(class'X2Item_TLMUpgrades'.default.HailofBulletsClipSizeBonus);
+		return true;
+	case 'BonusDamageAlien':
+		OutString = string(class'X2Ability_TLM'.default.BonusDamageAlien);
+		return true;
 	}
 	return false;
 }
