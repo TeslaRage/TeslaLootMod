@@ -433,3 +433,36 @@ static function int GetAdditionalCountForBase(XComGameState_Item Weapon)
 
 	return 0;
 }
+
+// Not used - but sad to delete so leave it here just in case it can be useful later
+// Background: This was initially made to prevent weapons with small clipsize like Hunter Rifles
+// 				from getting Rapid Fire/Hail of Bullets as those abilities need clip > 2.
+// 				Decided to give bonus clip size to those Legendary Upgrades instead.
+static function bool CanWeaponAffordAmmo(X2WeaponUpgradeTemplate WUTemplate, XComGameState_Item Weapon)
+{
+	local X2AbilityTemplateManager AbilityMan;	
+	local X2AbilityTemplate AbilityTemplate;
+	local X2AbilityCost Cost;
+	local X2AbilityCost_Ammo AmmoCost;
+	local name AbilityName;
+
+	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();	
+
+	foreach WUTemplate.BonusAbilities(AbilityName)
+	{
+		AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);		
+
+		foreach AbilityTemplate.AbilityCosts(Cost)
+		{
+			AmmoCost = X2AbilityCost_Ammo(Cost);
+			if (AmmoCost == none) continue;
+
+			if (AmmoCost.iAmmo > Weapon.GetClipSize())
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
