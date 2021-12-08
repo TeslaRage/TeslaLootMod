@@ -167,6 +167,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'FaceoffCooldown':
 		OutString = string(class'X2Ability_TLM'.default.FaceoffCooldown);
 		return true;
+	case 'BonusDamageAdventSoldier':
+		OutString = string(class'X2Ability_TLM'.default.BonusDamageAdventSoldier);
+		return true;
 	}
 	return false;
 }

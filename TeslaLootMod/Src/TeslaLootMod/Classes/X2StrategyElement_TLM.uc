@@ -191,7 +191,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	local X2WeaponUpgradeTemplate WUTemplate;
 	local array<X2WeaponUpgradeTemplate> WUTemplates;
 	local RarityData RarityStruct, ItemRarity;
-	local int Applied, RarityRoll, CurrentTotal, Idx;
+	local int Applied, RarityRoll, CurrentTotal, Idx, NumOfBaseUpgradesToApply;
 
 	RarityRoll = `SYNC_RAND_STATIC(100);
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();  
@@ -209,7 +209,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	}
 
 	// Just in case total chance is not 100
-	if (CurrentTotal < 100)
+	if (CurrentTotal < 100 && ItemRarity.Rarity == '')
 	{
 		ItemRarity = default.Rarity[0];
 	}
@@ -237,9 +237,10 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 
 	// Roll for base upgrades
 	WUTemplates = BuildUpgradePool(Weapon, ItemTemplateMan, default.RandomBaseUpgrades);
+	NumOfBaseUpgradesToApply = SelectedRarity.NumOfBaseUpgrades + GetAdditionalCountForBase(Weapon);
 
 	Applied = 0;
-	while (Applied < SelectedRarity.NumOfBaseUpgrades && WUTemplates.Length > 0)
+	while (Applied < NumOfBaseUpgradesToApply && WUTemplates.Length > 0)
 	{
 		Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
 		WUTemplate = WUTemplates[Idx];
@@ -417,4 +418,18 @@ static function array<X2WeaponUpgradeTemplate> BuildUpgradePool(XComGameState_It
 	}
 
 	return WUTemplates;
+}
+
+static function int GetAdditionalCountForBase(XComGameState_Item Weapon)
+{
+	local int Idx;
+
+	Idx = default.DeckedBaseWeapons.Find('BaseWeapon', Weapon.GetMyTemplateName());
+
+	if (Idx != INDEX_NONE)
+	{
+		return default.DeckedBaseWeapons[Idx].AdditionalBaseUpgrade;
+	}
+
+	return 0;
 }
