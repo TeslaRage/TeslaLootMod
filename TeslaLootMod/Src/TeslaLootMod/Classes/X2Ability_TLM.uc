@@ -40,6 +40,13 @@ struct UpgradePoolData
 	var array<name> DisallowedWeaponCats;
 };
 
+struct AbilityUpgradeData
+{
+	var name UpgradeName;
+	var name AbilityName;
+	var string Icon;
+};
+
 var config array<AmmoConversionData> ConvertAmmo;
 
 var config int RapidFireCharges;

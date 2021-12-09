@@ -217,7 +217,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	{
 		ItemRarity = default.Rarity[0];
 	}
-
+	
 	SelectedRarity = ItemRarity;
 
 	// If we rolled Legendary, then grab the Legendary Upgrade
@@ -433,7 +433,11 @@ static function array<X2WeaponUpgradeTemplate> BuildUpgradePool(XComGameState_It
 
 		// If configured as disallowed, then we don't include into pool
 		if (PoolData.DisallowedWeaponCats.Find(X2WeaponTemplate(Weapon.GetMyTemplate()).WeaponCat) != INDEX_NONE)
-			continue;		
+			continue;
+
+		// Does this upgrade have valid abilities?
+		if (HasInvalidAbilities(WUTemplate))
+			continue;
 
 		// If we reach here, it means the upgrade is meant for all weapon categories
 		WUTemplates.AddItem(WUTemplate);
@@ -498,4 +502,22 @@ static function ApplyBaseUpgrade(out array<X2WeaponUpgradeTemplate> WUTemplates,
 			WUTemplates.Remove(Idx, 1);
 		}
 	}
+}
+
+static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate)
+{
+	local X2AbilityTemplateManager AbilityMan;
+	local X2AbilityTemplate AbilityTemplate;
+	local name AbilityName;
+
+	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+
+	foreach WUTemplate.BonusAbilities(AbilityName)
+	{
+		AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);
+
+		if (AbilityTemplate == none) return true;
+	}
+
+	return false;
 }
