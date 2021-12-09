@@ -97,7 +97,7 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 	`XEVENTMGR.TriggerEvent('ItemConstructionCompleted', Weapon, Weapon, NewGameState);
 
 	TechState.ItemRewards.Length = 0; 						// Reset the item rewards array in case the tech is repeatable
-	TechState.ItemRewards.AddItem(Weapon.GetMyTemplate());  // Needed for UI Alert display info
+	TechState.ItemRewards.AddItem(Weapon.GetMyTemplate());	// Needed for UI Alert display info
 	TechState.bSeenResearchCompleteScreen = false; 			// Reset the research report for techs that are repeatable
 
 	if (!TechState.IsInstant() && TechState.TimesResearched >= default.NumOfTimesToForceInstant)
