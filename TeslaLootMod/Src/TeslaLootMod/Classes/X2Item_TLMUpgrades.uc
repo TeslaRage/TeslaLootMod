@@ -1,6 +1,5 @@
 class X2Item_TLMUpgrades extends X2Item_DefaultUpgrades config (TLM);
 
-var config array<name> ClipSizeModifyingUpgrades;
 var config array<WeaponAdjustmentData> WeaponAdjustmentUpgrades;
 var config int AmmoUpgradeClipSizePenalty;
 var config int RapidFireClipSizeBonus;
@@ -68,9 +67,6 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityN
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 2; // This influences the color in the popup
-
-	if (AmmoConversion.MEWithClipSizeMods)
-		Template.MutuallyExclusiveUpgrades = default.ClipSizeModifyingUpgrades;
 
 	SetUpgradeIcons(Template);
 	

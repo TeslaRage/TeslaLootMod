@@ -11,8 +11,7 @@ enum ETRPoolType
 
 struct AmmoConversionData
 {
-	var name Ammo;
-	var bool MEWithClipSizeMods;
+	var name Ammo;	
 	var string Image;
 };
 
