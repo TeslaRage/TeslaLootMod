@@ -1,15 +1,15 @@
 class X2StrategyElement_TLM extends X2StrategyElement config(TLM);
 
-struct ForceLevelDeckData
+struct DeckData
 {
-	var int MinFL;
-	var int MaxFL;
+	var int Tier;
 	var name Deck;
+	var name UnlockTech;
 };
 
 struct RarityData
 {
-	var name Rarity;
+	var name RarityName;
 	var int Chance;
 	var int NumOfBaseUpgrades;
 	var bool AllowAmmoUpgrade;
@@ -17,6 +17,7 @@ struct RarityData
 	var string Color;
 };
 
+var config array<name> RequiredTechsForLockbox;
 var config int NumOfTimesToForceInstant;
 var config int ChanceForAdjustmentUpgrade;
 var config array<UpgradePoolData> RandomLegendaryUpgrades;
@@ -24,7 +25,7 @@ var config array<UpgradePoolData> RandomAdjustmentUpgrades;
 var config array<UpgradePoolData> RandomBaseUpgrades;
 var config array<UpgradePoolData> RandomAmmoUpgrades;
 var config array<RarityData> Rarity;
-var config array<ForceLevelDeckData> BaseWeaponDecks;
+var config array<DeckData> BaseWeaponDecks;
 var config array<BaseWeaponDeckData> DeckedBaseWeapons;
 
 var localized array<String> RandomNickNames;
@@ -52,6 +53,7 @@ static function X2DataTemplate CreateUnlockLockboxTemplate()
 	Template.ResearchCompletedFn = UnlockLockboxCompleted;
 
 	Template.Requirements.RequiredItems.AddItem('LockBox');
+	Template.Requirements.RequiredTechs = default.RequiredTechsForLockbox;
 	Template.Requirements.RequiredEngineeringScore = 10;
 	Template.Requirements.bVisibleIfPersonnelGatesNotMet = true;
 
@@ -107,8 +109,7 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 }
 
 static function X2WeaponTemplate GetBaseWeapon()
-{	
-	local XComGameState_HeadquartersAlien AlienHQ;
+{		
 	local X2ItemTemplateManager ItemTemplateMan;
 	local X2WeaponTemplate WTemplate;
 	local XComGameState_HeadquartersXCom XComHQ;
@@ -116,7 +117,7 @@ static function X2WeaponTemplate GetBaseWeapon()
 	local XComGameState_Unit Unit;
 	local StateObjectReference UnitRef;
 	local X2CardManager CardMan;
-	local ForceLevelDeckData BaseWeaponDeck;
+	local DeckData BaseWeaponDeck;
 	local BaseWeaponDeckData DeckedBaseWeapon;
 	local name DeckToUse;
 	local int Weight, Idx;
@@ -124,16 +125,18 @@ static function X2WeaponTemplate GetBaseWeapon()
 	local array<string> CardLabels;
 
 	XComHQ = `XCOMHQ;
-	History = `XCOMHISTORY;
-	AlienHQ = XComGameState_HeadquartersAlien(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien'));
+	History = `XCOMHISTORY;	
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	CardMan = class'X2CardManager'.static.GetCardManager();
 
+	default.BaseWeaponDecks.Sort(SortByTierDesc);
+
 	foreach default.BaseWeaponDecks(BaseWeaponDeck)
-	{
-		if (AlienHQ.ForceLevel < BaseWeaponDeck.MinFL || AlienHQ.ForceLevel > BaseWeaponDeck.MaxFL) continue;
+	{		
+		if (!XComHQ.IsTechResearched(BaseWeaponDeck.UnlockTech)) continue;
 
 		DeckToUse = BaseWeaponDeck.Deck;
+		break;
 	}	
 
 	CardMan.GetAllCardsInDeck(DeckToUse, CardLabels);
@@ -210,7 +213,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 	}
 
 	// Just in case total chance is not 100
-	if (CurrentTotal < 100 && ItemRarity.Rarity == '')
+	if (CurrentTotal < 100 && ItemRarity.RarityName == '')
 	{
 		ItemRarity = default.Rarity[0];
 	}
@@ -295,6 +298,27 @@ function int SortByChanceDesc(RarityData RarityA, RarityData RarityB)
 		return -1;
 	}
 	else if (ChanceA > ChanceB)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+function int SortByTierDesc(DeckData DeckA, DeckData DeckB)
+{
+	local int TierA, TierB;
+
+	TierA = DeckA.Tier;
+	TierB = DeckB.Tier;
+
+	if (TierA < TierB)
+	{
+		return -1;
+	}
+	else if (TierA > TierB)
 	{
 		return 1;
 	}
