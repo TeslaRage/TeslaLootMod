@@ -1,16 +1,17 @@
 class X2Item_TLMUpgrades extends X2Item_DefaultUpgrades config (TLM);
 
-var config array<name> ClipSizeModifyingUpgrades;
 var config array<WeaponAdjustmentData> WeaponAdjustmentUpgrades;
 var config int AmmoUpgradeClipSizePenalty;
 var config int RapidFireClipSizeBonus;
 var config int HailofBulletsClipSizeBonus;
+var config array<AbilityUpgradeData> AbilityWeaponUpgrades;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Items;
 	local AmmoConversionData AmmoConversion;
 	local WeaponAdjustmentData Adjustment;
+	local AbilityUpgradeData AbilityWeaponUpgrade;
 	local string ItemName, AbilityName;
 
 	// Ammo Upgrades
@@ -36,6 +37,12 @@ static function array<X2DataTemplate> CreateTemplates()
 	Items.AddItem(Legendary_AdventSoldierKiller());
 	Items.AddItem(Legendary_AlienKiller());
 
+	// Ability to Weapon Upgrade Conversion
+	foreach default.AbilityWeaponUpgrades(AbilityWeaponUpgrade)
+	{
+		Items.AddItem(AbilityUpgrade(AbilityWeaponUpgrade));
+	}	
+
 	return Items;
 }
 
@@ -60,9 +67,6 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityN
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 2; // This influences the color in the popup
-
-	if (AmmoConversion.MEWithClipSizeMods)
-		Template.MutuallyExclusiveUpgrades = default.ClipSizeModifyingUpgrades;
 
 	SetUpgradeIcons(Template);
 	
@@ -267,6 +271,29 @@ static function SetUpLegendaryMutualExclusives(out X2WeaponUpgradeTemplate Templ
 	{
 		Template.MutuallyExclusiveUpgrades.AddItem(LegendaryUpgrade.UpgradeName);
 	}
+}
+
+static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUpgrade)
+{
+	local X2WeaponUpgradeTemplate Template;
+	
+	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, AbilityWeaponUpgrade.UpgradeName);
+
+	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
+	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Power_Cell";
+
+	Template.BonusAbilities.AddItem(AbilityWeaponUpgrade.AbilityName);
+
+	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
+	Template.CanBeBuilt = false;
+	Template.MaxQuantity = 1;
+	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
+	Template.Tier = 3;
+
+	// Mutual exclusive setup?
+	SetUpgradeIcons_AdjustmentUpgrade(Template, AbilityWeaponUpgrade.Icon);
+
+	return Template;
 }
 
 // DELEGATES

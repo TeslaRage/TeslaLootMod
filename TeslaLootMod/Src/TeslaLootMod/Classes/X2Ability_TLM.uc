@@ -11,15 +11,15 @@ enum ETRPoolType
 
 struct AmmoConversionData
 {
-	var name Ammo;
-	var bool MEWithClipSizeMods;
+	var name Ammo;	
 	var string Image;
 };
 
 struct BaseWeaponDeckData
 {
 	var name Deck;	
-	var name BaseWeapon;	
+	var name BaseWeapon;
+	var name ForcedRarity;
 	var string Image;
 };
 
@@ -38,6 +38,13 @@ struct UpgradePoolData
 	var name UpgradeName;
 	var array<name> AllowedWeaponCats;
 	var array<name> DisallowedWeaponCats;
+};
+
+struct AbilityUpgradeData
+{
+	var name UpgradeName;
+	var name AbilityName;
+	var string Icon;
 };
 
 var config array<AmmoConversionData> ConvertAmmo;
