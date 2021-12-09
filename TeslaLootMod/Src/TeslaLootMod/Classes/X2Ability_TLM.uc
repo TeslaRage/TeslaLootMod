@@ -19,7 +19,8 @@ struct AmmoConversionData
 struct BaseWeaponDeckData
 {
 	var name Deck;	
-	var name BaseWeapon;	
+	var name BaseWeapon;
+	var name ForcedRarity;
 	var string Image;
 };
 

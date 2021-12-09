@@ -218,6 +218,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Weapon, out RarityDat
 		ItemRarity = default.Rarity[0];
 	}
 	
+	CheckForForcedRarity(ItemRarity, Weapon);
 	SelectedRarity = ItemRarity;
 
 	// If we rolled Legendary, then grab the Legendary Upgrade
@@ -520,4 +521,21 @@ static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate)
 	}
 
 	return false;
+}
+
+static function CheckForForcedRarity(out RarityData SelectedRarity, XComGameState_Item Weapon)
+{
+	local int Idx, Idx2;
+
+	Idx = default.DeckedBaseWeapons.Find('BaseWeapon', Weapon.GetMyTemplateName());
+
+	if (Idx != INDEX_NONE && default.DeckedBaseWeapons[Idx].ForcedRarity != '')
+	{
+		Idx2 = default.Rarity.Find('RarityName', default.DeckedBaseWeapons[Idx].ForcedRarity);
+
+		if (Idx2 != INDEX_NONE)
+		{
+			SelectedRarity = default.Rarity[Idx2];
+		}
+	}	
 }
