@@ -83,7 +83,7 @@ strWeaponHasAmmoUpgrade = "WEAPON HAS AMMO UPGRADE"
 strRounds = "Rounds"
 strPlus = "+"
 
-[X2StrategyElement_TLM]
+[X2DownloadableContentInfo_TeslaLootMod]
 
 +RandomNickNames[0] = "Perfect Storm"
 +RandomNickNames[1] = "Thundercall"

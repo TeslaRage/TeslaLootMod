@@ -6,6 +6,7 @@ var config (TLM) string strTier1Color;
 var config (TLM) string strTier2Color;
 var config (TLM) string strTier3Color;
 
+var localized array<String> RandomNickNames;
 var localized string strHasAmmoAlreadyEquipped;
 var localized string strWeaponHasAmmoUpgrade;
 var localized string strRounds;
@@ -426,6 +427,125 @@ static function SetDelegatesToUpgradeDecks()
 	}
 }
 
+static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, XComGameState_Tech TechState, out X2BaseWeaponDeckTemplate BWTemplate)
+{
+	local XComGameState_Item Item;
+	local X2WeaponTemplate WTemplate;
+	local XComGameState_ItemData Data;
+
+	GetBaseWeapon(BWTemplate, WTemplate);
+	Item = WTemplate.CreateInstanceFromTemplate(NewGameState);
+
+	if (Item == none)
+	{
+		`LOG("TLM ERROR: Failed to get base weapon");		
+	}
+
+	ApplyWeaponUpgrades(Item, TechState);
+
+	Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
+	Data.NumUpgradeSlots = 0;
+	Item.AddComponentObject(Data);
+
+	return Item;
+}
+
+static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2WeaponTemplate WTemplate)
+{		
+	local X2ItemTemplateManager ItemTemplateMan;	
+	local XComGameState_HeadquartersXCom XComHQ;
+	local XComGameStateHistory History;
+	local XComGameState_Unit Unit;
+	local StateObjectReference UnitRef;
+	local X2CardManager CardMan;	
+	local X2BaseWeaponDeckTemplateManager BWMan;	
+	local int Weight, Idx;
+	local string strWeapon, CardLabel;
+	local array<string> CardLabels;
+	local array<name> ItemNames;
+	local name ItemTemplateName;
+
+	XComHQ = `XCOMHQ;
+	History = `XCOMHISTORY;	
+	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	CardMan = class'X2CardManager'.static.GetCardManager();
+	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
+	
+	BWTemplate = BWMan.DetermineBaseWeaponDeck();
+
+	if (BWTemplate == none)
+		`LOG("TLM ERROR: Unable to determine base weapon deck template");
+
+	ItemNames = BWTemplate.GetBaseItems();	
+
+	foreach ItemNames(ItemTemplateName)
+	{
+		WTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(ItemTemplateName));
+		if (WTemplate == none) continue;
+
+		Weight = 0.0;
+		foreach XComHQ.Crew(UnitRef)
+		{
+			Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+			if (Unit == none || !Unit.IsSoldier() || Unit.GetSoldierRank() == 0) continue;
+			
+			if (Unit.GetSoldierClassTemplate().IsWeaponAllowedByClass(WTemplate)) Weight++;
+		}
+
+		if (CardLabels.Find(string(WTemplate.DataName)) == INDEX_NONE)
+		{
+			CardMan.AddCardToDeck(BWTemplate.DataName, string(WTemplate.DataName), float(Weight));
+		}
+	}
+
+	CardLabels.Length = 0;
+	CardMan.GetAllCardsInDeck(BWTemplate.DataName, CardLabels);
+	
+	foreach CardLabels(CardLabel)
+	{
+		Idx = ItemNames.Find(name(CardLabel));
+		if (Idx == INDEX_NONE)
+		{			
+			CardMan.RemoveCardFromDeck(BWTemplate.DataName, CardLabel);
+		}
+	}
+
+	CardMan.SelectNextCardFromDeck(BWTemplate.DataName, strWeapon);
+	CardMan.MarkCardUsed(BWTemplate.DataName, strWeapon);
+
+	WTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(name(strWeapon)));
+}
+
+static function ApplyWeaponUpgrades(XComGameState_Item Item, XComGameState_Tech Tech)
+{	
+	local X2ItemTemplateManager ItemMan;	
+	local X2UpgradeDeckTemplateManager UpgradeDeckMan;
+	local X2UpgradeDeckTemplate UDTemplate;
+	local RarityDeckData Deck;
+	local X2RarityTemplate RarityTemplate;
+	local array<RarityDeckData> Decks;		
+	
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
+	UpgradeDeckMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+
+	Item.NickName = default.RandomNickNames[`SYNC_RAND_STATIC(default.RandomNickNames.Length)];	
+	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity(Item);
+	Decks = RarityTemplate.GetDecksToRoll();	
+
+	foreach Decks(Deck)
+	{	
+		UDTemplate = UpgradeDeckMan.GetUpgradeDeckTemplate(Deck.UpgradeDeckName);
+		if (UDTemplate == none) continue;
+
+		UDTemplate.RollUpgrades(Item, Deck.Quantity);
+	}
+
+	RarityTemplate.ApplyColorToString(Item.Nickname);
+}
+
+// =============
+// DELEGATES
+// =============
 static function string ModifyAmmoNick(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item)
 {
 	local X2WeaponUpgradeTemplate WUTemplate;
