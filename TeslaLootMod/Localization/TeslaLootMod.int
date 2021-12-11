@@ -46,10 +46,19 @@ strTier1Color = "#FFA500"
 strTier2Color = "#3ABD23"
 strTier3Color = "#9300FF"
 
-[X2StrategyElement_TLM]
-
 strRounds = "Rounds"
 strPlus = "+"
+
+[Rare X2RarityTemplate]
+RarityColor = "#FFFF00"
+
+[Epic X2RarityTemplate]
+RarityColor = "#FFA500"
+
+[Lego X2RarityTemplate]
+RarityColor = "#3ABD23"
+
+[X2StrategyElement_TLM]
 
 +RandomNickNames[0] = "Perfect Storm"
 +RandomNickNames[1] = "Thundercall"

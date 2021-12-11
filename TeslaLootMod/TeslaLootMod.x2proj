@@ -37,6 +37,15 @@
     <Content Include="Src\TeslaLootMod\Classes\X2Ability_TLM.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2BaseWeaponDeckSet.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2BaseWeaponDeckTemplate.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2BaseWeaponDeckTemplateManager.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2DownloadableContentInfo_TeslaLootMod.uc" />
     <Content Include="Src\TeslaLootMod\Classes\X2Effect_TLMEffects.uc">
       <SubType>Content</SubType>
@@ -50,7 +59,25 @@
     <Content Include="Src\TeslaLootMod\Classes\X2Item_TLMUpgrades.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2RaritySet.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2RarityTemplate.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2RarityTemplateManager.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2StrategyElement_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2UpgradeDeckSet.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2UpgradeDeckTemplate.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2UpgradeDeckTemplateManager.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2WeaponUpgradeTemplate_TLMAmmo.uc">

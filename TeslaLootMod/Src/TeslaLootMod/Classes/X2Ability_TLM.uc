@@ -1,25 +1,15 @@
 class X2Ability_TLM extends X2Ability config(TLM);
 
-enum ETRPoolType
+struct UpgradeDeckData
 {
-	ePool_Refinement,
-	ePool_Base,
-	ePool_Ammo,
-	ePool_Melee,
-	ePool_Gremlin,
+	var name UpgradeName;
+	var array<name> AllowedWeaponCats;
+	var array<name> DisallowedWeaponCats;
 };
 
 struct AmmoConversionData
 {
 	var name Ammo;	
-	var string Image;
-};
-
-struct BaseWeaponDeckData
-{
-	var name Deck;	
-	var name BaseWeapon;
-	var name ForcedRarity;
 	var string Image;
 };
 
@@ -33,18 +23,10 @@ struct WeaponAdjustmentData
 	var int Shred;
 };
 
-struct UpgradePoolData
-{
-	var name UpgradeName;
-	var array<name> AllowedWeaponCats;
-	var array<name> DisallowedWeaponCats;
-};
-
 struct AbilityUpgradeData
 {
 	var name UpgradeName;
-	var name AbilityName;
-	var string Icon;
+	var name AbilityName;	
 };
 
 var config array<AmmoConversionData> ConvertAmmo;

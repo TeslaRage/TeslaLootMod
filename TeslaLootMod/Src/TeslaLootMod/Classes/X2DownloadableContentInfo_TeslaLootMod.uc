@@ -8,6 +8,8 @@ var localized string strTier0Color;
 var localized string strTier1Color;
 var localized string strTier2Color;
 var localized string strTier3Color;
+var localized string strRounds;
+var localized string strPlus;
 
 // =============
 // DLC HOOKS
@@ -16,6 +18,7 @@ static event OnPostTemplatesCreated()
 {
 	AddLootTables();
 	UpdateWeaponUpgrade();
+	SetDelegatesToUpgradeDecks();
 }
 
 static event OnLoadedSavedGameToStrategy()
@@ -47,11 +50,16 @@ static function bool CanAddItemToInventory_CH_Improved(
 	local bool bFailedAmmoEquip, bFailedWeaponEquip;
 	local bool OverrideNormalBehavior;
 	local bool DoNotOverrideNormalBehavior;
+	local X2UpgradeDeckTemplateManager UDMan;
+	local X2UpgradeDeckTemplate UDTemplate;
 
 	// Prepare return values to make it easier for us to read the code.
 	OverrideNormalBehavior = CheckGameState != none;
 	DoNotOverrideNormalBehavior = CheckGameState == none;
 	
+	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+	UDTemplate = UDMan.GetUpgradeDeckTemplate('AmmoDeck');
+
 	// 1st scenario: Prevent weapon from being equipped if it has ammo upgrade and unit has ammo already equipped
 	// Interested when weapon is attempted to be equipped
 	WeaponTemplate = X2WeaponTemplate(ItemTemplate);
@@ -63,8 +71,8 @@ static function bool CanAddItemToInventory_CH_Improved(
 
 		foreach WUTemplates(WUTemplate)
 		{
-			// Check if this upgrade is an ammo upgrade and unit has Ammo in inventory
-			if (class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades.Find('UpgradeName', WUTemplate.DataName) != INDEX_NONE)
+			// Check if this upgrade is an ammo upgrade and unit has Ammo in inventory			
+			if (UDTemplate.Upgrades.Find('UpgradeName', WUTemplate.DataName) != INDEX_NONE)
 			{
 				if (UnitState.HasItemOfTemplateClass(class'X2AmmoTemplate'))
 				{
@@ -92,7 +100,7 @@ static function bool CanAddItemToInventory_CH_Improved(
 			foreach WUTemplates(WUTemplate)
 			{
 				// If the upgrade is ammo upgrade
-				if (class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades.Find('UpgradeName', WUTemplate.DataName) != INDEX_NONE)
+				if (UDTemplate.Upgrades.Find('UpgradeName', WUTemplate.DataName) != INDEX_NONE)
 				{
 					bFailedAmmoEquip = true;
 					break;
@@ -251,19 +259,27 @@ static function UpdateWeaponUpgrade()
 {
 	local X2ItemTemplateManager ItemTemplateMan;
 	local X2AbilityTemplateManager AbilityMan;
+	local X2UpgradeDeckTemplateManager UDMan;
+	local X2BaseWeaponDeckTemplateManager BWMan;
 	local array<X2DataTemplate> DataTemplates;
 	local X2DataTemplate DataTemplate;
 	local WeaponAdjustmentData Adjustment;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
 	local X2WeaponUpgradeTemplate WUTemplate;
 	local X2AbilityTemplate AbilityTemplate;
 	local X2Effect Effect;
 	local X2Effect_TLMEffects TLMEffect;	
-	local array<name> WUNames;
 	local string ItemName, strColor;
-	local name AbilityName, WUName;
+	local name AbilityName, ItemTemplateName;
+	local array<X2UpgradeDeckTemplate> UDTemplates;
+	local X2UpgradeDeckTemplate UDTemplate;
+	local array<name> ItemTemplateNames;
+	local UpgradeDeckData Upgrade;	
 
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
 	
 	foreach class'X2Item_TLMUpgrades'.default.WeaponAdjustmentUpgrades(Adjustment)
 	{
@@ -294,38 +310,79 @@ static function UpdateWeaponUpgrade()
 		}
 	}
 
-	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomAdjustmentUpgrades);
-	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomBaseUpgrades);	
-	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomAmmoUpgrades);		
-	CollectUpgradeNames(WUNames, class'X2StrategyElement_TLM'.default.RandomLegendaryUpgrades);	
-
-	foreach WUNames(WUName)
-	{		
-		ItemTemplateMan.FindDataTemplateAllDifficulties(WUName, DataTemplates);
-
-		foreach DataTemplates(DataTemplate)
+	WUTemplates = UDMan.GetAllUpgradeTemplates();
+	ItemTemplateNames = BWMan.GetAllItemTemplateNames();	
+	
+	foreach WUTemplates(WUTemplate)
+	{
+		switch (WUTemplate.Tier)
 		{
-			WUTemplate = X2WeaponUpgradeTemplate(DataTemplate);
-			if (WUTemplate == none) continue;
+			case 0:
+				strColor = default.strTier0Color;
+				break;
+			case 1:
+				strColor = default.strTier1Color;
+				break;
+			case 2:
+				strColor = default.strTier2Color;
+				break;
+			case 3:
+				strColor = default.strTier3Color;
+				break;
+		}
 
-			switch (WUTemplate.Tier)
+		if (strColor != "")
+			WUTemplate.FriendlyName = "<font color='" $strColor $"'>" $WUTemplate.FriendlyName $"</font>";
+
+		UDTemplates = UDMan.GetUpgradeDecksByUpgradeName(WUTemplate.DataName);		
+		
+		foreach UDTemplates(UDTemplate)
+		{
+			switch (UDTemplate.DataName)
 			{
-				case 0:
-					strColor = default.strTier0Color;
+				case 'RefnDeck':
+					foreach ItemTemplateNames(ItemTemplateName)
+					{
+						WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_heat_sink");
+					}
+
+					foreach UDTemplate.Upgrades(Upgrade)
+					{
+						WUTemplate.MutuallyExclusiveUpgrades.AddItem(Upgrade.UpgradeName);
+					}
+
 					break;
-				case 1:
-					strColor = default.strTier1Color;
+				case 'AmmoDeck':
+					foreach ItemTemplateNames(ItemTemplateName)
+					{
+						WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip");
+					}
+
+					foreach UDTemplate.Upgrades(Upgrade)
+					{					
+						WUTemplate.MutuallyExclusiveUpgrades.AddItem(Upgrade.UpgradeName);
+					}
+
 					break;
-				case 2:
-					strColor = default.strTier2Color;
-					break;
-				case 3:
-					strColor = default.strTier3Color;
+				case 'LegoDeck':
+					foreach WUTemplate.BonusAbilities(AbilityName)
+					{
+						AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);
+						break;
+					}
+					
+					foreach ItemTemplateNames(ItemTemplateName)
+					{
+						WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, AbilityTemplate.IconImage);
+					}
+
+					foreach UDTemplate.Upgrades(Upgrade)
+					{
+						WUTemplate.MutuallyExclusiveUpgrades.AddItem(Upgrade.UpgradeName);
+					}
+
 					break;
 			}
-
-			if (strColor != "")
-				WUTemplate.FriendlyName = "<font color='" $strColor $"'>" $WUTemplate.FriendlyName $"</font>";
 		}
 	}
 }
@@ -340,12 +397,43 @@ static function AppendArrays(out array<name> ArrayA, array<name> ArrayB)
 	}
 }
 
-static function CollectUpgradeNames(out array<name> WUNames, array<UpgradePoolData> UpgradePool)
+static function SetDelegatesToUpgradeDecks()
 {
-	local UpgradePoolData UpgradeData;
+	local X2UpgradeDeckTemplateManager UDMan;
+	local X2UpgradeDeckTemplate UDTemplate;
 
-	foreach UpgradePool(UpgradeData)
+	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+	UDTemplate = UDMan.GetUpgradeDeckTemplate('AmmoDeck');
+
+	if (UDTemplate != none)
 	{
-		WUNames.AddItem(UpgradeData.UpgradeName);
+		UDTemplate.ModifyNickNameFn = ModifyAmmoNick;
 	}
+
+	UDTemplate = UDMan.GetUpgradeDeckTemplate('RefnDeck');
+
+	if (UDTemplate != none)
+	{
+		UDTemplate.ModifyNickNameFn = ModifyRefnNick;
+	}
+}
+
+static function string ModifyAmmoNick(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item)
+{
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local string Temp;
+
+	foreach AppliedUpgrades(WUTemplate)
+	{
+		Temp = WUTemplate.GetItemFriendlyNamePlural();
+		Temp -= default.strRounds;
+		break; // 1 is enough
+	}	
+	
+	return Temp $Item.Nickname;
+}
+
+static function string ModifyRefnNick(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item)
+{	
+	return Item.Nickname $default.strPlus;
 }
