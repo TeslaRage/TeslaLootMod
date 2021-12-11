@@ -1,13 +1,13 @@
 class X2DownloadableContentInfo_TeslaLootMod extends X2DownloadableContentInfo;
 
 var config (TLM) array<LootTable> LootEntry;
+var config (TLM) string strTier0Color;
+var config (TLM) string strTier1Color;
+var config (TLM) string strTier2Color;
+var config (TLM) string strTier3Color;
 
 var localized string strHasAmmoAlreadyEquipped;
 var localized string strWeaponHasAmmoUpgrade;
-var localized string strTier0Color;
-var localized string strTier1Color;
-var localized string strTier2Color;
-var localized string strTier3Color;
 var localized string strRounds;
 var localized string strPlus;
 
@@ -230,27 +230,35 @@ static function AddLootTables()
 
 static function CreateTechsMidCampaign()
 {
+	local X2StrategyElementTemplateManager StratMan;
 	local XComGameState_Tech Tech;
 	local X2TechTemplate TechTemplate;
 	local XComGameState NewGameState;
-	local bool bTechExists;
+	local TechData UnlockLootBoxTech;	
+	local array<name> TechsToCreate;
+	local name TechName;	
 
-	bTechExists = false;
-	foreach `XCOMHISTORY.IterateByClassType(class'XComGameState_Tech', Tech)
+	foreach class'X2StrategyElement_TLM'.default.UnlockLootBoxTechs(UnlockLootBoxTech)
 	{
-		if (Tech.GetMyTemplateName() == 'UnlockLockbox')
-		{
-			bTechExists = true;
-			break;
-		}
+		TechsToCreate.AddItem(UnlockLootBoxTech.TemplateName);
+	}
+	
+	foreach `XCOMHISTORY.IterateByClassType(class'XComGameState_Tech', Tech)
+	{		
+		TechsToCreate.RemoveItem(Tech.GetMyTemplateName());
 	}
 
-	if (!bTechExists)
+	if (TechsToCreate.Length > 0)
 	{
+		StratMan = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Create tech mid campaign");
-		TechTemplate = X2TechTemplate(class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager().FindStrategyElementTemplate('UnlockLockbox'));
 
-		Tech = XComGameState_Tech(NewGameState.CreateNewStateObject(class'XComGameState_Tech', TechTemplate));
+		foreach TechsToCreate(TechName)
+		{
+			TechTemplate = X2TechTemplate(StratMan.FindStrategyElementTemplate(TechName));
+			Tech = XComGameState_Tech(NewGameState.CreateNewStateObject(class'XComGameState_Tech', TechTemplate));
+		}
+
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
 }
