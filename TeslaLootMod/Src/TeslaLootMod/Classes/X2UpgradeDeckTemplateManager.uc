@@ -42,8 +42,7 @@ function array<X2WeaponUpgradeTemplate> GetAllUpgradeTemplates()
 
 				WUTemplates.AddItem(WUTemplate);
 			}
-		}
-		
+		}		
 	}
 
 	return WUTemplates;
