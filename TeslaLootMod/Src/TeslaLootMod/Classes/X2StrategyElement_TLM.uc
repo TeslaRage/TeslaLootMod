@@ -1,8 +1,6 @@
 class X2StrategyElement_TLM extends X2StrategyElement config(TLM);
 
 var config array<TechData> UnlockLootBoxTechs;
-var config array<name> RequiredTechsForLockbox;
-var config int NumOfTimesToForceInstant;
 
 var localized array<String> RandomNickNames;
 
@@ -24,7 +22,7 @@ static function X2DataTemplate CreateUnlockLockboxTemplate(name TemplateName)
 	local X2TechTemplate_TLM Template;	
 
 	`CREATE_X2TEMPLATE(class'X2TechTemplate_TLM', Template, TemplateName);
-	Template.PointsToComplete = 360;
+	
 	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";	
 	Template.SortingTier = 2;
 	Template.ResearchCompletedFn = GenerateItem;
