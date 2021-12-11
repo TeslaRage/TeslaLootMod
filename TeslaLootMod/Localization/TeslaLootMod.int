@@ -1,3 +1,42 @@
+[UnlockRareBox X2TechTemplate_TLM]
+DisplayName="Unlock Rare Lockbox"
+Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+
+[UnlockEpicBox X2TechTemplate_TLM]
+DisplayName="Unlock Epic Lockbox"
+Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+
+[UnlockLegoBox X2TechTemplate_TLM]
+DisplayName="Unlock Legendary Lockbox"
+Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+
+[UnlockRareBoxInstant X2TechTemplate_TLM]
+DisplayName="Unlock Rare Lockbox (Instant)"
+Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+
+[UnlockEpicBoxInstant X2TechTemplate_TLM]
+DisplayName="Unlock Epic Lockbox (Instant)"
+Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+
+[UnlockLegoBoxInstant X2TechTemplate_TLM]
+DisplayName="Unlock Legendary Lockbox (Instant)"
+Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+
+[RareBox X2ItemTemplate_LootBox]
+FriendlyName="Rare Lockbox"
+FriendlyNamePlural="Rare Lockboxes"
+BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Potentially..."
+
+[EpicBox X2ItemTemplate_LootBox]
+FriendlyName="Epic Lockbox"
+FriendlyNamePlural="Epic Lockboxes"
+BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Potentially..."
+
+[LegoBox X2ItemTemplate_LootBox]
+FriendlyName="Legendary Lockbox"
+FriendlyNamePlural="Legendary Lockboxes"
+BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Potentially..."
+
 [TLMUpgrade_APRounds X2WeaponUpgradeTemplate_TLMAmmo]
 FriendlyName="AP Rounds"
 FriendlyNamePlural="AP Rounds"
@@ -41,22 +80,8 @@ strSlotLocked = "LOCKED"
 
 strHasAmmoAlreadyEquipped = "AMMO EQUIPPED"
 strWeaponHasAmmoUpgrade = "WEAPON HAS AMMO UPGRADE"
-strTier0Color = "#FFFF00"
-strTier1Color = "#FFA500"
-strTier2Color = "#3ABD23"
-strTier3Color = "#9300FF"
-
 strRounds = "Rounds"
 strPlus = "+"
-
-[Rare X2RarityTemplate]
-RarityColor = "#FFFF00"
-
-[Epic X2RarityTemplate]
-RarityColor = "#FFA500"
-
-[Lego X2RarityTemplate]
-RarityColor = "#3ABD23"
 
 [X2StrategyElement_TLM]
 
