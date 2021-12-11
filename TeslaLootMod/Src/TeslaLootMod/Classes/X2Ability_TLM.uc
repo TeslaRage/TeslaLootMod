@@ -1,50 +1,5 @@
 class X2Ability_TLM extends X2Ability config(TLM);
 
-struct TechData
-{
-	var name TemplateName;
-};
-
-struct LootBoxRarityData
-{
-	var name RarityName;
-	var int Chance;
-};
-
-struct LootBoxData
-{
-	var name LootBoxName;
-};
-
-struct UpgradeDeckData
-{
-	var name UpgradeName;
-	var array<name> AllowedWeaponCats;
-	var array<name> DisallowedWeaponCats;
-};
-
-struct AmmoConversionData
-{
-	var name Ammo;	
-	var string Image;
-};
-
-struct WeaponAdjustmentData
-{
-	var name AdjustmentName;
-	var int Tier;
-	var int Damage;
-	var int Crit;
-	var int Pierce;
-	var int Shred;
-};
-
-struct AbilityUpgradeData
-{
-	var name UpgradeName;
-	var name AbilityName;	
-};
-
 var config array<AmmoConversionData> ConvertAmmo;
 
 var config int RapidFireCharges;

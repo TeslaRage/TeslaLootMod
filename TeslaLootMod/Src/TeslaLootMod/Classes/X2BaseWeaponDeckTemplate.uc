@@ -1,12 +1,5 @@
 class X2BaseWeaponDeckTemplate extends X2DataTemplate config(TLM);
 
-struct BaseItemData{
-	var name TemplateName;
-	var name ForcedRarity;
-	var string Image;
-	var StrategyRequirement Requirements;	
-};
-
 var config int Tier;
 var config StrategyRequirement Requirements;
 var config array<BaseItemData> BaseItems;
@@ -40,9 +33,13 @@ function string GetImage(name TemplateName)
 	local int Idx;
 
 	Idx = BaseItems.Find('TemplateName', TemplateName);
-	if (Idx == INDEX_NONE) return "";
 
-	return BaseItems[Idx].Image;
+	if (Idx != INDEX_NONE)
+	{
+		return BaseItems[Idx].Image;
+	}	
+
+	return "";
 }
 
 function name GetForcedRarity(name TemplateName)
@@ -50,7 +47,11 @@ function name GetForcedRarity(name TemplateName)
 	local int Idx;
 
 	Idx = BaseItems.Find('TemplateName', TemplateName);
-	if (Idx == INDEX_NONE) return '';
 
-	return BaseItems[Idx].ForcedRarity;
+	if (Idx != INDEX_NONE)
+	{
+		return BaseItems[Idx].ForcedRarity;
+	}
+
+	return '';
 }

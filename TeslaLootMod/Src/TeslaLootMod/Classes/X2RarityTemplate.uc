@@ -1,16 +1,5 @@
 class X2RarityTemplate extends X2DataTemplate config(TLM);
 
-struct RarityDeckData
-{
-	var name UpgradeDeckName;
-	var int Quantity;
-	var int Chance;
-
-	structdefaultproperties{
-		Chance = 100;
-	}
-};
-
 var config int Tier;
 var config array<RarityDeckData> Decks;
 var config string RarityColor;
