@@ -6,12 +6,15 @@ var Delegate<ModifyNickNameDelegate> ModifyNickNameFn;
 
 delegate string ModifyNickNameDelegate(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item);
 
-function RollUpgrades(out XComGameState_Item Item, X2ItemTemplateManager ItemMan, int Quantity)
+function RollUpgrades(out XComGameState_Item Item, int Quantity)
 {
 	local UpgradeDeckData Upgrade;
 	local X2WeaponUpgradeTemplate WUTemplate;
 	local array<X2WeaponUpgradeTemplate> WUTemplates, AppliedUpgrades;
+	local X2ItemTemplateManager ItemMan;
 	local int Applied, Idx;
+
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
 	foreach Upgrades(Upgrade)
 	{

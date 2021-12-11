@@ -53,6 +53,9 @@
     <Content Include="Src\TeslaLootMod\Classes\X2EventListener_TLM.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2ItemTemplate_LootBox.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2Item_TLM.uc">
       <SubType>Content</SubType>
     </Content>
@@ -69,6 +72,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2StrategyElement_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2TechTemplate_TLM.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2UpgradeDeckSet.uc">

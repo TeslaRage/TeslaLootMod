@@ -1,5 +1,21 @@
 class X2Ability_TLM extends X2Ability config(TLM);
 
+struct TechData
+{
+	var name TemplateName;
+};
+
+struct LootBoxRarityData
+{
+	var name RarityName;
+	var int Chance;
+};
+
+struct LootBoxData
+{
+	var name LootBoxName;
+};
+
 struct UpgradeDeckData
 {
 	var name UpgradeName;

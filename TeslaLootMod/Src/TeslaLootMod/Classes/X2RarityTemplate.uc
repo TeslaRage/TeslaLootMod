@@ -11,7 +11,6 @@ struct RarityDeckData
 	}
 };
 
-var config int Chance;
 var config int Tier;
 var config array<RarityDeckData> Decks;
 

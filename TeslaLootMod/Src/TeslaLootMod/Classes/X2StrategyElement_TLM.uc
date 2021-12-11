@@ -1,5 +1,6 @@
 class X2StrategyElement_TLM extends X2StrategyElement config(TLM);
 
+var config array<TechData> UnlockLootBoxTechs;
 var config array<name> RequiredTechsForLockbox;
 var config int NumOfTimesToForceInstant;
 
@@ -8,48 +9,42 @@ var localized array<String> RandomNickNames;
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Techs;
+	local TechData UnlockLootBoxTech;
 
-	Techs.AddItem(CreateUnlockLockboxTemplate());
+	foreach default.UnlockLootBoxTechs(UnlockLootBoxTech)
+	{
+		Techs.AddItem(CreateUnlockLockboxTemplate(UnlockLootBoxTech.TemplateName));
+	}	
 
 	return Techs;
 }
 
-static function X2DataTemplate CreateUnlockLockboxTemplate()
+static function X2DataTemplate CreateUnlockLockboxTemplate(name TemplateName)
 {
-	local X2TechTemplate Template;
-	local ArtifactCost Artifacts;
+	local X2TechTemplate_TLM Template;	
 
-	`CREATE_X2TEMPLATE(class'X2TechTemplate', Template, 'UnlockLockbox');
+	`CREATE_X2TEMPLATE(class'X2TechTemplate_TLM', Template, TemplateName);
 	Template.PointsToComplete = 360;
 	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";	
 	Template.SortingTier = 2;
-	Template.ResearchCompletedFn = UnlockLockboxCompleted;
+	Template.ResearchCompletedFn = GenerateItem;
 
-	Template.Requirements.RequiredItems.AddItem('LockBox');
-	Template.Requirements.RequiredTechs = default.RequiredTechsForLockbox;
 	Template.Requirements.RequiredEngineeringScore = 10;
 	Template.Requirements.bVisibleIfPersonnelGatesNotMet = true;
 
 	Template.bRepeatable = true;
 	Template.bProvingGround = true;
 
-	// Cost
-	Artifacts.ItemTemplateName = 'LockboxKey';
-	Artifacts.Quantity = 1;
-	Template.Cost.ArtifactCosts.AddItem(Artifacts);
-
 	return Template;
 }
 
-static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState_Tech TechState)
+static function GenerateItem(XComGameState NewGameState, XComGameState_Tech TechState)
 {			  
 	local XComGameState_Item Weapon;   
 	local XComGameState_HeadquartersXCom XComHQ;
-	local XComGameState_ItemData Data;
-	local X2RarityTemplate SelectedRarity;
+	local XComGameState_ItemData Data;	
 	local X2WeaponTemplate WTemplate;
-	local X2BaseWeaponDeckTemplate BWTemplate;
-	local string NickAmmo, NickAdjustment;
+	local X2BaseWeaponDeckTemplate BWTemplate;	
 
 	XComHQ = `XCOMHQ;	
 	
@@ -62,7 +57,7 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 		`LOG("TLM ERROR: Failed to get base weapon");		
 	}
 
-	ApplyWeaponUpgrades(Weapon, SelectedRarity, NickAmmo, NickAdjustment);	
+	ApplyWeaponUpgrades(Weapon, TechState);	
 
 	Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
 	Data.NumUpgradeSlots = 0;
@@ -74,11 +69,6 @@ static function UnlockLockboxCompleted(XComGameState NewGameState, XComGameState
 	TechState.ItemRewards.Length = 0; 						// Reset the item rewards array in case the tech is repeatable
 	TechState.ItemRewards.AddItem(Weapon.GetMyTemplate());	// Needed for UI Alert display info
 	TechState.bSeenResearchCompleteScreen = false; 			// Reset the research report for techs that are repeatable
-
-	if (!TechState.IsInstant() && TechState.TimesResearched >= default.NumOfTimesToForceInstant)
-	{
-		TechState.bForceInstant = true; 
-	}
 
 	UIItemReceived(NewGameState, Weapon, BWTemplate);
 }
@@ -149,21 +139,20 @@ static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2Wea
 	WTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(name(strWeapon)));
 }
 
-static function ApplyWeaponUpgrades(out XComGameState_Item Item, out X2RarityTemplate RarityTemplate, out string NickAmmo, out string NickAdjustment)
-{
-	local X2ItemTemplateManager ItemTemplateMan;
-	local X2RarityTemplateManager RarityMan;	
+static function ApplyWeaponUpgrades(XComGameState_Item Item, XComGameState_Tech Tech)
+{	
+	local X2ItemTemplateManager ItemMan;	
 	local X2UpgradeDeckTemplateManager UpgradeDeckMan;
 	local X2UpgradeDeckTemplate UDTemplate;
 	local RarityDeckData Deck;
-	local array<RarityDeckData> Decks;	
+	local X2RarityTemplate RarityTemplate;
+	local array<RarityDeckData> Decks;		
 	
-	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
-	RarityMan = class'X2RarityTemplateManager'.static.GetRarityTemplateManager();
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
 	UpgradeDeckMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
 
 	Item.NickName = default.RandomNickNames[`SYNC_RAND_STATIC(default.RandomNickNames.Length)];	
-	RarityTemplate = RarityMan.RollRarity(Item);
+	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity(Item);
 	Decks = RarityTemplate.GetDecksToRoll();	
 
 	foreach Decks(Deck)
@@ -171,7 +160,7 @@ static function ApplyWeaponUpgrades(out XComGameState_Item Item, out X2RarityTem
 		UDTemplate = UpgradeDeckMan.GetUpgradeDeckTemplate(Deck.UpgradeDeckName);
 		if (UDTemplate == none) continue;
 
-		UDTemplate.RollUpgrades(Item, ItemTemplateMan, Deck.Quantity);
+		UDTemplate.RollUpgrades(Item, Deck.Quantity);
 	}
 
 	RarityTemplate.ApplyColorToString(Item.Nickname);
