@@ -13,8 +13,7 @@ struct RarityDeckData
 
 var config int Tier;
 var config array<RarityDeckData> Decks;
-
-var localized string RarityColor;
+var config string RarityColor;
 
 function array<RarityDeckData> GetDecksToRoll()
 {
