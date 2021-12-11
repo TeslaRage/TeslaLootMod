@@ -19,8 +19,6 @@ function X2BaseWeaponDeckTemplate DetermineBaseWeaponDeck()
 	local XComGameState_HeadquartersXCom XComHQ;
 	local X2DataTemplate DataTemplate;
 	local X2BaseWeaponDeckTemplate BWTemplate, ChosenBWTemplate;	
-	local name TechName;
-	local bool bTechCheckFail;
 
 	XComHQ = `XCOMHQ;
 
@@ -28,17 +26,11 @@ function X2BaseWeaponDeckTemplate DetermineBaseWeaponDeck()
 	{
 		BWTemplate = X2BaseWeaponDeckTemplate(DataTemplate);
 		if (BWTemplate == none) continue;
-
-		bTechCheckFail = false;
-		foreach BWTemplate.TechsToUnlock(TechName)
-		{
-			if (!XComHQ.IsTechResearched(TechName)) bTechCheckFail = true;
-		}		
 		
-		if (!bTechCheckFail)
+		if (XComHQ.MeetsAllStrategyRequirements(BWTemplate.Requirements))
 		{
 			if (ChosenBWTemplate == none) ChosenBWTemplate = BWTemplate;
-			if (ChosenBWTemplate.Tier < BWTemplate.Tier) ChosenBWTemplate = BWTemplate;
+			else if (ChosenBWTemplate.Tier < BWTemplate.Tier) ChosenBWTemplate = BWTemplate;
 		}			
 	}
 

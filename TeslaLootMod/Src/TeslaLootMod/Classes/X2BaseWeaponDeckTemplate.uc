@@ -2,13 +2,13 @@ class X2BaseWeaponDeckTemplate extends X2DataTemplate config(TLM);
 
 struct BaseItemData{
 	var name TemplateName;
-	var name RequiredTech;
 	var name ForcedRarity;
 	var string Image;
+	var StrategyRequirement Requirements;	
 };
 
 var config int Tier;
-var config array<name> TechsToUnlock;
+var config StrategyRequirement Requirements;
 var config array<BaseItemData> BaseItems;
 
 function array<name> GetBaseItems()
@@ -23,8 +23,8 @@ function array<name> GetBaseItems()
 	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
 	foreach BaseItems(BaseItem)
-	{
-		if (!XComHQ.IsTechResearched(BaseItem.RequiredTech) && BaseItem.RequiredTech != '') continue;
+	{		
+		if (!XComHQ.MeetsAllStrategyRequirements(BaseItem.Requirements)) continue;
 		
 		ItemTemplate = ItemMan.FindItemTemplate(BaseItem.TemplateName);
 		if (ItemTemplate == none) continue;
