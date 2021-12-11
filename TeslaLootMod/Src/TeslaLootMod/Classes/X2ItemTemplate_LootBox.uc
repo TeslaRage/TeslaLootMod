@@ -33,12 +33,12 @@ function X2RarityTemplate RollRarity(XComGameState_Item Item)
 		RarityTemplate = LowestTierRarityTemplate;
 	}		
 
-	CheckForForcedRarity(RarityTemplate, Item);	
+	GetForcedRarityIfAny(RarityTemplate, Item);	
 
 	return RarityTemplate;
 }
 
-private function CheckForForcedRarity(out X2RarityTemplate SelectedRarity, XComGameState_Item Item)
+private function GetForcedRarityIfAny(out X2RarityTemplate SelectedRarity, XComGameState_Item Item)
 {
 	local X2BaseWeaponDeckTemplateManager BWMan;
 	local X2BaseWeaponDeckTemplate BWTemplate;
