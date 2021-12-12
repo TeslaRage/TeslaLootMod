@@ -544,24 +544,14 @@ static function ApplyWeaponUpgrades(XComGameState_Item Item, XComGameState_Tech 
 }
 
 static function FindAndMakeTechInstant(XComGameState NewGameState, XComGameState_Tech Tech)
-{
-	local X2TechTemplate_TLM TLMTechTemplate;
+{	
 	local XComGameState_Tech TechFromHistory;
 	local bool bFoundInstantVersion;
-
-	// Get our version of the template
-	TLMTechTemplate = X2TechTemplate_TLM(Tech.GetMyTemplate());
-	
-	// If there is no instant version of the tech, we bail
-	if (TLMTechTemplate.InstantTech == '')
-	{
-		return;
-	}
 	
 	// Look for the instant version of the tech from history
 	foreach `XCOMHISTORY.IterateByClassType(class'XComGameState_Tech', TechFromHistory)
-	{		
-		if (TechFromHistory.GetMyTemplateName() == TLMTechTemplate.InstantTech)
+	{	
+		if (TechFromHistory.GetMyTemplate().Requirements.RequiredTechs.Find(Tech.GetMyTemplateName()) != INDEX_NONE)
 		{
 			bFoundInstantVersion = true;
 			break;
