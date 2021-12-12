@@ -53,6 +53,8 @@ static function UnlockLootBoxCompleted(XComGameState NewGameState, XComGameState
 	TechState.ItemRewards.AddItem(Item.GetMyTemplate());	// Needed for UI Alert display info
 	TechState.bSeenResearchCompleteScreen = false; 			// Reset the research report for techs that are repeatable
 
+	class'X2DownloadableContentInfo_TeslaLootMod'.static.FindAndMakeTechInstant(NewGameState, TechState);
+
 	UIItemReceived(NewGameState, Item, BWTemplate);
 }
 

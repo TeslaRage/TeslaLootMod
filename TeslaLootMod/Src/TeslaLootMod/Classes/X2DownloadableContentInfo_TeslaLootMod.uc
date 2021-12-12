@@ -543,6 +543,39 @@ static function ApplyWeaponUpgrades(XComGameState_Item Item, XComGameState_Tech 
 	RarityTemplate.ApplyColorToString(Item.Nickname);
 }
 
+static function FindAndMakeTechInstant(XComGameState NewGameState, XComGameState_Tech Tech)
+{
+	local X2TechTemplate_TLM TLMTechTemplate;
+	local XComGameState_Tech TechFromHistory;
+	local bool bFoundInstantVersion;
+
+	// Get our version of the template
+	TLMTechTemplate = X2TechTemplate_TLM(Tech.GetMyTemplate());
+	
+	// If there is no instant version of the tech, we bail
+	if (TLMTechTemplate.InstantTech == '')
+	{
+		return;
+	}
+	
+	// Look for the instant version of the tech from history
+	foreach `XCOMHISTORY.IterateByClassType(class'XComGameState_Tech', TechFromHistory)
+	{		
+		if (TechFromHistory.GetMyTemplateName() == TLMTechTemplate.InstantTech)
+		{
+			bFoundInstantVersion = true;
+			break;
+		}
+	}
+
+	// If there is one, then we force it to instant
+	if (bFoundInstantVersion)
+	{
+		TechFromHistory = XComGameState_Tech(NewGameState.ModifyStateObject(class'XComGameState_Tech', TechFromHistory.ObjectID));
+		TechFromHistory.bForceInstant = true;
+	}
+}
+
 // =============
 // DELEGATES
 // =============
