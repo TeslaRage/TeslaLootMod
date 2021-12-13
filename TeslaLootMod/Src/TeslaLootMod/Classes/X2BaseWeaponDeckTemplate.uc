@@ -4,12 +4,13 @@ var config int Tier;
 var config StrategyRequirement Requirements;
 var config array<BaseItemData> BaseItems;
 
-function array<name> GetBaseItems()
+function array<name> GetBaseItems(X2RarityTemplate RarityTemplate)
 {
 	local XComGameState_HeadquartersXCom XComHQ;
 	local X2ItemTemplateManager ItemMan;
 	local BaseItemData BaseItem;
 	local X2ItemTemplate ItemTemplate;
+	local name ForcedRarityName;
 	local array<name> BaseItemsTemplateNames;
 
 	XComHQ = `XCOMHQ;
@@ -22,6 +23,9 @@ function array<name> GetBaseItems()
 		ItemTemplate = ItemMan.FindItemTemplate(BaseItem.TemplateName);
 		if (ItemTemplate == none) continue;
 
+		ForcedRarityName = GetForcedRarity(ItemTemplate.DataName);
+		if (ForcedRarityName != '' && ForcedRarityName != RarityTemplate.DataName) continue;
+		
 		BaseItemsTemplateNames.AddItem(BaseItem.TemplateName);
 	}
 

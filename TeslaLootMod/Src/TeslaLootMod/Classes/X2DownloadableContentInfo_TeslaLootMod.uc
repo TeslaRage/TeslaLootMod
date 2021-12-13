@@ -427,13 +427,18 @@ static function SetDelegatesToUpgradeDecks()
 	}
 }
 
-static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, XComGameState_Tech TechState, out X2BaseWeaponDeckTemplate BWTemplate)
+static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, XComGameState_Tech Tech, out X2BaseWeaponDeckTemplate BWTemplate)
 {
+	local X2ItemTemplateManager ItemMan;
 	local XComGameState_Item Item;
 	local X2WeaponTemplate WTemplate;
 	local XComGameState_ItemData Data;
+	local X2RarityTemplate RarityTemplate;
+	
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
+	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity();
 
-	GetBaseWeapon(BWTemplate, WTemplate);
+	GetBaseWeapon(BWTemplate, WTemplate, RarityTemplate);
 	Item = WTemplate.CreateInstanceFromTemplate(NewGameState);
 
 	if (Item == none)
@@ -441,7 +446,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 		`LOG("TLM ERROR: Failed to get base weapon");		
 	}
 
-	ApplyWeaponUpgrades(Item, TechState);
+	ApplyWeaponUpgrades(Item, Tech, RarityTemplate);
 
 	Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
 	Data.NumUpgradeSlots = 0;
@@ -450,7 +455,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 	return Item;
 }
 
-static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2WeaponTemplate WTemplate)
+static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2WeaponTemplate WTemplate, X2RarityTemplate RarityTemplate)
 {		
 	local X2ItemTemplateManager ItemTemplateMan;	
 	local XComGameState_HeadquartersXCom XComHQ;
@@ -476,7 +481,7 @@ static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2Wea
 	if (BWTemplate == none)
 		`LOG("TLM ERROR: Unable to determine base weapon deck template");
 
-	ItemNames = BWTemplate.GetBaseItems();	
+	ItemNames = BWTemplate.GetBaseItems(RarityTemplate);	
 
 	foreach ItemNames(ItemTemplateName)
 	{
@@ -516,20 +521,16 @@ static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2Wea
 	WTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(name(strWeapon)));
 }
 
-static function ApplyWeaponUpgrades(XComGameState_Item Item, XComGameState_Tech Tech)
-{	
-	local X2ItemTemplateManager ItemMan;	
+static function ApplyWeaponUpgrades(XComGameState_Item Item, XComGameState_Tech Tech, X2RarityTemplate RarityTemplate)
+{		
 	local X2UpgradeDeckTemplateManager UpgradeDeckMan;
 	local X2UpgradeDeckTemplate UDTemplate;
-	local RarityDeckData Deck;
-	local X2RarityTemplate RarityTemplate;
-	local array<RarityDeckData> Decks;		
+	local RarityDeckData Deck;	
+	local array<RarityDeckData> Decks;	
 	
-	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
 	UpgradeDeckMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
 
 	Item.NickName = default.RandomNickNames[`SYNC_RAND_STATIC(default.RandomNickNames.Length)];	
-	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity(Item);
 	Decks = RarityTemplate.GetDecksToRoll();	
 
 	foreach Decks(Deck)
