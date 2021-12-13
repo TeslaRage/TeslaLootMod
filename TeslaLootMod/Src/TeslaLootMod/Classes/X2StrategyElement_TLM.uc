@@ -9,20 +9,20 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	foreach default.UnlockLootBoxTechs(UnlockLootBoxTech)
 	{
-		Techs.AddItem(CreateUnlockLockboxTemplate(UnlockLootBoxTech.TemplateName));
+		Techs.AddItem(CreateUnlockLockboxTemplate(UnlockLootBoxTech));
 	}	
 
 	return Techs;
 }
 
-static function X2DataTemplate CreateUnlockLockboxTemplate(name TemplateName)
+static function X2DataTemplate CreateUnlockLockboxTemplate(TechData UnlockLootBoxTech)
 {
 	local X2TechTemplate_TLM Template;	
 
-	`CREATE_X2TEMPLATE(class'X2TechTemplate_TLM', Template, TemplateName);
+	`CREATE_X2TEMPLATE(class'X2TechTemplate_TLM', Template, UnlockLootBoxTech.TemplateName);
 	
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";	
-	Template.SortingTier = 2;
+	Template.strImage = UnlockLootBoxTech.Image;	
+	Template.SortingTier = UnlockLootBoxTech.SortingTier;
 	Template.ResearchCompletedFn = UnlockLootBoxCompleted;
 
 	Template.Requirements.RequiredEngineeringScore = 10;

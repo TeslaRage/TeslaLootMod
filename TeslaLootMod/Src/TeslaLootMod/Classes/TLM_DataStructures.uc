@@ -3,6 +3,8 @@ class TLM_DataStructures extends Object;
 struct TechData
 {
 	var name TemplateName;
+	var int SortingTier;
+	var string Image;
 };
 
 struct LootBoxRarityData
