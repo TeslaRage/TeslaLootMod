@@ -92,3 +92,19 @@ static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate)
 
 	return false;
 }
+
+function bool ValidateTemplate (out string strError)
+{
+	if (!super.ValidateTemplate(strError))
+	{
+		return false;
+	}
+
+	if (Upgrades.Length == 0)
+	{
+		strError = "Upgrades is empty so items will not get any weapon upgrades";
+		return false;
+	}
+
+	return true;
+}

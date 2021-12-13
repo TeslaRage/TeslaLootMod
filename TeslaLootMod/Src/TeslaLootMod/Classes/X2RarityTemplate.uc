@@ -22,3 +22,19 @@ function ApplyColorToString(out string ColoredString)
 {	
 	ColoredString = "<font color='" $RarityColor $"'>" $ColoredString $"</font>";
 }
+
+function bool ValidateTemplate (out string strError)
+{
+	if (!super.ValidateTemplate(strError))
+	{
+		return false;
+	}
+
+	if (Decks.Length == 0)
+	{
+		strError = "Decks is empty so items with this rarity will not get any weapon upgrades";
+		return false;
+	}
+
+	return true;
+}

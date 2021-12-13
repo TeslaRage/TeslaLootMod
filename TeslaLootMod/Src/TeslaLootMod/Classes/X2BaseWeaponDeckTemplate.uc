@@ -76,3 +76,19 @@ function name GetForcedRarity(name TemplateName)
 
 	return '';
 }
+
+function bool ValidateTemplate (out string strError)
+{
+	if (!super.ValidateTemplate(strError))
+	{
+		return false;
+	}
+
+	if (BaseItems.Length == 0)
+	{
+		strError = "BaseItems is empty so no item can be chosen during item generation";
+		// return false;
+	}
+
+	return true;
+}
