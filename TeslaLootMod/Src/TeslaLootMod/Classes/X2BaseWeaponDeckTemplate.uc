@@ -9,19 +9,36 @@ function array<name> GetBaseItems(X2RarityTemplate RarityTemplate)
 	local XComGameState_HeadquartersXCom XComHQ;
 	local X2ItemTemplateManager ItemMan;
 	local BaseItemData BaseItem;
-	local X2ItemTemplate ItemTemplate;
+	local X2ItemTemplate ItemTemplate, SchematicTemplate;	
 	local name ForcedRarityName;
 	local array<name> BaseItemsTemplateNames;
 
 	XComHQ = `XCOMHQ;
-	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
 
 	foreach BaseItems(BaseItem)
-	{		
-		if (!XComHQ.MeetsAllStrategyRequirements(BaseItem.Requirements)) continue;
-		
+	{	
 		ItemTemplate = ItemMan.FindItemTemplate(BaseItem.TemplateName);
 		if (ItemTemplate == none) continue;
+
+		// Individually built items requirement check
+		if (!XComHQ.MeetsAllStrategyRequirements(ItemTemplate.Requirements))
+		{
+			continue;
+		}
+
+		// Pipu still playing with schematics requirement check
+		if (ItemTemplate.CreatorTemplateName != '')
+		{
+			SchematicTemplate = ItemMan.FindItemTemplate(ItemTemplate.CreatorTemplateName);
+			if (SchematicTemplate != none)
+			{
+				if (!XComHQ.MeetsAllStrategyRequirements(SchematicTemplate.Requirements))
+				{
+					continue;
+				}
+			}
+		}
 
 		ForcedRarityName = GetForcedRarity(ItemTemplate.DataName);
 		if (ForcedRarityName != '' && ForcedRarityName != RarityTemplate.DataName) continue;

@@ -50,8 +50,7 @@ struct AbilityUpgradeData
 struct BaseItemData{
 	var name TemplateName;
 	var name ForcedRarity;
-	var string Image;
-	var StrategyRequirement Requirements;	
+	var string Image;	
 };
 
 struct RarityDeckData
