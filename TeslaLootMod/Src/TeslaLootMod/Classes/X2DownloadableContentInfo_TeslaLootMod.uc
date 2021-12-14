@@ -599,6 +599,9 @@ static function string ModifyAmmoNick(array<X2WeaponUpgradeTemplate> AppliedUpgr
 
 	foreach AppliedUpgrades(WUTemplate)
 	{
+		// We only want to do this for ammo upgrades
+		if (X2WeaponUpgradeTemplate_TLMAmmo(WUTemplate) == none) continue;
+
 		Temp = WUTemplate.GetItemFriendlyNamePlural();
 		Temp -= default.strRounds;
 		break; // 1 is enough
