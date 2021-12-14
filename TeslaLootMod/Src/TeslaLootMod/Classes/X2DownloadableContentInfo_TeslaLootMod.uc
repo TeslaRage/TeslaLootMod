@@ -431,22 +431,22 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 {
 	local X2ItemTemplateManager ItemMan;
 	local XComGameState_Item Item;
-	local X2WeaponTemplate WTemplate;
+	local X2ItemTemplate ItemTemplate;
 	local XComGameState_ItemData Data;
 	local X2RarityTemplate RarityTemplate;
 	
 	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
 	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity();
 
-	GetBaseWeapon(BWTemplate, WTemplate, RarityTemplate);
-	Item = WTemplate.CreateInstanceFromTemplate(NewGameState);
+	GetBaseItem(BWTemplate, ItemTemplate, RarityTemplate);
+	Item = ItemTemplate.CreateInstanceFromTemplate(NewGameState);
 
 	if (Item == none)
 	{
 		`LOG("TLM ERROR: Failed to get base weapon");		
 	}
 
-	ApplyWeaponUpgrades(Item, Tech, RarityTemplate);
+	ApplyUpgrades(Item, Tech, RarityTemplate);
 
 	Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
 	Data.NumUpgradeSlots = 0;
@@ -455,7 +455,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 	return Item;
 }
 
-static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2WeaponTemplate WTemplate, X2RarityTemplate RarityTemplate)
+static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate)
 {		
 	local X2ItemTemplateManager ItemTemplateMan;	
 	local XComGameState_HeadquartersXCom XComHQ;
@@ -463,9 +463,11 @@ static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2Wea
 	local XComGameState_Unit Unit;
 	local StateObjectReference UnitRef;
 	local X2CardManager CardMan;	
-	local X2BaseWeaponDeckTemplateManager BWMan;	
+	local X2BaseWeaponDeckTemplateManager BWMan;
+	local X2WeaponTemplate WeaponTemplate;
+	local X2ArmorTemplate ArmorTemplate;
 	local int Weight, Idx;
-	local string strWeapon, CardLabel;
+	local string strItem, CardLabel;
 	local array<string> CardLabels;
 	local array<name> ItemNames;
 	local name ItemTemplateName;
@@ -485,8 +487,8 @@ static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2Wea
 
 	foreach ItemNames(ItemTemplateName)
 	{
-		WTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(ItemTemplateName));
-		if (WTemplate == none) continue;
+		WeaponTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(ItemTemplateName));
+		if (WeaponTemplate == none) continue;
 
 		Weight = 0.0;
 		foreach XComHQ.Crew(UnitRef)
@@ -494,12 +496,32 @@ static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2Wea
 			Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
 			if (Unit == none || !Unit.IsSoldier() || Unit.GetSoldierRank() == 0) continue;
 			
-			if (Unit.GetSoldierClassTemplate().IsWeaponAllowedByClass(WTemplate)) Weight++;
+			if (Unit.GetSoldierClassTemplate().IsWeaponAllowedByClass(WeaponTemplate)) Weight++;
 		}
 
-		if (CardLabels.Find(string(WTemplate.DataName)) == INDEX_NONE)
+		if (CardLabels.Find(string(WeaponTemplate.DataName)) == INDEX_NONE)
 		{
-			CardMan.AddCardToDeck(BWTemplate.DataName, string(WTemplate.DataName), float(Weight));
+			CardMan.AddCardToDeck(BWTemplate.DataName, string(WeaponTemplate.DataName), float(Weight));
+		}
+	}
+
+	foreach ItemNames(ItemTemplateName)
+	{
+		ArmorTemplate = X2ArmorTemplate(ItemTemplateMan.FindItemTemplate(ItemTemplateName));
+		if (ArmorTemplate == none) continue;
+
+		Weight = 0.0;
+		foreach XComHQ.Crew(UnitRef)
+		{
+			Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+			if (Unit == none || !Unit.IsSoldier() || Unit.GetSoldierRank() == 0) continue;
+			
+			if (Unit.GetSoldierClassTemplate().IsArmorAllowedByClass(ArmorTemplate)) Weight++;
+		}
+
+		if (CardLabels.Find(string(ArmorTemplate.DataName)) == INDEX_NONE)
+		{
+			CardMan.AddCardToDeck(BWTemplate.DataName, string(ArmorTemplate.DataName), float(Weight));
 		}
 	}
 
@@ -515,13 +537,13 @@ static function GetBaseWeapon(out X2BaseWeaponDeckTemplate BWTemplate, out X2Wea
 		}
 	}
 
-	CardMan.SelectNextCardFromDeck(BWTemplate.DataName, strWeapon);
-	CardMan.MarkCardUsed(BWTemplate.DataName, strWeapon);
+	CardMan.SelectNextCardFromDeck(BWTemplate.DataName, strItem);
+	CardMan.MarkCardUsed(BWTemplate.DataName, strItem);
 
-	WTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(name(strWeapon)));
+	ItemTemplate = ItemTemplateMan.FindItemTemplate(name(strItem));
 }
 
-static function ApplyWeaponUpgrades(XComGameState_Item Item, XComGameState_Tech Tech, X2RarityTemplate RarityTemplate)
+static function ApplyUpgrades(XComGameState_Item Item, XComGameState_Tech Tech, X2RarityTemplate RarityTemplate)
 {		
 	local X2UpgradeDeckTemplateManager UpgradeDeckMan;
 	local X2UpgradeDeckTemplate UDTemplate;
