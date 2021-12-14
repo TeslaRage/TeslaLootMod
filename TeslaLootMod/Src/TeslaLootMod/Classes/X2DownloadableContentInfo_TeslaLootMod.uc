@@ -323,7 +323,7 @@ static function UpdateWeaponUpgrade()
 	ItemTemplateNames = BWMan.GetAllItemTemplateNames();	
 	
 	foreach WUTemplates(WUTemplate)
-	{
+	{		
 		switch (WUTemplate.Tier)
 		{
 			case 0:
@@ -438,7 +438,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
 	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity();
 
-	GetBaseItem(BWTemplate, ItemTemplate, RarityTemplate);
+	GetBaseItem(BWTemplate, ItemTemplate, RarityTemplate, NewGameState);
 	Item = ItemTemplate.CreateInstanceFromTemplate(NewGameState);
 
 	if (Item == none)
@@ -455,7 +455,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 	return Item;
 }
 
-static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate)
+static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
 {		
 	local X2ItemTemplateManager ItemTemplateMan;	
 	local XComGameState_HeadquartersXCom XComHQ;
@@ -483,7 +483,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	if (BWTemplate == none)
 		`LOG("TLM ERROR: Unable to determine base weapon deck template");
 
-	ItemNames = BWTemplate.GetBaseItems(RarityTemplate);	
+	ItemNames = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);	
 
 	foreach ItemNames(ItemTemplateName)
 	{

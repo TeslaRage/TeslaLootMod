@@ -6,7 +6,7 @@ var Delegate<ModifyNickNameDelegate> ModifyNickNameFn;
 
 delegate string ModifyNickNameDelegate(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item);
 
-function RollUpgrades(out XComGameState_Item Item, int Quantity)
+function RollUpgrades(XComGameState_Item Item, int Quantity)
 {
 	local UpgradeDeckData Upgrade;
 	local X2WeaponUpgradeTemplate WUTemplate;
@@ -23,29 +23,8 @@ function RollUpgrades(out XComGameState_Item Item, int Quantity)
 		// Maybe because required mod like melee upgrades is not installed
 		if (WUTemplate == none) continue;
 
-		// Go through the basic validation first
-		if (!WUTemplate.CanApplyUpgradeToWeapon(Item, Item.GetMyWeaponUpgradeCount())
-			&& !Item.CanWeaponApplyUpgrade(WUTemplate))
-			continue;
-
-		// If configured as allowed, then we include into pool
-		if (Upgrade.AllowedWeaponCats.Find(X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat) != INDEX_NONE)
-		{
-			WUTemplates.AddItem(WUTemplate);
-			continue;
-		}
-		else if (Upgrade.AllowedWeaponCats.Length > 0)		
-			continue;
-
-		// If configured as disallowed, then we don't include into pool
-		if (Upgrade.DisallowedWeaponCats.Find(X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat) != INDEX_NONE)
-			continue;
-
-		// Does this upgrade have valid abilities?
-		if (HasInvalidAbilities(WUTemplate))
-			continue;
-
-		// If we reach here, it means the upgrade is meant for all weapon categories
+		if (!CanApplyUpgrade(WUTemplate, Item, Upgrade)) continue;
+		
 		WUTemplates.AddItem(WUTemplate);
 	}
 
@@ -73,6 +52,34 @@ function RollUpgrades(out XComGameState_Item Item, int Quantity)
 	{
 		Item.NickName = ModifyNickNameFn(AppliedUpgrades, Item);
 	}
+}
+
+function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_Item Item, UpgradeDeckData Upgrade)
+{
+	// Go through the basic validation first
+	if (!WUTemplate.CanApplyUpgradeToWeapon(Item, Item.GetMyWeaponUpgradeCount()))
+		return false;
+
+	if (!Item.CanWeaponApplyUpgrade(WUTemplate))
+		return false;
+
+	// If not configured as allowed cat, say no.
+	if (Upgrade.AllowedWeaponCats.Length > 0
+		&& Upgrade.AllowedWeaponCats.Find(X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat) == INDEX_NONE)
+	{
+		return false;
+	}
+
+	// If configured as disallowed, say no.
+	if (Upgrade.DisallowedWeaponCats.Find(X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat) != INDEX_NONE)
+		return false;
+
+	// Does this upgrade have valid abilities?
+	if (HasInvalidAbilities(WUTemplate))
+		return false;
+
+	// If we reach here, it means the upgrade is good for this item
+	return true;
 }
 
 static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate)
