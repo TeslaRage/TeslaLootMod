@@ -87,7 +87,7 @@ function bool ValidateTemplate (out string strError)
 	if (BaseItems.Length == 0)
 	{
 		strError = "BaseItems is empty so no item can be chosen during item generation";
-		// return false;
+		return false;
 	}
 
 	return true;
