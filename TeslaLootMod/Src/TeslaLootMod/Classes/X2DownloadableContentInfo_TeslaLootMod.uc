@@ -185,6 +185,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'HailofBulletsClipSizeBonus':
 		OutString = string(class'X2Item_TLMUpgrades'.default.HailofBulletsClipSizeBonus);
 		return true;
+	case 'HailofBulletsClipSizeBonus':
+		OutString = string(class'X2Item_TLMUpgrades'.default.KillZoneClipSizeBonus);
+		return true;	
 	case 'BonusDamageAlien':
 		OutString = string(class'X2Ability_TLM'.default.BonusDamageAlien);
 		return true;
