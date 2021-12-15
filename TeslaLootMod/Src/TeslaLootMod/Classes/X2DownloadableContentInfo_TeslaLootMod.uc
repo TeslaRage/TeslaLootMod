@@ -6,7 +6,8 @@ var config (TLM) string strTier1Color;
 var config (TLM) string strTier2Color;
 var config (TLM) string strTier3Color;
 
-var localized array<String> RandomNickNames;
+var localized array<String> RandomWeaponNickNames;
+var localized array<String> RandomArmorNickNames;
 var localized string strHasAmmoAlreadyEquipped;
 var localized string strWeaponHasAmmoUpgrade;
 var localized string strRounds;
@@ -541,7 +542,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	}
 
 	CardMan.SelectNextCardFromDeck(BWTemplate.DataName, strItem);
-	CardMan.MarkCardUsed(BWTemplate.DataName, strItem);
+	// CardMan.MarkCardUsed(BWTemplate.DataName, strItem); // Need to test further
 
 	ItemTemplate = ItemTemplateMan.FindItemTemplate(name(strItem));
 }
@@ -555,7 +556,7 @@ static function ApplyUpgrades(XComGameState_Item Item, XComGameState_Tech Tech, 
 	
 	UpgradeDeckMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
 
-	Item.NickName = default.RandomNickNames[`SYNC_RAND_STATIC(default.RandomNickNames.Length)];	
+	Item.NickName = GetInitialNickName(Item);
 	Decks = RarityTemplate.GetDecksToRoll();	
 
 	foreach Decks(Deck)
@@ -590,6 +591,21 @@ static function FindAndMakeTechInstant(XComGameState NewGameState, XComGameState
 		TechFromHistory = XComGameState_Tech(NewGameState.ModifyStateObject(class'XComGameState_Tech', TechFromHistory.ObjectID));
 		TechFromHistory.bForceInstant = true;
 	}
+}
+
+static function string GetInitialNickName(XComGameState_Item Item)
+{
+	if (X2WeaponTemplate(Item.GetMyTemplate()) != none)
+	{
+		return default.RandomWeaponNickNames[`SYNC_RAND_STATIC(default.RandomWeaponNickNames.Length)];
+	}
+	else if (X2ArmorTemplate(Item.GetMyTemplate()) != none)
+	{
+		// For the moment we share the same pool
+		return default.RandomWeaponNickNames[`SYNC_RAND_STATIC(default.RandomWeaponNickNames.Length)];
+	}
+
+	return "";
 }
 
 // =============
