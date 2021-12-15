@@ -4,6 +4,7 @@ var config array<WeaponAdjustmentData> WeaponAdjustmentUpgrades;
 var config int AmmoUpgradeClipSizePenalty;
 var config int RapidFireClipSizeBonus;
 var config int HailofBulletsClipSizeBonus;
+var config int KillZoneClipSizeBonus;
 var config array<AbilityUpgradeData> AbilityWeaponUpgrades;
 
 static function array<X2DataTemplate> CreateTemplates()
@@ -66,21 +67,11 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityN
 	Template.CanBeBuilt = false;
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 2; // This influences the color in the popup
+	Template.Tier = 2;
 
-	SetUpgradeIcons(Template);
+	// Upgrade icons are set up in OPTC
 	
 	return Template;
-}
-
-static function SetUpgradeIcons(out X2WeaponUpgradeTemplate_TLMAmmo Template)
-{
-	local BaseWeaponDeckData DeckedBaseWeapon;
-
-	foreach class'X2StrategyElement_TLM'.default.DeckedBaseWeapons(DeckedBaseWeapon)
-	{
-		Template.AddUpgradeAttachment('', '', "", "", DeckedBaseWeapon.BaseWeapon, , "", Template.strImage, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip");
-	}	
 }
 
 static function X2DataTemplate AdjustmentUpgrade(name WeaponUpgradeName, WeaponAdjustmentData Adjustment)
@@ -102,19 +93,9 @@ static function X2DataTemplate AdjustmentUpgrade(name WeaponUpgradeName, WeaponA
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = Adjustment.Tier;
 
-	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_heat_sink");
+	// Upgrade icons are set up in OPTC
 	
 	return Template;
-}
-
-static function SetUpgradeIcons_AdjustmentUpgrade(out X2WeaponUpgradeTemplate Template, string Icon)
-{
-	local BaseWeaponDeckData DeckedBaseWeapon;
-
-	foreach class'X2StrategyElement_TLM'.default.DeckedBaseWeapons(DeckedBaseWeapon)
-	{
-		Template.AddUpgradeAttachment('', '', "", "", DeckedBaseWeapon.BaseWeapon, , "", Template.strImage, Icon);
-	}
 }
 
 static function X2DataTemplate Legendary_RapidFire()
@@ -138,8 +119,8 @@ static function X2DataTemplate Legendary_RapidFire()
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 3;
 
-	SetUpLegendaryMutualExclusives(Template);
-	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_rapidfire"); // Fine to reuse this
+	// Mutual exclusives are set up in OPTC
+	// Upgrade icons are set up in OPTC
 
 	return Template;
 }
@@ -165,8 +146,8 @@ static function X2DataTemplate Legendary_HailOfBullets()
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 3;
 
-	SetUpLegendaryMutualExclusives(Template);
-	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_hailofbullets"); // Fine to reuse this
+	// Mutual exclusives are set up in OPTC
+	// Upgrade icons are set up in OPTC
 
 	return Template;
 }
@@ -182,14 +163,18 @@ static function X2DataTemplate Legendary_KillZone()
 	
 	Template.BonusAbilities.AddItem('TLMAbility_KillZone');
 
+	// Ability feels meh when you only have 2 ammo (after reduction from ammo upgrades)
+	Template.ClipSizeBonus = default.KillZoneClipSizeBonus;
+	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;	
+
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 3;
 
-	SetUpLegendaryMutualExclusives(Template);
-	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_killzone"); // Fine to reuse this
+	// Mutual exclusives are set up in OPTC
+	// Upgrade icons are set up in OPTC
 
 	return Template;
 }
@@ -211,8 +196,8 @@ static function X2DataTemplate Legendary_Faceoff()
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 3;
 
-	SetUpLegendaryMutualExclusives(Template);
-	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_faceoff"); // Fine to reuse this
+	// Mutual exclusives are set up in OPTC
+	// Upgrade icons are set up in OPTC
 
 	return Template;
 }
@@ -234,8 +219,8 @@ static function X2DataTemplate Legendary_AdventSoldierKiller()
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 3;
 
-	SetUpLegendaryMutualExclusives(Template);
-	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_hunter"); // Fine to reuse this
+	// Mutual exclusives are set up in OPTC
+	// Upgrade icons are set up in OPTC
 
 	return Template;
 }
@@ -257,20 +242,10 @@ static function X2DataTemplate Legendary_AlienKiller()
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
 	Template.Tier = 3;
 
-	SetUpLegendaryMutualExclusives(Template);
-	SetUpgradeIcons_AdjustmentUpgrade(Template, "img:///UILibrary_PerkIcons.UIPerk_hunter"); // Fine to reuse this
+	// Mutual exclusives are set up in OPTC
+	// Upgrade icons are set up in OPTC
 
 	return Template;
-}
-
-static function SetUpLegendaryMutualExclusives(out X2WeaponUpgradeTemplate Template)
-{
-	local UpgradePoolData LegendaryUpgrade;
-
-	foreach class'X2StrategyElement_TLM'.default.RandomLegendaryUpgrades(LegendaryUpgrade)
-	{
-		Template.MutuallyExclusiveUpgrades.AddItem(LegendaryUpgrade.UpgradeName);
-	}
 }
 
 static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUpgrade)
@@ -291,7 +266,7 @@ static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUp
 	Template.Tier = 3;
 
 	// Mutual exclusive setup?
-	SetUpgradeIcons_AdjustmentUpgrade(Template, AbilityWeaponUpgrade.Icon);
+	// Upgrade icons are set up in OPTC
 
 	return Template;
 }

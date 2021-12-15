@@ -1,11 +1,17 @@
 class X2Item_TLM extends X2Item_DefaultResources config(TLM);
 
+var config array<LootBoxData> LootBoxes;
+
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Resources;
+	local LootBoxData LootBox;
 
+	foreach default.LootBoxes(LootBox)
+	{
+		Resources.AddItem(CreateLockBox(LootBox.LootBoxName));
+	}
     Resources.AddItem(CreateLockboxKey());
-    Resources.AddItem(CreateLockBox());
 
    	return Resources;
 }
@@ -25,11 +31,11 @@ static function X2DataTemplate CreateLockboxKey()
 	return Template;
 }
 
-static function X2DataTemplate CreateLockBox()
+static function X2DataTemplate CreateLockBox(name TemplateName)
 {
-	local X2ItemTemplate Template;
+	local X2ItemTemplate_LootBox Template;
 
-	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'LockBox');
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate_LootBox', Template, TemplateName);
 
 	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.AdventDatapad';
 	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";
