@@ -4,6 +4,7 @@ var config array<WeaponAdjustmentData> WeaponAdjustmentUpgrades;
 var config int AmmoUpgradeClipSizePenalty;
 var config int RapidFireClipSizeBonus;
 var config int HailofBulletsClipSizeBonus;
+var config int KillZoneClipSizeBonus;
 var config array<AbilityUpgradeData> AbilityWeaponUpgrades;
 
 static function array<X2DataTemplate> CreateTemplates()
@@ -161,6 +162,10 @@ static function X2DataTemplate Legendary_KillZone()
 	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
 	
 	Template.BonusAbilities.AddItem('TLMAbility_KillZone');
+
+	// Ability feels meh when you only have 2 ammo (after reduction from ammo upgrades)
+	Template.ClipSizeBonus = default.KillZoneClipSizeBonus;
+	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;	
 
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
