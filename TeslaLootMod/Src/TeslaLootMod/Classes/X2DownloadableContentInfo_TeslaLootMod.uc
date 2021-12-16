@@ -145,6 +145,7 @@ static function bool DisplayQueuedDynamicPopup(DynamicPropertySet PropertySet)
 static function bool AbilityTagExpandHandler(string InString, out string OutString)
 {
 	local name Type;
+	local int i;
 
 	Type = name(InString);
 
@@ -180,15 +181,30 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'BonusDamageAdventSoldier':
 		OutString = string(class'X2Ability_TLM'.default.BonusDamageAdventSoldier);
 		return true;
-	case 'RapidFireClipSizeBonus':
-		OutString = string(class'X2Item_TLMUpgrades'.default.RapidFireClipSizeBonus);
-		return true;
+	case 'RapidFireClipSizeBonus':		
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_RapidFire');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
 	case 'HailofBulletsClipSizeBonus':
-		OutString = string(class'X2Item_TLMUpgrades'.default.HailofBulletsClipSizeBonus);
-		return true;
-	case 'HailofBulletsClipSizeBonus':
-		OutString = string(class'X2Item_TLMUpgrades'.default.KillZoneClipSizeBonus);
-		return true;	
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_HailOfBullets');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
+	case 'KillZoneClipSizeBonus':
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_KillZone');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
 	case 'BonusDamageAlien':
 		OutString = string(class'X2Ability_TLM'.default.BonusDamageAlien);
 		return true;
@@ -269,62 +285,47 @@ static function CreateTechsMidCampaign()
 }
 
 static function UpdateWeaponUpgrade()
-{
-	local X2ItemTemplateManager ItemTemplateMan;
+{	
 	local X2AbilityTemplateManager AbilityMan;
-	local X2UpgradeDeckTemplateManager UDMan;
-	local X2BaseWeaponDeckTemplateManager BWMan;
-	local array<X2DataTemplate> DataTemplates;
-	local X2DataTemplate DataTemplate;
-	local WeaponAdjustmentData Adjustment;
+	local X2UpgradeDeckTemplateManager UDMan;	
 	local array<X2WeaponUpgradeTemplate> WUTemplates;
 	local X2WeaponUpgradeTemplate WUTemplate;
 	local X2AbilityTemplate AbilityTemplate;
+	local X2UpgradeDeckTemplate UDTemplate;
 	local X2Effect Effect;
 	local X2Effect_TLMEffects TLMEffect;	
-	local string ItemName, strColor;
-	local name AbilityName, ItemTemplateName;
-	local array<X2UpgradeDeckTemplate> UDTemplates;
-	local X2UpgradeDeckTemplate UDTemplate;
-	local array<name> ItemTemplateNames;
-	local UpgradeDeckData Upgrade;	
+	local string strColor;
+	local name AbilityName;
 
-	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
-	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
-	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
+	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();	
 	
-	foreach class'X2Item_TLMUpgrades'.default.WeaponAdjustmentUpgrades(Adjustment)
+	UDTemplate = UDMan.GetUpgradeDeckTemplate('RefnDeck');
+	WUTemplates = UDTemplate.GetUpgradeTemplates();
+
+	// Localization update for refinement upgrades
+	foreach WUTemplates(WUTemplate)
 	{
-		ItemName = "TLMUpgrade_" $Adjustment.AdjustmentName;
-		ItemTemplateMan.FindDataTemplateAllDifficulties(name(ItemName), DataTemplates);
-
-		foreach DataTemplates(DataTemplate)
+		foreach WUTemplate.BonusAbilities(AbilityName)
 		{
-			WUTemplate = X2WeaponUpgradeTemplate(DataTemplate);
-			if (WUTemplate == none) continue;
+			AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);
+			if (AbilityTemplate == none) continue;
 
-			foreach WUTemplate.BonusAbilities(AbilityName)
+			foreach AbilityTemplate.AbilityTargetEffects(Effect)
 			{
-				AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);
-				if (AbilityTemplate == none) continue;
+				TLMEffect = X2Effect_TLMEffects(Effect);
+				if (TLMEffect == none) continue;
 
-				foreach AbilityTemplate.AbilityTargetEffects(Effect)
-				{
-					TLMEffect = X2Effect_TLMEffects(Effect);
-					if (TLMEffect == none) continue;
-
-					WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMDAMAGE", TLMEffect.FlatBonusDamage < 0 ? TLMEffect.FlatBonusDamage * -1 : TLMEffect.FlatBonusDamage);
-					WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMCRITDAMAGE", TLMEffect.CritDamage < 0 ? TLMEffect.CritDamage * -1 : TLMEffect.CritDamage);
-					WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMPIERCE", TLMEffect.Pierce < 0 ? TLMEffect.Pierce * -1 : TLMEffect.Pierce);
-					WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMSHRED", TLMEffect.Shred < 0 ? TLMEffect.Shred * -1 : TLMEffect.Shred);
-				}
+				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMDAMAGE", TLMEffect.FlatBonusDamage < 0 ? TLMEffect.FlatBonusDamage * -1 : TLMEffect.FlatBonusDamage);
+				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMCRITDAMAGE", TLMEffect.CritDamage < 0 ? TLMEffect.CritDamage * -1 : TLMEffect.CritDamage);
+				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMPIERCE", TLMEffect.Pierce < 0 ? TLMEffect.Pierce * -1 : TLMEffect.Pierce);
+				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMSHRED", TLMEffect.Shred < 0 ? TLMEffect.Shred * -1 : TLMEffect.Shred);
 			}
 		}
-	}
+	}	
 
-	WUTemplates = UDMan.GetAllUpgradeTemplates();
-	ItemTemplateNames = BWMan.GetAllItemTemplateNames();	
+	// Template coloring contest
+	WUTemplates = UDMan.GetAllUpgradeTemplates();		
 	
 	foreach WUTemplates(WUTemplate)
 	{		
@@ -346,56 +347,67 @@ static function UpdateWeaponUpgrade()
 
 		if (strColor != "")
 			WUTemplate.FriendlyName = "<font color='" $strColor $"'>" $WUTemplate.FriendlyName $"</font>";
+	}
 
-		UDTemplates = UDMan.GetUpgradeDecksByUpgradeName(WUTemplate.DataName);		
-		
-		foreach UDTemplates(UDTemplate)
+	// Setting up of upgrade icons and mutual exclusives
+	SetUpUpgradeIconsAndME('LegoDeck');
+	SetUpUpgradeIconsAndME('RefnDeck');
+	SetUpUpgradeIconsAndME('AmmoDeck');
+}
+
+static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName)
+{
+	local X2BaseWeaponDeckTemplateManager BWMan;
+	local X2UpgradeDeckTemplateManager UDMan;
+	local X2AbilityTemplateManager ABilityMan;
+	local X2UpgradeDeckTemplate UDTemplate;
+	local X2AbilityTemplate AbilityTemplate;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local array<name> ItemTemplateNames, WUTemplateNames;	
+	local name AbilityName, ItemTemplateName;
+	local string IconString;
+
+	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
+	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+	ItemTemplateNames = BWMan.GetAllItemTemplateNames();
+
+	UDTemplate = UDMan.GetUpgradeDeckTemplate(UpgradeDeckTemplateName);
+	if (UDTemplate != none)
+	{
+		WUTemplates = UDTemplate.GetUpgradeTemplates();
+		WUTemplateNames = UDTemplate.GetUpgradeTemplateNames();
+
+		foreach WUTemplates(WUTemplate)
 		{
-			switch (UDTemplate.DataName)
+			// Get an ability from the weapon upgrade
+			foreach WUTemplate.BonusAbilities(AbilityName)
 			{
-				case 'RefnDeck':
-					foreach ItemTemplateNames(ItemTemplateName)
-					{
-						WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_heat_sink");
-					}
-
-					foreach UDTemplate.Upgrades(Upgrade)
-					{
-						WUTemplate.MutuallyExclusiveUpgrades.AddItem(Upgrade.UpgradeName);
-					}
-
-					break;
-				case 'AmmoDeck':
-					foreach ItemTemplateNames(ItemTemplateName)
-					{
-						WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip");
-					}
-
-					foreach UDTemplate.Upgrades(Upgrade)
-					{					
-						WUTemplate.MutuallyExclusiveUpgrades.AddItem(Upgrade.UpgradeName);
-					}
-
-					break;
-				case 'LegoDeck':
-					foreach WUTemplate.BonusAbilities(AbilityName)
-					{
-						AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);
-						break;
-					}
-					
-					foreach ItemTemplateNames(ItemTemplateName)
-					{
-						WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, AbilityTemplate.IconImage);
-					}
-
-					foreach UDTemplate.Upgrades(Upgrade)
-					{
-						WUTemplate.MutuallyExclusiveUpgrades.AddItem(Upgrade.UpgradeName);
-					}
-
-					break;
+				AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);
+				break;
 			}
+			
+			// If we managed to get an ability, use the ability's icon
+			if (AbilityTemplate != none)
+			{
+				IconString = AbilityTemplate.IconImage;
+			}
+
+			// If there is no icon due to no ability or ability has no icon, we give default icon
+			if (IconString == "")
+			{
+				IconString = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip";
+			}
+
+			// Sets up the attachment icon and items that its applicable to
+			foreach ItemTemplateNames(ItemTemplateName)
+			{
+				WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, IconString);
+			}
+			
+			// Sets up the mutual exclusive
+			WUTemplate.MutuallyExclusiveUpgrades = WUTemplateNames;			
 		}
 	}
 }
