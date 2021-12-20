@@ -9,7 +9,8 @@ function array<name> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState
 	local XComGameState_HeadquartersXCom XComHQ;
 	local X2ItemTemplateManager ItemMan;
 	local BaseItemData BaseItem;
-	local X2ItemTemplate ItemTemplate, SchematicTemplate;	
+	local X2ItemTemplate ItemTemplate, SchematicTemplate;
+	local StrategyRequirement ItemRequirements;
 	local name ForcedRarityName;
 	local array<name> BaseItemsTemplateNames;
 
@@ -21,8 +22,11 @@ function array<name> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState
 		ItemTemplate = ItemMan.FindItemTemplate(BaseItem.TemplateName);
 		if (ItemTemplate == none) continue;
 
+		// Requirement wise, we only want to check RequiredTechs
+		ItemRequirements.RequiredTechs = ItemTemplate.Requirements.RequiredTechs;
+
 		// Individually built items requirement check
-		if (!XComHQ.MeetsAllStrategyRequirements(ItemTemplate.Requirements))
+		if (!XComHQ.MeetsAllStrategyRequirements(ItemRequirements))
 		{
 			continue;
 		}
@@ -33,7 +37,10 @@ function array<name> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState
 			SchematicTemplate = ItemMan.FindItemTemplate(ItemTemplate.CreatorTemplateName);
 			if (SchematicTemplate != none)
 			{
-				if (!XComHQ.MeetsAllStrategyRequirements(SchematicTemplate.Requirements))
+				// Requirement wise, we only want to check RequiredTechs
+				ItemRequirements.RequiredTechs = SchematicTemplate.Requirements.RequiredTechs;
+
+				if (!XComHQ.MeetsAllStrategyRequirements(ItemRequirements))
 				{
 					continue;
 				}
