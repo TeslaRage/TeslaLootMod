@@ -1,17 +1,12 @@
 class X2Item_TLMUpgrades extends X2Item_DefaultUpgrades config (TLM);
 
-var config array<WeaponAdjustmentData> WeaponAdjustmentUpgrades;
 var config int AmmoUpgradeClipSizePenalty;
-var config int RapidFireClipSizeBonus;
-var config int HailofBulletsClipSizeBonus;
-var config int KillZoneClipSizeBonus;
 var config array<AbilityUpgradeData> AbilityWeaponUpgrades;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Items;
-	local AmmoConversionData AmmoConversion;
-	local WeaponAdjustmentData Adjustment;
+	local AmmoConversionData AmmoConversion;	
 	local AbilityUpgradeData AbilityWeaponUpgrade;
 	local string ItemName, AbilityName;
 
@@ -22,21 +17,6 @@ static function array<X2DataTemplate> CreateTemplates()
 		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;		
 		Items.AddItem(AmmoUpgrade(name(ItemName), name(AbilityName), AmmoConversion));
 	}
-
-	// Weapon Refinement Upgrades
-	foreach default.WeaponAdjustmentUpgrades(Adjustment)
-	{
-		ItemName = "TLMUpgrade_" $Adjustment.AdjustmentName;
-		Items.AddItem(AdjustmentUpgrade(name(ItemName), Adjustment));
-	}
-
-	// Legendary upgrades
-	Items.AddItem(Legendary_RapidFire());
-	Items.AddItem(Legendary_HailOfBullets());
-	Items.AddItem(Legendary_KillZone());
-	Items.AddItem(Legendary_Faceoff());
-	Items.AddItem(Legendary_AdventSoldierKiller());
-	Items.AddItem(Legendary_AlienKiller());
 
 	// Ability to Weapon Upgrade Conversion
 	foreach default.AbilityWeaponUpgrades(AbilityWeaponUpgrade)
@@ -74,180 +54,6 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityN
 	return Template;
 }
 
-static function X2DataTemplate AdjustmentUpgrade(name WeaponUpgradeName, WeaponAdjustmentData Adjustment)
-{
-	local X2WeaponUpgradeTemplate Template;
-	local string AbilityName;
-
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, WeaponUpgradeName);	
-		
-	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Power_Cell";
-
-	AbilityName = "TLMAbility_" $Adjustment.AdjustmentName;
-	Template.BonusAbilities.AddItem(name(AbilityName));
-
-	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
-	Template.CanBeBuilt = false;
-	Template.MaxQuantity = 1;
-	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = Adjustment.Tier;
-
-	// Upgrade icons are set up in OPTC
-	
-	return Template;
-}
-
-static function X2DataTemplate Legendary_RapidFire()
-{
-	local X2WeaponUpgradeTemplate Template;	
-
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_RapidFire');	
-		
-	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
-	
-	Template.BonusAbilities.AddItem('TLMAbility_RapidFire');
-
-	// Ability needs 2 ammo so +1 (with ammo upgrade clip size penalty taken into consideration)
-	Template.ClipSizeBonus = default.RapidFireClipSizeBonus;
-	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;
-
-	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
-	Template.CanBeBuilt = false;
-	Template.MaxQuantity = 1;
-	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 3;
-
-	// Mutual exclusives are set up in OPTC
-	// Upgrade icons are set up in OPTC
-
-	return Template;
-}
-
-static function X2DataTemplate Legendary_HailOfBullets()
-{
-	local X2WeaponUpgradeTemplate Template;	
-
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_HailOfBullets');	
-		
-	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
-	
-	Template.BonusAbilities.AddItem('TLMAbility_HailOfBullets');
-
-	// Ability needs 3 ammo so +2 (with ammo upgrade clip size penalty taken into consideration)
-	Template.ClipSizeBonus = default.HailofBulletsClipSizeBonus;
-	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;
-
-	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
-	Template.CanBeBuilt = false;
-	Template.MaxQuantity = 1;
-	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 3;
-
-	// Mutual exclusives are set up in OPTC
-	// Upgrade icons are set up in OPTC
-
-	return Template;
-}
-
-static function X2DataTemplate Legendary_KillZone()
-{
-	local X2WeaponUpgradeTemplate Template;	
-
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_KillZone');	
-		
-	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
-	
-	Template.BonusAbilities.AddItem('TLMAbility_KillZone');
-
-	// Ability feels meh when you only have 2 ammo (after reduction from ammo upgrades)
-	Template.ClipSizeBonus = default.KillZoneClipSizeBonus;
-	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;	
-
-	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
-	Template.CanBeBuilt = false;
-	Template.MaxQuantity = 1;
-	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 3;
-
-	// Mutual exclusives are set up in OPTC
-	// Upgrade icons are set up in OPTC
-
-	return Template;
-}
-
-static function X2DataTemplate Legendary_Faceoff()
-{
-	local X2WeaponUpgradeTemplate Template;	
-
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_Faceoff');	
-		
-	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
-	
-	Template.BonusAbilities.AddItem('TLMAbility_Faceoff');
-
-	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
-	Template.CanBeBuilt = false;
-	Template.MaxQuantity = 1;
-	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 3;
-
-	// Mutual exclusives are set up in OPTC
-	// Upgrade icons are set up in OPTC
-
-	return Template;
-}
-
-static function X2DataTemplate Legendary_AdventSoldierKiller()
-{
-	local X2WeaponUpgradeTemplate Template;	
-
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_AdventSoldierKiller');	
-		
-	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
-	
-	Template.BonusAbilities.AddItem('TLMAbility_AdventSoldierKiller');
-
-	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
-	Template.CanBeBuilt = false;
-	Template.MaxQuantity = 1;
-	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 3;
-
-	// Mutual exclusives are set up in OPTC
-	// Upgrade icons are set up in OPTC
-
-	return Template;
-}
-
-static function X2DataTemplate Legendary_AlienKiller()
-{
-	local X2WeaponUpgradeTemplate Template;	
-
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, 'TLMUpgrade_AlienKiller');	
-		
-	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_X4";
-	
-	Template.BonusAbilities.AddItem('TLMAbility_AlienKiller');
-
-	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
-	Template.CanBeBuilt = false;
-	Template.MaxQuantity = 1;
-	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 3;
-
-	// Mutual exclusives are set up in OPTC
-	// Upgrade icons are set up in OPTC
-
-	return Template;
-}
-
 static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUpgrade)
 {
 	local X2WeaponUpgradeTemplate Template;
@@ -255,17 +61,23 @@ static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUp
 	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate', Template, AbilityWeaponUpgrade.UpgradeName);
 
 	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.WeapFragmentA';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Power_Cell";
+	Template.strImage = AbilityWeaponUpgrade.strImage;
 
 	Template.BonusAbilities.AddItem(AbilityWeaponUpgrade.AbilityName);
+
+	if (AbilityWeaponUpgrade.ClipSizeBonus != 0)
+	{
+		Template.ClipSizeBonus = AbilityWeaponUpgrade.ClipSizeBonus;
+		Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;
+	}	
 
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 3;
+	Template.Tier = AbilityWeaponUpgrade.Tier;
 
-	// Mutual exclusive setup?
+	// Mutual exclusive setup is done in OPTC group by weapon upgrade deck
 	// Upgrade icons are set up in OPTC
 
 	return Template;

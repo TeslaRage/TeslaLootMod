@@ -1,6 +1,7 @@
 class X2Ability_TLM extends X2Ability config(TLM);
 
 var config array<AmmoConversionData> ConvertAmmo;
+var config array<RefinementUpgradeAbilityData> RefinementUpgradeAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -18,7 +19,7 @@ static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 	local AmmoConversionData AmmoConversion;
-	local WeaponAdjustmentData WeaponAdjustmentUpgrade;	
+	local RefinementUpgradeAbilityData RefinementUpgradeAbility;	
 	local string AbilityName;
 
 	// Abilities for ammo upgrades are taken from CLAP mod
@@ -29,10 +30,9 @@ static function array<X2DataTemplate> CreateTemplates()
 	}
 
 	// Abilities for Weapon Refinement upgrades
-	foreach class'X2Item_TLMUpgrades'.default.WeaponAdjustmentUpgrades(WeaponAdjustmentUpgrade)
-	{
-		AbilityName = "TLMAbility_" $WeaponAdjustmentUpgrade.AdjustmentName;
-		Templates.AddItem(AdjustmentAbility(name(AbilityName), WeaponAdjustmentUpgrade));
+	foreach default.RefinementUpgradeAbilities(RefinementUpgradeAbility)
+	{		
+		Templates.AddItem(RefinementAbility(RefinementUpgradeAbility));
 	}
 
 	Templates.AddItem(TLMRapidFire());
@@ -139,12 +139,12 @@ simulated function XComGameState BuiltInAmmo_BuildGameState(XComGameStateContext
 	return NewGameState;
 }
 
-static function X2DataTemplate AdjustmentAbility(name AbilityName, WeaponAdjustmentData WeaponAdjustmentUpgrade)
+static function X2DataTemplate RefinementAbility(RefinementUpgradeAbilityData RefinementUpgrade)
 {
 	local X2AbilityTemplate Template;	
 	local X2Effect_TLMEffects TLMEffect;
 
-	`CREATE_X2ABILITY_TEMPLATE(Template, AbilityName);
+	`CREATE_X2ABILITY_TEMPLATE(Template, RefinementUpgrade.AbilityName);
 
 	Template.AbilitySourceName = 'eAbilitySource_Item';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
@@ -158,10 +158,10 @@ static function X2DataTemplate AdjustmentAbility(name AbilityName, WeaponAdjustm
 	TLMEffect = new class'X2Effect_TLMEffects';
 	TLMEffect.BuildPersistentEffect(1, true, false, false);
 	TLMEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, false,, Template.AbilitySourceName);
-	TLMEffect.FlatBonusDamage = WeaponAdjustmentUpgrade.Damage;
-	TLMEffect.CritDamage = WeaponAdjustmentUpgrade.Crit;
-	TLMEffect.Pierce = WeaponAdjustmentUpgrade.Pierce;
-	TLMEffect.Shred = WeaponAdjustmentUpgrade.Shred;
+	TLMEffect.FlatBonusDamage = RefinementUpgrade.Damage;
+	TLMEffect.CritDamage = RefinementUpgrade.Crit;
+	TLMEffect.Pierce = RefinementUpgrade.Pierce;
+	TLMEffect.Shred = RefinementUpgrade.Shred;
 	TLMEffect.FriendlyName = Template.LocFriendlyName;
 	Template.AddTargetEffect(TLMEffect);	
 

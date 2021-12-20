@@ -31,10 +31,9 @@ struct AmmoConversionData
 	var string Image;
 };
 
-struct WeaponAdjustmentData
+struct RefinementUpgradeAbilityData
 {
-	var name AdjustmentName;
-	var int Tier;
+	var name AbilityName;	
 	var int Damage;
 	var int Crit;
 	var int Pierce;
@@ -44,7 +43,10 @@ struct WeaponAdjustmentData
 struct AbilityUpgradeData
 {
 	var name UpgradeName;
-	var name AbilityName;	
+	var name AbilityName;
+	var string strImage;
+	var int ClipSizeBonus;
+	var int Tier;
 };
 
 struct BaseItemData{

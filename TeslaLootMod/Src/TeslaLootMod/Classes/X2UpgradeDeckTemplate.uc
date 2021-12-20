@@ -100,6 +100,38 @@ static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate)
 	return false;
 }
 
+function array<X2WeaponUpgradeTemplate> GetUpgradeTemplates()
+{
+	local X2ItemTemplateManager ItemMan;
+	local array<X2WeaponUpgradeTemplate> UpgradeTemplates;
+	local X2WeaponUpgradeTemplate UpgradeTemplate;
+	local UpgradeDeckData Upgrade;
+
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+
+	foreach Upgrades(Upgrade)
+	{
+		UpgradeTemplate = X2WeaponUpgradeTemplate(ItemMan.FindItemTemplate(Upgrade.UpgradeName));
+		if (UpgradeTemplate == none) continue;
+		UpgradeTemplates.AddItem(UpgradeTemplate);
+	}
+
+	return UpgradeTemplates;
+}
+
+function array<name> GetUpgradeTemplateNames()
+{
+	local array<name> UpgradeTemplateNames;	
+	local UpgradeDeckData Upgrade;
+
+	foreach Upgrades(Upgrade)
+	{	
+		UpgradeTemplateNames.AddItem(Upgrade.UpgradeName);
+	}
+
+	return UpgradeTemplateNames;
+}
+
 function bool ValidateTemplate (out string strError)
 {
 	if (!super.ValidateTemplate(strError))
