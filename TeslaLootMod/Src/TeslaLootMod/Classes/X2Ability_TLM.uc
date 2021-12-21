@@ -19,11 +19,13 @@ static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 	local AmmoConversionData AmmoConversion;
+	local array<AmmoConversionData> DistinctConvertAmmo;
 	local RefinementUpgradeAbilityData RefinementUpgradeAbility;	
 	local string AbilityName;
 
 	// Abilities for ammo upgrades are taken from CLAP mod
-	foreach default.ConvertAmmo(AmmoConversion)
+	DistinctConvertAmmo = MakeDistinct(default.ConvertAmmo);
+	foreach DistinctConvertAmmo(AmmoConversion)
 	{
 		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
 		Templates.AddItem(AmmoAbility(name(AbilityName)));
@@ -618,4 +620,22 @@ static function X2AbilityTemplate TLMAlienKiller()
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	return Template;
+}
+
+// HELPERS
+static function array<AmmoConversionData> MakeDistinct(array<AmmoConversionData> ConfigAmmoConversion)
+{
+	local array<AmmoConversionData> DistinctAmmoConversion;
+	local AmmoConversionData AmmoConversion;
+
+	foreach ConfigAmmoConversion(AmmoConversion)
+	{
+		if (DistinctAmmoConversion.Find('Ammo', AmmoConversion.Ammo) == INDEX_NONE)
+		{
+			DistinctAmmoConversion.AddItem(AmmoConversion);
+			`LOG("AmmoConversion.Ammo: " $AmmoConversion.Ammo);
+		}
+	}
+
+	return DistinctAmmoConversion;
 }

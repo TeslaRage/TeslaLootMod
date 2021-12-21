@@ -27,7 +27,10 @@ struct UpgradeDeckData
 
 struct AmmoConversionData
 {
-	var name Ammo;	
+	var name Ammo;
+	var name UpgradeName;
+	var int ClipSizeBonus;
+	var int Tier;
 	var string Image;
 };
 
