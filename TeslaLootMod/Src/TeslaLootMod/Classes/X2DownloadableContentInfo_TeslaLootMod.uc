@@ -474,22 +474,14 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
 {		
 	local X2ItemTemplateManager ItemTemplateMan;	
-	local XComGameState_HeadquartersXCom XComHQ;
-	local XComGameStateHistory History;
-	local XComGameState_Unit Unit;
-	local StateObjectReference UnitRef;
 	local X2CardManager CardMan;	
 	local X2BaseWeaponDeckTemplateManager BWMan;
-	local X2WeaponTemplate WeaponTemplate;
-	local X2ArmorTemplate ArmorTemplate;
-	local int Weight, Idx;
+	local BaseItemData QualifiedBaseItem;
+	local array<BaseItemData> QualifiedBaseItems;	
 	local string strItem, CardLabel;
-	local array<string> CardLabels;
-	local array<name> ItemNames;
-	local name ItemTemplateName;
-
-	XComHQ = `XCOMHQ;
-	History = `XCOMHISTORY;	
+	local array<string> CardLabels;	
+	local int Idx;
+	
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	CardMan = class'X2CardManager'.static.GetCardManager();
 	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
@@ -499,45 +491,17 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	if (BWTemplate == none)
 		`LOG("TLM ERROR: Unable to determine base weapon deck template");
 
-	ItemNames = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);	
+	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);	
+	CardMan.GetAllCardsInDeck(BWTemplate.DataName, CardLabels);	
 
-	foreach ItemNames(ItemTemplateName)
+	foreach QualifiedBaseItems(QualifiedBaseItem)
 	{
-		WeaponTemplate = X2WeaponTemplate(ItemTemplateMan.FindItemTemplate(ItemTemplateName));
-		if (WeaponTemplate == none) continue;
+		strItem = string(QualifiedBaseItem.TemplateName);		
 
-		Weight = 0.0;
-		foreach XComHQ.Crew(UnitRef)
+		if (CardLabels.Find(strItem) == INDEX_NONE)
 		{
-			Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
-			if (Unit == none || !Unit.IsSoldier() || Unit.GetSoldierRank() == 0) continue;
-			
-			if (Unit.GetSoldierClassTemplate().IsWeaponAllowedByClass(WeaponTemplate)) Weight++;
-		}
-
-		if (CardLabels.Find(string(WeaponTemplate.DataName)) == INDEX_NONE)
-		{
-			CardMan.AddCardToDeck(BWTemplate.DataName, string(WeaponTemplate.DataName), float(Weight));
-		}
-	}
-
-	foreach ItemNames(ItemTemplateName)
-	{
-		ArmorTemplate = X2ArmorTemplate(ItemTemplateMan.FindItemTemplate(ItemTemplateName));
-		if (ArmorTemplate == none) continue;
-
-		Weight = 0.0;
-		foreach XComHQ.Crew(UnitRef)
-		{
-			Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
-			if (Unit == none || !Unit.IsSoldier() || Unit.GetSoldierRank() == 0) continue;
-			
-			if (Unit.GetSoldierClassTemplate().IsArmorAllowedByClass(ArmorTemplate)) Weight++;
-		}
-
-		if (CardLabels.Find(string(ArmorTemplate.DataName)) == INDEX_NONE)
-		{
-			CardMan.AddCardToDeck(BWTemplate.DataName, string(ArmorTemplate.DataName), float(Weight));
+			CardLabels.AddItem(strItem);
+			CardMan.AddCardToDeck(BWTemplate.DataName, strItem, float(QualifiedBaseItem.Weight));
 		}
 	}
 
@@ -546,15 +510,15 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	
 	foreach CardLabels(CardLabel)
 	{
-		Idx = ItemNames.Find(name(CardLabel));
+		Idx = QualifiedBaseItems.Find('TemplateName', name(CardLabel));
 		if (Idx == INDEX_NONE)
 		{			
 			CardMan.RemoveCardFromDeck(BWTemplate.DataName, CardLabel);
 		}
 	}
 
-	CardMan.SelectNextCardFromDeck(BWTemplate.DataName, strItem);
-	// CardMan.MarkCardUsed(BWTemplate.DataName, strItem); // Need to test further
+	// This also marks the card as "used" so `MarkCardUsed` is not needed
+	CardMan.SelectNextCardFromDeck(BWTemplate.DataName, strItem);	
 
 	ItemTemplate = ItemTemplateMan.FindItemTemplate(name(strItem));
 }

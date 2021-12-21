@@ -51,8 +51,13 @@ struct AbilityUpgradeData
 
 struct BaseItemData{
 	var name TemplateName;
+	var int Weight;
 	var name ForcedRarity;
-	var string Image;	
+	var string Image;
+
+	structdefaultproperties{
+		Weight = 3;
+	}
 };
 
 struct RarityDeckData
