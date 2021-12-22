@@ -27,7 +27,10 @@ struct UpgradeDeckData
 
 struct AmmoConversionData
 {
-	var name Ammo;	
+	var name Ammo;
+	var name UpgradeName;
+	var int ClipSizeBonus;
+	var int Tier;
 	var string Image;
 };
 
@@ -51,8 +54,13 @@ struct AbilityUpgradeData
 
 struct BaseItemData{
 	var name TemplateName;
+	var int Weight;
 	var name ForcedRarity;
-	var string Image;	
+	var string Image;
+
+	structdefaultproperties{
+		Weight = 3;
+	}
 };
 
 struct RarityDeckData
@@ -63,5 +71,14 @@ struct RarityDeckData
 
 	structdefaultproperties{
 		Chance = 100;
+	}
+};
+
+struct ItemCatData
+{
+	var name AllowedItemCat;
+
+	structdefaultproperties{
+		AllowedItemCat = "weapon";
 	}
 };

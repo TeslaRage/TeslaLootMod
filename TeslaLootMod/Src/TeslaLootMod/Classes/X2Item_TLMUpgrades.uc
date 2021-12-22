@@ -1,6 +1,5 @@
 class X2Item_TLMUpgrades extends X2Item_DefaultUpgrades config (TLM);
 
-var config int AmmoUpgradeClipSizePenalty;
 var config array<AbilityUpgradeData> AbilityWeaponUpgrades;
 
 static function array<X2DataTemplate> CreateTemplates()
@@ -8,14 +7,13 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Items;
 	local AmmoConversionData AmmoConversion;	
 	local AbilityUpgradeData AbilityWeaponUpgrade;
-	local string ItemName, AbilityName;
+	local string AbilityName;
 
 	// Ammo Upgrades
 	foreach class'X2Ability_TLM'.default.ConvertAmmo(AmmoConversion)
 	{
-		ItemName = "TLMUpgrade_" $AmmoConversion.Ammo;
 		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;		
-		Items.AddItem(AmmoUpgrade(name(ItemName), name(AbilityName), AmmoConversion));
+		Items.AddItem(AmmoUpgrade(name(AbilityName), AmmoConversion));
 	}
 
 	// Ability to Weapon Upgrade Conversion
@@ -28,11 +26,11 @@ static function array<X2DataTemplate> CreateTemplates()
 }
 
 // HELPERS
-static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityName, AmmoConversionData AmmoConversion)
+static function X2DataTemplate AmmoUpgrade(name AbilityName, AmmoConversionData AmmoConversion)
 {
 	local X2WeaponUpgradeTemplate_TLMAmmo Template;	
 
-	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate_TLMAmmo', Template, WeaponUpgradeName);
+	`CREATE_X2TEMPLATE(class'X2WeaponUpgradeTemplate_TLMAmmo', Template, AmmoConversion.UpgradeName);
 
 	Template.BonusAbilities.AddItem(AbilityName);
 		
@@ -40,14 +38,14 @@ static function X2DataTemplate AmmoUpgrade(name WeaponUpgradeName, name AbilityN
 	Template.strImage = AmmoConversion.Image;
 	Template.AmmoTemplateName = AmmoConversion.Ammo;
 
-	Template.ClipSizeBonus = -default.AmmoUpgradeClipSizePenalty;
+	Template.ClipSizeBonus = AmmoConversion.ClipSizeBonus;
 	Template.AdjustClipSizeFn = TLMUpgradeAdjustClipSize;
 
 	Template.CanApplyUpgradeToWeaponFn = CanApplyUpgradeToWeapon;
 	Template.CanBeBuilt = false;
 	Template.MaxQuantity = 1;
 	Template.BlackMarketTexts = default.UpgradeBlackMarketTexts;
-	Template.Tier = 2;
+	Template.Tier = AmmoConversion.Tier;
 
 	// Upgrade icons are set up in OPTC
 	

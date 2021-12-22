@@ -4,15 +4,15 @@ var config int Tier;
 var config StrategyRequirement Requirements;
 var config array<BaseItemData> BaseItems;
 
-function array<name> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState NewGameState)
+function array<BaseItemData> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState NewGameState)
 {
 	local XComGameState_HeadquartersXCom XComHQ;
 	local X2ItemTemplateManager ItemMan;
 	local BaseItemData BaseItem;
+	local array<BaseItemData> QualifiedBaseItems;
 	local X2ItemTemplate ItemTemplate, SchematicTemplate;
 	local StrategyRequirement ItemRequirements;
-	local name ForcedRarityName;
-	local array<name> BaseItemsTemplateNames;
+	local name ForcedRarityName;	
 
 	XComHQ = `XCOMHQ;
 	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
@@ -51,11 +51,11 @@ function array<name> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState
 		if (ForcedRarityName != '' && ForcedRarityName != RarityTemplate.DataName) continue;
 		
 		if (!CanItemGetAnyUpgrades(ItemTemplate, RarityTemplate, NewGameState)) continue;
-
-		BaseItemsTemplateNames.AddItem(BaseItem.TemplateName);
+		
+		QualifiedBaseItems.AddItem(BaseItem);
 	}
 
-	return BaseItemsTemplateNames;
+	return QualifiedBaseItems;
 }
 
 function bool CanItemGetAnyUpgrades(X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
@@ -74,7 +74,7 @@ function bool CanItemGetAnyUpgrades(X2ItemTemplate ItemTemplate, X2RarityTemplat
 	
 	// This is a temporary item state to test apply upgrades
 	Item = ItemTemplate.CreateInstanceFromTemplate(NewGameState);
-	UpgradeDecks = RarityTemplate.GetDecksToRoll();
+	UpgradeDecks = RarityTemplate.GetDecksToRoll(Item);
 
 	foreach UpgradeDecks(UpgradeDeck)
 	{

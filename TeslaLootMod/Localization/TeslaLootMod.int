@@ -73,6 +73,42 @@ FriendlyNamePlural="Bluescreen Rounds"
 BriefSummary="Named for an inexplicable computing phenomenon common before the war, Bluescreen Rounds wreak havoc on targeted electronic systems."
 TinySummary="+Ammo Bonus, -Clip size"
 
+[TLMUpgrade_APRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced AP Rounds"
+FriendlyNamePlural="AP Rounds"
+BriefSummary="Hand machined from ultra strong, ultra light alien alloys, these deadly rounds will effectively bypass all enemy armor to deal unmitigated damage."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_TracerRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Tracer Rounds"
+FriendlyNamePlural="Tracer Rounds"
+BriefSummary="Containing high tech \"smart rounds\" that relay detailed tracking data back to the shooter when fired, this specialized ammo adds +<Ability:TRACERROUNDSAIMBONUS/> to the shooter's aim when equipped."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_IncendiaryRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Dragon Rounds"
+FriendlyNamePlural="Dragon Rounds"
+BriefSummary="Capped with a highly combustible mini-charge, Dragon Rounds do bonus damage to all targets and can even set some targets alight."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_TalonRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Talon Rounds"
+FriendlyNamePlural="Talon Rounds"
+BriefSummary="These rounds fracture into wicked micro-shards of alien alloy on impact, granting +<Ability:TALONROUNDSCRITCHANCE/>% critical chance and +<Ability:TALONROUNDSCRITDAMAGEBONUS/> bonus damage on critical hits."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_VenomRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Venom Rounds"
+FriendlyNamePlural="Venom Rounds"
+BriefSummary="The tips of these rounds contain microcapsules of a fast-acting toxin effective on organic aliens and humans alike, poisoning the target on impact and dealing bonus damage."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_BluescreenRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Bluescreen Rounds"
+FriendlyNamePlural="Bluescreen Rounds"
+BriefSummary="Named for an inexplicable computing phenomenon common before the war, Bluescreen Rounds wreak havoc on targeted electronic systems."
+TinySummary="+Ammo Bonus, +Clip size"
+
 [X2EventListener_TLM]
 strSlotLocked = "LOCKED"
 
