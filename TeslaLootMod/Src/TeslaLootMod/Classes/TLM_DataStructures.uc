@@ -73,3 +73,12 @@ struct RarityDeckData
 		Chance = 100;
 	}
 };
+
+struct ItemCatData
+{
+	var name AllowedItemCat;
+
+	structdefaultproperties{
+		AllowedItemCat = "weapon";
+	}
+};

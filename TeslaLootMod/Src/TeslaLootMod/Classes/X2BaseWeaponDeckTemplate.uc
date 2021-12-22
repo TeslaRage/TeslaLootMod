@@ -74,7 +74,7 @@ function bool CanItemGetAnyUpgrades(X2ItemTemplate ItemTemplate, X2RarityTemplat
 	
 	// This is a temporary item state to test apply upgrades
 	Item = ItemTemplate.CreateInstanceFromTemplate(NewGameState);
-	UpgradeDecks = RarityTemplate.GetDecksToRoll();
+	UpgradeDecks = RarityTemplate.GetDecksToRoll(Item);
 
 	foreach UpgradeDecks(UpgradeDeck)
 	{

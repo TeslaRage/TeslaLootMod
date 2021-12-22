@@ -10,12 +10,40 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Config\" />
+    <Folder Include="Config\Base Item Decks" />
+    <Folder Include="Config\Upgrade Decks - Armor" />
+    <Folder Include="Config\Upgrade Decks - Melee" />
+    <Folder Include="Config\Upgrade Decks - Shield" />
+    <Folder Include="Config\Upgrade Decks - ABB" />
+    <Folder Include="Config\Upgrade Decks - WIO" />
+    <Folder Include="Config\Upgrade Decks" />
     <Folder Include="Localization\" />
     <Folder Include="Src\" />
     <Folder Include="Src\TeslaLootMod\" />
     <Folder Include="Src\TeslaLootMod\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\Base Item Decks\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Upgrade Decks - ABB\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Upgrade Decks - Armor\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Upgrade Decks - Melee\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Upgrade Decks - Shield\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Upgrade Decks - WIO\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Upgrade Decks\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComGameCore.ini">
       <SubType>Content</SubType>
     </Content>

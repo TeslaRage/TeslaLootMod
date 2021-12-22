@@ -533,7 +533,7 @@ static function ApplyUpgrades(XComGameState_Item Item, XComGameState_Tech Tech, 
 	UpgradeDeckMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
 
 	Item.NickName = GetInitialNickName(Item);
-	Decks = RarityTemplate.GetDecksToRoll();	
+	Decks = RarityTemplate.GetDecksToRoll(Item);	
 
 	foreach Decks(Deck)
 	{	

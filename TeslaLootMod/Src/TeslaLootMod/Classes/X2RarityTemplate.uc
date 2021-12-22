@@ -4,15 +4,53 @@ var config int Tier;
 var config array<RarityDeckData> Decks;
 var config string RarityColor;
 
-function array<RarityDeckData> GetDecksToRoll()
+function array<RarityDeckData> GetDecksToRoll(XComGameState_Item Item)
 {
+	local X2UpgradeDeckTemplateManager UDMan;
+	local X2UpgradeDeckTemplate UDTemplate;
+	local X2WeaponTemplate WTemplate;
+	local X2ArmorTemplate ArmorTemplate;
 	local RarityDeckData Deck;
 	local array<RarityDeckData> UpgradeDecks;
 
+	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+
 	foreach Decks(Deck)
 	{
+		// Get upgrade deck template for checks
+		UDTemplate = UDMan.GetUpgradeDeckTemplate(Deck.UpgradeDeckName);
+		if (UDTemplate == none) continue;
+
+		// First check if `ItemCat` matches
+		if (UDTemplate.AllowedItemCat.AllowedItemCat != Item.GetMyTemplate().ItemCat) continue;
+
+		// Now we check for `WeaponCat` or `ArmorCat`
+		WTemplate = X2WeaponTemplate(Item.GetMyTemplate());
+
+		if (WTemplate != none)
+		{
+			if (UDTemplate.AllowedCats.Length > 0 && UDTemplate.AllowedCats.Find(WTemplate.WeaponCat) == INDEX_NONE)
+			{
+				continue;
+			}
+		}
+		else
+		{
+			// If not a weapon, then it can only be an armor template
+			ArmorTemplate = X2ArmorTemplate(Item.GetMyTemplate());
+			if (ArmorTemplate == none) continue;
+			
+			if (UDTemplate.AllowedCats.Length > 0 && UDTemplate.AllowedCats.Find(ArmorTemplate.ArmorCat) == INDEX_NONE)
+			{
+				continue;
+			}
+		}		
+
+		// Possibility of getting the deck
 		if (`SYNC_RAND_STATIC(100) < Deck.Chance)
+		{
 			UpgradeDecks.AddItem(Deck);
+		}
 	}
 
 	return UpgradeDecks;
