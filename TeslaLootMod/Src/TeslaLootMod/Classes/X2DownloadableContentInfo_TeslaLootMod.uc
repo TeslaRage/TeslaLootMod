@@ -447,8 +447,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 {
 	local X2ItemTemplateManager ItemMan;
 	local XComGameState_Item Item;
-	local X2ItemTemplate ItemTemplate;
-	local XComGameState_ItemData Data;
+	local X2ItemTemplate ItemTemplate;	
 	local X2RarityTemplate RarityTemplate;
 	
 	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
@@ -459,16 +458,33 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 
 	if (Item == none)
 	{
-		`LOG("TLM ERROR: Failed to get base weapon");		
+		`LOG("TLM ERROR: Failed to get base weapon");
+		return Item; // Blank item i.e. get nothing when tech completes	
 	}
 
-	ApplyUpgrades(Item, Tech, RarityTemplate);
-
-	Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
-	Data.NumUpgradeSlots = 0;
-	Item.AddComponentObject(Data);
+	ApplyUpgrades(Item, RarityTemplate);
+	CreateTLMItemState(NewGameState, Item, RarityTemplate.DataName);
 
 	return Item;
+}
+
+static function CreateTLMItemState(XComGameState NewGameState, XComGameState_Item Item, name RarityName)
+{
+	local XComGameState_ItemData Data;
+
+	Data = XComGameState_ItemData(NewGameState.CreateNewStateObject(class'XComGameState_ItemData'));
+		
+	if (class'X2EventListener_TLM'.default.bAllowRemoveUpgrade)
+	{
+		Data.NumUpgradeSlots = Item.GetMyWeaponUpgradeCount();
+	}
+	else
+	{
+		Data.NumUpgradeSlots = 0;
+	}
+
+	Data.RarityName = RarityName;
+	Item.AddComponentObject(Data);
 }
 
 static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
@@ -523,7 +539,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	ItemTemplate = ItemTemplateMan.FindItemTemplate(name(strItem));
 }
 
-static function ApplyUpgrades(XComGameState_Item Item, XComGameState_Tech Tech, X2RarityTemplate RarityTemplate)
+static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTemplate)
 {		
 	local X2UpgradeDeckTemplateManager UpgradeDeckMan;
 	local X2UpgradeDeckTemplate UDTemplate;
@@ -584,6 +600,25 @@ static function string GetInitialNickName(XComGameState_Item Item)
 	return "";
 }
 
+static function bool UpdateSlotCount(StateObjectReference ItemRef, XComGameState NewGameState)
+{
+	local XComGameState_Item Item;
+	local XComGameState_ItemData Data;
+
+	Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+	if (Item == none) return false;
+
+	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
+	if (Data == none) return false;
+
+	Data = XComGameState_ItemData(NewGameState.ModifyStateObject(class'XComGameState_ItemData', Data.ObjectID));
+	Data.NumUpgradeSlots = class'X2EventListener_TLM'.default.bAllowRemoveUpgrade ? Item.GetMyWeaponUpgradeCount() : 0;
+
+	class'Helpers'.static.OutputMsg("Updated" @Item.GetMyTemplateName() @Item.Nickname @Data.NumUpgradeSlots @"slots");
+
+	return true;
+}
+
 // =============
 // DELEGATES
 // =============
@@ -608,4 +643,123 @@ static function string ModifyAmmoNick(array<X2WeaponUpgradeTemplate> AppliedUpgr
 static function string ModifyRefnNick(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item)
 {	
 	return Item.Nickname $default.strPlus;
+}
+
+// =============
+// CONSOLE COMMANDS
+// =============
+
+exec function TLM_UpdateSlotCount()
+{
+	local XComGameStateHistory History;
+	local XComGameState_HeadquartersXCom XComHQ;
+	local XComGameState_Unit Unit;	
+	local StateObjectReference ItemRef, UnitRef;
+	local XComGameState NewGameState;
+	local bool bUpdated;	
+
+	XComHQ = `XCOMHQ;
+	History = `XCOMHISTORY;
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Update items' slot count");
+
+	// Update Data.NumUpgradeSlots for all items in XCOM HQ inventory
+	foreach XComHQ.Inventory(ItemRef)
+	{
+		if (UpdateSlotCount(ItemRef, NewGameState)) bUpdated = true;
+	}
+
+	// Update Data.NumUpgradeSlots for all items held in crew's inventory
+	foreach XComHQ.Crew(UnitRef)
+	{
+		Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (Unit == none) continue;
+
+		foreach Unit.InventoryItems(ItemRef)
+		{			
+			if (UpdateSlotCount(ItemRef, NewGameState)) bUpdated = true;
+		}
+	}
+
+	if (bUpdated)
+	{
+		`GAMERULES.SubmitGameState(NewGameState);
+	}
+	else
+	{
+		class'Helpers'.static.OutputMsg("No item was updated");
+		`XCOMHISTORY.CleanupPendingGameState(NewGameState);
+	}
+}
+
+exec function GiveNickName(string Nickname, string HexColor)
+{
+	local XComGameState NewGameState;
+	local UIArmory_WeaponUpgrade Armory_WeaponUpgrade;
+	local XComGameState_Item Item;
+
+	Armory_WeaponUpgrade = UIArmory_WeaponUpgrade(`SCREENSTACK.GetFirstInstanceOf(class'UIArmory_WeaponUpgrade'));
+
+	if (Armory_WeaponUpgrade == none)
+	{
+		class'Helpers'.static.OutputMsg("Need to be in item upgrade screen");
+		return;
+	}
+
+	Item = XComGameState_Item(`XCOMHISTORY.GetGameStateforObjectID(Armory_WeaponUpgrade.WeaponRef.ObjectID));
+
+	if (Item == none)
+	{
+		class'Helpers'.static.OutputMsg("No item selected");
+		return;
+	}
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Update items' slot count");
+
+	Item = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', Item.ObjectID));
+	Item.Nickname = "<font color='" $HexColor $"'>" $Nickname $"</font>";
+
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	class'Helpers'.static.OutputMsg("Item nickname updated to " $Item.Nickname);
+}
+
+exec function UpdateRarity(name RarityName)
+{
+	local XComGameState NewGameState;
+	local UIArmory_WeaponUpgrade Armory_WeaponUpgrade;
+	local XComGameState_Item Item;
+	local XComGameState_ItemData Data;
+
+	Armory_WeaponUpgrade = UIArmory_WeaponUpgrade(`SCREENSTACK.GetFirstInstanceOf(class'UIArmory_WeaponUpgrade'));
+
+	if (Armory_WeaponUpgrade == none)
+	{
+		class'Helpers'.static.OutputMsg("Need to be in item upgrade screen");
+		return;
+	}
+
+	Item = XComGameState_Item(`XCOMHISTORY.GetGameStateforObjectID(Armory_WeaponUpgrade.WeaponRef.ObjectID));
+
+	if (Item == none)
+	{
+		class'Helpers'.static.OutputMsg("No item selected");
+		return;
+	}
+
+	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
+
+	if (Data == none)
+	{
+		class'Helpers'.static.OutputMsg("Not a TLM item");
+		return;
+	}
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Update item's rarity");
+
+	Data = XComGameState_ItemData(NewGameState.ModifyStateObject(class'XComGameState_ItemData', Data.ObjectID));
+	Data.RarityName = RarityName;
+
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	class'Helpers'.static.OutputMsg("Item rarity updated to " $RarityName $". This has no gameplay changes just nick color when renaming.");
 }
