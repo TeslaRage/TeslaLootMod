@@ -12,8 +12,12 @@ static function array<X2DataTemplate> CreateTemplates()
 	// Ammo Upgrades
 	foreach class'X2Ability_TLM'.default.ConvertAmmo(AmmoConversion)
 	{
-		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;		
-		Items.AddItem(AmmoUpgrade(name(AbilityName), AmmoConversion));
+		if ((class'X2DownloadableContentInfo_TeslaLootMod'.static.IsModLoaded(AmmoConversion.DLC) && AmmoConversion.DLC != '')
+			|| AmmoConversion.DLC == '')
+		{
+			AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
+			Items.AddItem(AmmoUpgrade(name(AbilityName), AmmoConversion));
+		}
 	}
 
 	// Ability to Weapon Upgrade Conversion

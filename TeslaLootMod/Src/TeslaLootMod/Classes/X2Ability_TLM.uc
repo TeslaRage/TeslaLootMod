@@ -27,8 +27,12 @@ static function array<X2DataTemplate> CreateTemplates()
 	DistinctConvertAmmo = MakeDistinct(default.ConvertAmmo);
 	foreach DistinctConvertAmmo(AmmoConversion)
 	{
-		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
-		Templates.AddItem(AmmoAbility(name(AbilityName)));
+		if ((class'X2DownloadableContentInfo_TeslaLootMod'.static.IsModLoaded(AmmoConversion.DLC) && AmmoConversion.DLC != '')
+			|| AmmoConversion.DLC == '')
+		{
+			AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
+			Templates.AddItem(AmmoAbility(name(AbilityName)));
+		}
 	}
 
 	// Abilities for Weapon Refinement upgrades

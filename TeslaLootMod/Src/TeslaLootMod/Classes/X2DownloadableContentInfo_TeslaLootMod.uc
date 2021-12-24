@@ -215,6 +215,23 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 // =============
 // HELPERS
 // =============
+static function bool IsModLoaded(name DLCName)
+{
+    local XComOnlineEventMgr    EventManager;
+    local int                   Index;
+
+    EventManager = `ONLINEEVENTMGR;
+
+    for(Index = EventManager.GetNumDLC() - 1; Index >= 0; Index--)  
+    {
+        if(EventManager.GetDLCNames(Index) == DLCName)  
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 static function CallUIAlert_TLM(const out DynamicPropertySet PropertySet)
 {
 	local XComHQPresentationLayer Pres;
