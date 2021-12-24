@@ -44,7 +44,7 @@ static function UnlockLootBoxCompleted(XComGameState NewGameState, XComGameState
 	
 	XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));	
 
-	Item = class'X2DownloadableContentInfo_TeslaLootMod'.static.GenerateTLMItem(NewGameState, TechState, BWTemplate);
+	Item = class'X2Helper_TLM'.static.GenerateTLMItem(NewGameState, TechState, BWTemplate);
 	
 	XComHQ.PutItemInInventory(NewGameState, Item);
 	`XEVENTMGR.TriggerEvent('ItemConstructionCompleted', Item, Item, NewGameState);
@@ -53,7 +53,7 @@ static function UnlockLootBoxCompleted(XComGameState NewGameState, XComGameState
 	TechState.ItemRewards.AddItem(Item.GetMyTemplate());	// Needed for UI Alert display info
 	TechState.bSeenResearchCompleteScreen = false; 			// Reset the research report for techs that are repeatable
 
-	class'X2DownloadableContentInfo_TeslaLootMod'.static.FindAndMakeTechInstant(NewGameState, TechState);
+	class'X2Helper_TLM'.static.FindAndMakeTechInstant(NewGameState, TechState);
 
 	UIItemReceived(NewGameState, Item, BWTemplate);
 }

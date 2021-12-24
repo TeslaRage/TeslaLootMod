@@ -54,7 +54,7 @@ function array<name> GetAllItemTemplateNames()
 			BaseItemTemplateNames.AddItem(BaseItem.TemplateName);
 		}
 
-		class'X2DownloadableContentInfo_TeslaLootMod'.static.AppendArrays(ItemTemplateNames, BaseItemTemplateNames);
+		class'X2Helper_TLM'.static.AppendArrays(ItemTemplateNames, BaseItemTemplateNames);
 	}
 
 	return ItemTemplateNames;

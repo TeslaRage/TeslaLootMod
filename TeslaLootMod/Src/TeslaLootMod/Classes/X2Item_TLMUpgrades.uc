@@ -12,7 +12,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	// Ammo Upgrades
 	foreach class'X2Ability_TLM'.default.ConvertAmmo(AmmoConversion)
 	{
-		if ((class'X2DownloadableContentInfo_TeslaLootMod'.static.IsModLoaded(AmmoConversion.DLC) && AmmoConversion.DLC != '')
+		if ((class'X2Helper_TLM'.static.IsModLoaded(AmmoConversion.DLC) && AmmoConversion.DLC != '')
 			|| AmmoConversion.DLC == '')
 		{
 			AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
