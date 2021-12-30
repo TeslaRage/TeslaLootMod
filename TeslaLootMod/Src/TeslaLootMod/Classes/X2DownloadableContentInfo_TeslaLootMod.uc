@@ -258,7 +258,7 @@ exec function TLM_UpdateSlotCount()
 	}
 }
 
-exec function GiveNickName(string Nickname, string HexColor)
+exec function TLM_GiveNickName(string Nickname, string HexColor)
 {
 	local XComGameState NewGameState;
 	local UIArmory_WeaponUpgrade Armory_WeaponUpgrade;
@@ -290,7 +290,7 @@ exec function GiveNickName(string Nickname, string HexColor)
 	class'Helpers'.static.OutputMsg("Item nickname updated to " $Item.Nickname);
 }
 
-exec function UpdateRarity(name RarityName)
+exec function TLM_UpdateRarity(name RarityName)
 {
 	local XComGameState NewGameState;
 	local UIArmory_WeaponUpgrade Armory_WeaponUpgrade;
