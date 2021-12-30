@@ -73,6 +73,18 @@ FriendlyNamePlural="Bluescreen Rounds"
 BriefSummary="Named for an inexplicable computing phenomenon common before the war, Bluescreen Rounds wreak havoc on targeted electronic systems."
 TinySummary="+Ammo Bonus, -Clip size"
 
+[TLMUpgrade_MZAntiVioletRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="AntiViolet Rounds"
+FriendlyNamePlural="AntiViolet Rounds"
+BriefSummary="Made by Mitzruti Industries, AntiViolet Rounds release discordant waves that trigger feedback damage to foes with psionic power, and disable energy shields."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_MZEnervativeRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Enervative Rounds"
+FriendlyNamePlural="Enervative Rounds"
+BriefSummary="Made by Mitzruti Industries, these rounds release a spray of fragments that interfere with alien weaponry, reducing the damage enemies can do."
+TinySummary="+Ammo Bonus, -Clip size"
+
 [TLMUpgrade_APRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
 FriendlyName="Advanced AP Rounds"
 FriendlyNamePlural="AP Rounds"
@@ -107,6 +119,18 @@ TinySummary="+Ammo Bonus, +Clip size"
 FriendlyName="Advanced Bluescreen Rounds"
 FriendlyNamePlural="Bluescreen Rounds"
 BriefSummary="Named for an inexplicable computing phenomenon common before the war, Bluescreen Rounds wreak havoc on targeted electronic systems."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_MZAntiVioletRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced AntiViolet Rounds"
+FriendlyNamePlural="AntiViolet Rounds"
+BriefSummary="Made by Mitzruti Industries, AntiViolet Rounds release discordant waves that trigger feedback damage to foes with psionic power, and disable energy shields."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_MZEnervativeRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Enervative Rounds"
+FriendlyNamePlural="Enervative Rounds"
+BriefSummary="Made by Mitzruti Industries, these rounds release a spray of fragments that interfere with alien weaponry, reducing the damage enemies can do."
 TinySummary="+Ammo Bonus, +Clip size"
 
 [X2EventListener_TLM]

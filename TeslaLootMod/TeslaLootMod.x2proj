@@ -84,6 +84,9 @@
     <Content Include="Src\TeslaLootMod\Classes\X2EventListener_TLM.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2Helper_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2ItemTemplate_LootBox.uc">
       <SubType>Content</SubType>
     </Content>

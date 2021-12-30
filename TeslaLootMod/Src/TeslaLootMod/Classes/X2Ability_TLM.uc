@@ -27,8 +27,12 @@ static function array<X2DataTemplate> CreateTemplates()
 	DistinctConvertAmmo = MakeDistinct(default.ConvertAmmo);
 	foreach DistinctConvertAmmo(AmmoConversion)
 	{
-		AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
-		Templates.AddItem(AmmoAbility(name(AbilityName)));
+		if ((class'X2Helper_TLM'.static.IsModLoaded(AmmoConversion.DLC) && AmmoConversion.DLC != '')
+			|| AmmoConversion.DLC == '')
+		{
+			AbilityName = "TLMAAbility_" $AmmoConversion.Ammo;
+			Templates.AddItem(AmmoAbility(name(AbilityName)));
+		}
 	}
 
 	// Abilities for Weapon Refinement upgrades
@@ -632,8 +636,7 @@ static function array<AmmoConversionData> MakeDistinct(array<AmmoConversionData>
 	{
 		if (DistinctAmmoConversion.Find('Ammo', AmmoConversion.Ammo) == INDEX_NONE)
 		{
-			DistinctAmmoConversion.AddItem(AmmoConversion);
-			`LOG("AmmoConversion.Ammo: " $AmmoConversion.Ammo);
+			DistinctAmmoConversion.AddItem(AmmoConversion);			
 		}
 	}
 
