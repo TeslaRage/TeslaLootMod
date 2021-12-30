@@ -292,16 +292,11 @@ static function CreateTLMItemState(XComGameState NewGameState, XComGameState_Ite
 static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
 {		
 	local X2ItemTemplateManager ItemTemplateMan;	
-	local X2CardManager CardMan;	
-	local X2BaseWeaponDeckTemplateManager BWMan;
-	local BaseItemData QualifiedBaseItem;
+	local X2BaseWeaponDeckTemplateManager BWMan;	
 	local array<BaseItemData> QualifiedBaseItems;	
-	local string strItem, CardLabel;
-	local array<string> CardLabels;	
-	local int Idx;
+	local name ItemTemplateName;
 
-	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
-	CardMan = class'X2CardManager'.static.GetCardManager();
+	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
 	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
 	
 	BWTemplate = BWMan.DetermineBaseWeaponDeck();
@@ -309,36 +304,9 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	if (BWTemplate == none)
 		`LOG("TLM ERROR: Unable to determine base weapon deck template");
 
-	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);	
-	CardMan.GetAllCardsInDeck(BWTemplate.DataName, CardLabels);
-
-	foreach QualifiedBaseItems(QualifiedBaseItem)
-	{
-		strItem = string(QualifiedBaseItem.TemplateName);		
-
-		if (CardLabels.Find(strItem) == INDEX_NONE)
-		{
-			CardLabels.AddItem(strItem);
-			CardMan.AddCardToDeck(BWTemplate.DataName, strItem, float(QualifiedBaseItem.Weight));
-		}
-	}
-
-	CardLabels.Length = 0;
-	CardMan.GetAllCardsInDeck(BWTemplate.DataName, CardLabels);
-	
-	foreach CardLabels(CardLabel)
-	{
-		Idx = QualifiedBaseItems.Find('TemplateName', name(CardLabel));
-		if (Idx == INDEX_NONE)
-		{			
-			CardMan.RemoveCardFromDeck(BWTemplate.DataName, CardLabel);
-		}
-	}
-
-	// This also marks the card as "used" so `MarkCardUsed` is not needed
-	CardMan.SelectNextCardFromDeck(BWTemplate.DataName, strItem);	
-
-	ItemTemplate = ItemTemplateMan.FindItemTemplate(name(strItem));
+	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
+	ItemTemplateName = QualifiedBaseItems[`SYNC_RAND_STATIC(QualifiedBaseItems.Length)].TemplateName;
+	ItemTemplate = ItemTemplateMan.FindItemTemplate(ItemTemplateName);
 }
 
 static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTemplate)
