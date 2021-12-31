@@ -1,3 +1,7 @@
+;============================================
+; TECH TEMPLATES
+;============================================
+
 [UnlockRareBox X2TechTemplate_TLM]
 DisplayName="Unlock Rare Lockbox"
 Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
@@ -22,6 +26,10 @@ Summary="Our troops recovered a lockbox from the field, and there might be somet
 DisplayName="Unlock Legendary Lockbox (Instant)"
 Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
 
+;============================================
+; ITEM TEMPLATES
+;============================================
+
 [RareBox X2ItemTemplate_LootBox]
 FriendlyName="Rare Lockbox"
 FriendlyNamePlural="Rare Lockboxes"
@@ -36,6 +44,10 @@ BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Pot
 FriendlyName="Legendary Lockbox"
 FriendlyNamePlural="Legendary Lockboxes"
 BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Potentially..."
+
+;============================================
+; AMMO UPGRADES - BASIC
+;============================================
 
 [TLMUpgrade_APRounds X2WeaponUpgradeTemplate_TLMAmmo]
 FriendlyName="AP Rounds"
@@ -85,6 +97,40 @@ FriendlyNamePlural="Enervative Rounds"
 BriefSummary="Made by Mitzruti Industries, these rounds release a spray of fragments that interfere with alien weaponry, reducing the damage enemies can do."
 TinySummary="+Ammo Bonus, -Clip size"
 
+[TLMUpgrade_RiotRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Riot Rounds"
+FriendlyNamePlural="Riot Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds sacrifice lethality for a chance to knock our opponents out temporarily."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_FalconRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Falcon Rounds"
+FriendlyNamePlural="Falcon Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds explode when near enemies and deal +2 bonus damage."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_FlechetteRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Flechette Rounds"
+FriendlyNamePlural="Flechette Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds are designed with just enough penetration to rupture interal organs but not enough to leave the victim's body."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_NeedleRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Needle Rounds"
+FriendlyNamePlural="Needle Rounds"
+BriefSummary="Made by MrShadowCX Industries, what these rounds lack in cover piercing, they make up for lethality."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_AcidRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Acid Rounds"
+FriendlyNamePlural="Acid Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds burn the target for added damage."
+TinySummary="+Ammo Bonus, -Clip size"
+
+;============================================
+; AMMO UPGRADES - ADVANCED
+;============================================
+
 [TLMUpgrade_APRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
 FriendlyName="Advanced AP Rounds"
 FriendlyNamePlural="AP Rounds"
@@ -132,6 +178,40 @@ FriendlyName="Advanced Enervative Rounds"
 FriendlyNamePlural="Enervative Rounds"
 BriefSummary="Made by Mitzruti Industries, these rounds release a spray of fragments that interfere with alien weaponry, reducing the damage enemies can do."
 TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_RiotRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Riot Rounds"
+FriendlyNamePlural="Riot Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds sacrifice lethality for a chance to knock our opponents out temporarily."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_FalconRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Falcon Rounds"
+FriendlyNamePlural="Falcon Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds explode when near enemies and deal +2 bonus damage."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_FlechetteRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Flechette Rounds"
+FriendlyNamePlural="Flechette Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds are designed with just enough penetration to rupture interal organs but not enough to leave the victim's body."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_NeedleRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Needle Rounds"
+FriendlyNamePlural="Needle Rounds"
+BriefSummary="Made by MrShadowCX Industries, what these rounds lack in cover piercing, they make up for lethality."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_AcidRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Acid Rounds"
+FriendlyNamePlural="Acid Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds burn the target for added damage."
+TinySummary="+Ammo Bonus, +Clip size"
+
+;============================================
+; OTHERS
+;============================================
 
 [X2EventListener_TLM]
 strSlotLocked = "LOCKED"
