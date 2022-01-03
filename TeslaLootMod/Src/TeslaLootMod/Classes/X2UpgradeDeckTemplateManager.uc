@@ -48,7 +48,7 @@ function array<X2WeaponUpgradeTemplate> GetAllUpgradeTemplates()
 	return WUTemplates;
 }
 
-function array<X2UpgradeDeckTemplate> GetUpgradeDecksByUpgradeName(name WeaponUpgradeName)
+function array<X2UpgradeDeckTemplate> GetUpgradeDecksByUpgradeName(name WeaponUpgradeName, optional bool bJustOne = false)
 {
 	local X2UpgradeDeckTemplate UDTemplate;
 	local array<X2UpgradeDeckTemplate> UDTemplates;
@@ -62,6 +62,11 @@ function array<X2UpgradeDeckTemplate> GetUpgradeDecksByUpgradeName(name WeaponUp
 		if (UDTemplate.Upgrades.Find('UpgradeName', WeaponUpgradeName) != INDEX_NONE)
 		{
 			UDTemplates.AddItem(UDTemplate);
+
+			if (bJustOne)
+			{
+				return UDTemplates;
+			}
 		}
 	}
 

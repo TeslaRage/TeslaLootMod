@@ -8,7 +8,7 @@ var Delegate<ModifyNickNameDelegate> ModifyNickNameFn;
 
 delegate string ModifyNickNameDelegate(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item);
 
-function RollUpgrades(XComGameState_Item Item, int Quantity)
+function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bApplyNick = true)
 {
 	local UpgradeDeckData Upgrade;
 	local X2WeaponUpgradeTemplate WUTemplate;
@@ -50,7 +50,7 @@ function RollUpgrades(XComGameState_Item Item, int Quantity)
 		}		
 	}
 
-	if (ModifyNickNameFn != none)
+	if (ModifyNickNameFn != none && bApplyNick)
 	{
 		Item.NickName = ModifyNickNameFn(AppliedUpgrades, Item);
 	}
@@ -63,17 +63,6 @@ function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_
 		return false;
 
 	if (!Item.CanWeaponApplyUpgrade(WUTemplate))
-		return false;
-
-	// If not configured as allowed cat, say no.
-	if (Upgrade.AllowedWeaponCats.Length > 0
-		&& Upgrade.AllowedWeaponCats.Find(X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat) == INDEX_NONE)
-	{
-		return false;
-	}
-
-	// If configured as disallowed, say no.
-	if (Upgrade.DisallowedWeaponCats.Find(X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat) != INDEX_NONE)
 		return false;
 
 	// Does this upgrade have valid abilities?
