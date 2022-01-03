@@ -18,8 +18,7 @@ var localized string strPlus;
 // =============
 static event OnPostTemplatesCreated()
 {
-	class'X2Helper_TLM'.static.AddLootTables();
-	class'X2Helper_TLM'.static.UpdateWeaponUpgrade();
+	class'X2Helper_TLM'.static.AddLootTables();	
 	class'X2Helper_TLM'.static.SetDelegatesToUpgradeDecks();
 }
 
