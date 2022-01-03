@@ -138,7 +138,7 @@ static function EventListenerReturn UIArmory_WeaponUpgrade_SlotsUpdated_GiveColo
 
 	// Get item state
 	Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(Screen.WeaponRef.ObjectID));
-	if (Item == none) return ELR_NoInterrupt;
+	if (Item == none || Item.Nickname == "") return ELR_NoInterrupt;
 
 	// Get TLM item state, so we only do this for our items
 	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
