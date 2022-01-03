@@ -69,7 +69,8 @@ function int GetExtraShredValue(XComGameState_Effect EffectState, XComGameState_
 	local XComGameState_Item SourceWeapon;
 
 	SourceWeapon = AbilityState.GetSourceWeapon();
-	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
+	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID
+		&& class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult))
 	{
 		return Shred;
 	}
