@@ -78,3 +78,14 @@ struct ItemCatData
 		AllowedItemCat = "weapon";
 	}
 };
+
+struct PatchItemData
+{
+	var name ItemTemplateName;
+	var name Rarity;
+	var bool ApplyNick;
+
+	structdefaultproperties{
+		ApplyNick = true;
+	}
+};

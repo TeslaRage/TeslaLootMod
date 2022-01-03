@@ -174,6 +174,7 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName)
 	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
 	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
 	ItemTemplateNames = BWMan.GetAllItemTemplateNames();
+	AppendPatchedItems(ItemTemplateNames);
 
 	UDTemplate = UDMan.GetUpgradeDeckTemplate(UpgradeDeckTemplateName);
 	if (UDTemplate != none)
@@ -309,7 +310,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	ItemTemplate = ItemTemplateMan.FindItemTemplate(ItemTemplateName);
 }
 
-static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTemplate)
+static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTemplate, optional bool bApplyNick = true)
 {		
 	local X2UpgradeDeckTemplateManager UpgradeDeckMan;
 	local X2UpgradeDeckTemplate UDTemplate;
@@ -318,7 +319,11 @@ static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTe
 
 	UpgradeDeckMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
 
-	Item.NickName = GetInitialNickName(Item);
+	if (bApplyNick)
+	{
+		Item.NickName = GetInitialNickName(Item);
+	}
+	
 	Decks = RarityTemplate.GetDecksToRoll(Item);	
 
 	foreach Decks(Deck)
@@ -326,10 +331,13 @@ static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTe
 		UDTemplate = UpgradeDeckMan.GetUpgradeDeckTemplate(Deck.UpgradeDeckName);
 		if (UDTemplate == none) continue;
 
-		UDTemplate.RollUpgrades(Item, Deck.Quantity);
+		UDTemplate.RollUpgrades(Item, Deck.Quantity, bApplyNick);
 	}
 
-	RarityTemplate.ApplyColorToString(Item.Nickname);
+	if (bApplyNick)
+	{
+		RarityTemplate.ApplyColorToString(Item.Nickname);
+	}
 }
 
 static function FindAndMakeTechInstant(XComGameState NewGameState, XComGameState_Tech Tech)
@@ -389,6 +397,40 @@ static function bool UpdateSlotCount(StateObjectReference ItemRef, XComGameState
 	return true;
 }
 
+static function ApplyTLMTreatmentToItems()
+{
+	local X2ItemTemplateManager ItemMan;
+	local PatchItemData PatchItem;
+	local array<X2DataTemplate> DataTemplates;
+	local X2DataTemplate DataTemplate;
+	local X2ItemTemplate ItemTemplate;
+
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+
+	foreach class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems(PatchItem)
+	{
+		ItemMan.FindDataTemplateAllDifficulties(PatchItem.ItemTemplateName, DataTemplates);
+
+		foreach DataTemplates(DataTemplate)
+		{
+			ItemTemplate = X2ItemTemplate(DataTemplate);
+			if (ItemTemplate == none) continue;
+
+			ItemTemplate.OnAcquiredFn = OnItemAcquired_TLM;
+		}
+	}
+}
+
+static function AppendPatchedItems(out array<name> ItemTemplateNames)
+{
+	local PatchItemData PatchItem;
+
+	foreach class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems(PatchItem)
+	{
+		ItemTemplateNames.AddItem(PatchItem.ItemTemplateName);
+	}
+}
+
 // =============
 // DELEGATES
 // =============
@@ -414,4 +456,31 @@ static function string ModifyAmmoNick(array<X2WeaponUpgradeTemplate> AppliedUpgr
 static function string ModifyRefnNick(array<X2WeaponUpgradeTemplate> AppliedUpgrades, XComGameState_Item Item)
 {	
 	return Item.Nickname $class'X2DownloadableContentInfo_TeslaLootMod'.default.strPlus;
+}
+
+static function bool OnItemAcquired_TLM(XComGameState NewGameState, XComGameState_Item ItemState)
+{	
+	local X2RarityTemplate RarityTemplate;
+	local X2RarityTemplateManager RMan;
+	local bool bApplyNick;
+	local name RarityName;
+	local int Index;
+
+	RMan = class'X2RarityTemplateManager'.static.GetRarityTemplateManager();
+
+	// Get Rarity Template
+	Index = class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems.Find('ItemTemplateName', ItemState.GetMyTemplateName());
+	if (Index == INDEX_NONE) return false;
+
+	RarityName = class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems[Index].Rarity;
+	bApplyNick = class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems[Index].ApplyNick;
+
+	RarityTemplate = RMan.GetRarityTemplate(RarityName);
+	if (RarityTemplate == none) return false;
+
+	// Apply TLM treatment
+	ApplyUpgrades(ItemState, RarityTemplate, bApplyNick);
+	CreateTLMItemState(NewGameState, ItemState, RarityTemplate.DataName);
+
+	return true;
 }

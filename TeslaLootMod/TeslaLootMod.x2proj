@@ -12,6 +12,7 @@
   <ItemGroup>
     <Folder Include="Config\" />
     <Folder Include="Config\Base Item Decks" />
+    <Folder Include="Config\Item Patcher" />
     <Folder Include="Config\Upgrade Decks - Armor" />
     <Folder Include="Config\Upgrade Decks - Melee" />
     <Folder Include="Config\Upgrade Decks - Shield" />
@@ -25,6 +26,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config\Base Item Decks\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Item Patcher\XComTLM.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\Upgrade Decks - ABB\XComTLM.ini">
@@ -79,6 +83,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2DownloadableContentInfo_TeslaLootMod.uc" />
+    <Content Include="Src\TeslaLootMod\Classes\X2DownloadableContentInfo_TeslaLootMod_Last.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2Effect_TLMEffects.uc">
       <SubType>Content</SubType>
     </Content>
