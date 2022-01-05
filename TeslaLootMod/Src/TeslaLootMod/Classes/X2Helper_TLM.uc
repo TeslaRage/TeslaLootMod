@@ -2,19 +2,19 @@ class X2Helper_TLM extends Object config(TLM) abstract;
 
 static function bool IsModLoaded(name DLCName)
 {
-    local XComOnlineEventMgr    EventManager;
-    local int                   Index;
+	local XComOnlineEventMgr EventManager;
+	local int Index;
 
-    EventManager = `ONLINEEVENTMGR;
+	EventManager = `ONLINEEVENTMGR;
 
-    for(Index = EventManager.GetNumDLC() - 1; Index >= 0; Index--)  
-    {
-        if(EventManager.GetDLCNames(Index) == DLCName)  
-        {
-            return true;
-        }
-    }
-    return false;
+	for(Index = EventManager.GetNumDLC() - 1; Index >= 0; Index--)  
+	{
+		if(EventManager.GetDLCNames(Index) == DLCName)  
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 static function CallUIAlert_TLM(const out DynamicPropertySet PropertySet)
@@ -122,6 +122,7 @@ static function UpdateWeaponUpgrade()
 				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMCRITDAMAGE", TLMEffect.CritDamage < 0 ? TLMEffect.CritDamage * -1 : TLMEffect.CritDamage);
 				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMPIERCE", TLMEffect.Pierce < 0 ? TLMEffect.Pierce * -1 : TLMEffect.Pierce);
 				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMSHRED", TLMEffect.Shred < 0 ? TLMEffect.Shred * -1 : TLMEffect.Shred);
+				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMCRITMULT", TLMEffect.CritDamageMultiplier < 0 ? int(TLMEffect.CritDamageMultiplier * -100): int(TLMEffect.CritDamageMultiplier * 100));
 			}
 		}
 	}	
@@ -152,12 +153,14 @@ static function UpdateWeaponUpgrade()
 	}
 
 	// Setting up of upgrade icons and mutual exclusives
-	SetUpUpgradeIconsAndME('LegoDeck');
-	SetUpUpgradeIconsAndME('RefnDeck');
-	SetUpUpgradeIconsAndME('AmmoDeck');
+	SetUpUpgradeIconsAndME('LegoDeck', true);
+	SetUpUpgradeIconsAndME('RefnDeck', true);
+	SetUpUpgradeIconsAndME('AmmoDeck', true);
+	SetUpUpgradeIconsAndME('BaseGLDeck', false);
+	SetUpUpgradeIconsAndME('AmmoGLDeck', true);
 }
 
-static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName)
+static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMutualExclusives)
 {
 	local X2BaseWeaponDeckTemplateManager BWMan;
 	local X2UpgradeDeckTemplateManager UDMan;
@@ -210,7 +213,10 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName)
 			}
 			
 			// Sets up the mutual exclusive
-			WUTemplate.MutuallyExclusiveUpgrades = WUTemplateNames;			
+			if (SetMutualExclusives)
+			{
+				WUTemplate.MutuallyExclusiveUpgrades = WUTemplateNames;
+			}
 		}
 	}
 }
@@ -429,6 +435,31 @@ static function AppendPatchedItems(out array<name> ItemTemplateNames)
 	{
 		ItemTemplateNames.AddItem(PatchItem.ItemTemplateName);
 	}
+}
+
+// Heavily inspired by Proficiency Class Pack Air Burst Grenades ability
+static function AddAbilityBonusRadius()
+{
+	local X2AbilityTemplateManager AbilityTemplateMgr;
+	local array<X2AbilityTemplate> AbilityTemplateArray;
+	local X2AbilityTemplate AbilityTemplate;
+	local AbilityGivesGRadiusData AbilityBonusRadius;
+	local name AbilityName;
+
+	AbilityTemplateMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+
+	foreach class'X2Ability_TLM'.default.GrenadeLaunchAbilities(AbilityName)
+	{
+		AbilityTemplateMgr.FindAbilityTemplateAllDifficulties(AbilityName, AbilityTemplateArray);
+
+		foreach class'X2Ability_TLM'.default.AbilityGivesGRadius(AbilityBonusRadius)
+		{
+			foreach AbilityTemplateArray(AbilityTemplate)
+			{
+				X2AbilityMultiTarget_Radius(AbilityTemplate.AbilityMultiTargetStyle).AddAbilityBonusRadius(AbilityBonusRadius.AbilityName, AbilityBonusRadius.GrenadeRadiusBonus);
+			}
+		}
+	}	
 }
 
 // =============

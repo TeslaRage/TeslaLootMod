@@ -20,6 +20,7 @@ static event OnPostTemplatesCreated()
 {
 	class'X2Helper_TLM'.static.AddLootTables();	
 	class'X2Helper_TLM'.static.SetDelegatesToUpgradeDecks();
+	class'X2Helper_TLM'.static.AddAbilityBonusRadius();
 }
 
 static event OnLoadedSavedGameToStrategy()
@@ -207,6 +208,54 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'BonusDamageAlien':
 		OutString = string(class'X2Ability_TLM'.default.BonusDamageAlien);
 		return true;
+	case 'GrenadeRangeT1':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRange.Find('AbilityName', 'TLMAbility_GrenadeRangeT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRange[i].GrenadeRangeBonus);
+			return true;
+		}
+		break;
+	case 'GrenadeRangeT2':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRange.Find('AbilityName', 'TLMAbility_GrenadeRangeT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRange[i].GrenadeRangeBonus);
+			return true;
+		}
+		break;
+	case 'GrenadeRangeT3':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRange.Find('AbilityName', 'TLMAbility_GrenadeRangeT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRange[i].GrenadeRangeBonus);
+			return true;
+		}
+		break;
+	case 'GrenadeRadiusT1':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			return true;
+		}
+		break;
+	case 'GrenadeRadiusT2':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			return true;
+		}
+		break;
+	case 'GrenadeRadiusT3':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			return true;
+		}
+		break;
 	}
 	return false;
 }

@@ -2,6 +2,9 @@ class X2Ability_TLM extends X2Ability config(TLM);
 
 var config array<AmmoConversionData> ConvertAmmo;
 var config array<RefinementUpgradeAbilityData> RefinementUpgradeAbilities;
+var config array<AbilityGivesGRangeData> AbilityGivesGRange;
+var config array<AbilityGivesGRadiusData> AbilityGivesGRadius;
+var config array<name> GrenadeLaunchAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -48,6 +51,12 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TLMFaceoff());
 	Templates.AddItem(TLMAdventSoldierKiller());
 	Templates.AddItem(TLMAlienKiller());
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRangeT1', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRangeT2', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRangeT3', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRadiusT1', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRadiusT2', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRadiusT3', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
 
 	return Templates;
 }
@@ -166,6 +175,7 @@ static function X2DataTemplate RefinementAbility(RefinementUpgradeAbilityData Re
 	TLMEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, false,, Template.AbilitySourceName);
 	TLMEffect.FlatBonusDamage = RefinementUpgrade.Damage;
 	TLMEffect.CritDamage = RefinementUpgrade.Crit;
+	TLMEffect.CritDamageMultiplier = RefinementUpgrade.CritDamageMultiplier;
 	TLMEffect.Pierce = RefinementUpgrade.Pierce;
 	TLMEffect.Shred = RefinementUpgrade.Shred;
 	TLMEffect.FriendlyName = Template.LocFriendlyName;
@@ -626,6 +636,15 @@ static function X2AbilityTemplate TLMAlienKiller()
 	return Template;
 }
 
+static function X2AbilityTemplate TLMPassiveAbility(name AbilityName, string AbilityIcon)
+{
+	local X2AbilityTemplate Template;
+
+	Template = CreatePassiveAbility(AbilityName, AbilityIcon, '', false);
+
+	return Template;
+}
+
 // HELPERS
 static function array<AmmoConversionData> MakeDistinct(array<AmmoConversionData> ConfigAmmoConversion)
 {
@@ -641,4 +660,32 @@ static function array<AmmoConversionData> MakeDistinct(array<AmmoConversionData>
 	}
 
 	return DistinctAmmoConversion;
+}
+
+static function X2AbilityTemplate CreatePassiveAbility(name AbilityName, optional string IconString, optional name IconEffectName = AbilityName, optional bool bDisplayIcon = true)
+{	
+	local X2AbilityTemplate Template;
+	local X2Effect_Persistent IconEffect;	
+
+	`CREATE_X2ABILITY_TEMPLATE (Template, AbilityName);
+	Template.IconImage = IconString;
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.bCrossClassEligible = false;
+	Template.bUniqueSource = true;
+	Template.bIsPassive = true;
+
+	// Dummy effect to show a passive icon in the tactical UI for the SourceUnit
+	IconEffect = new class'X2Effect_Persistent';
+	IconEffect.BuildPersistentEffect(1, true, false);
+	IconEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, bDisplayIcon,, Template.AbilitySourceName);
+	IconEffect.EffectName = IconEffectName;
+	Template.AddTargetEffect(IconEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	return Template;
 }

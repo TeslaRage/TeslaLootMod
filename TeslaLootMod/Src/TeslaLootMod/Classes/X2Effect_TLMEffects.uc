@@ -7,6 +7,7 @@ var int Pierce;
 var int Shred;
 var int CritChance;
 var int CritDamage;
+var float CritDamageMultiplier;
 var int BonusDamageAdventSoldier;
 var int BonusDamageAlien;
 
@@ -33,7 +34,12 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 
 		if (AppliedData.AbilityResultContext.HitResult == eHit_Crit && CritDamage != 0)
 		{		
-			ExtraDamage += CritDamage;		
+			ExtraDamage += CritDamage;
+		}
+
+		if (AppliedData.AbilityResultContext.HitResult == eHit_Crit && CritDamageMultiplier > 0)
+		{			
+			ExtraDamage += (CurrentDamage * CritDamageMultiplier);
 		}
 
 		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && BonusDamageAdventSoldier != 0)
@@ -49,7 +55,7 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 		}
 	}
 
-	return int(ExtraDamage);
+	return round(ExtraDamage);
 }
 
 function int GetExtraArmorPiercing(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData)

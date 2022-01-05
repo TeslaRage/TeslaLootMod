@@ -42,6 +42,7 @@ struct RefinementUpgradeAbilityData
 	var int Crit;
 	var int Pierce;
 	var int Shred;
+	var float CritDamageMultiplier;
 };
 
 struct AbilityUpgradeData
@@ -51,6 +52,7 @@ struct AbilityUpgradeData
 	var string strImage;
 	var int ClipSizeBonus;
 	var int Tier;
+	var array<name> MutuallyExclusiveUpgrades;
 };
 
 struct BaseItemData{
@@ -88,4 +90,16 @@ struct PatchItemData
 	structdefaultproperties{
 		ApplyNick = true;
 	}
+};
+
+struct AbilityGivesGRangeData
+{
+	var name AbilityName;
+	var int GrenadeRangeBonus;
+};
+
+struct AbilityGivesGRadiusData
+{
+	var name AbilityName;
+	var float GrenadeRadiusBonus;
 };

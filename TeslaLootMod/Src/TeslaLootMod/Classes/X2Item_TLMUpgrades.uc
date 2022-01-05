@@ -80,6 +80,12 @@ static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUp
 	Template.Tier = AbilityWeaponUpgrade.Tier;
 
 	// Mutual exclusive setup is done in OPTC group by weapon upgrade deck
+	// or if this list from config is not blank
+	if (AbilityWeaponUpgrade.MutuallyExclusiveUpgrades.Length != 0)
+	{
+		Template.MutuallyExclusiveUpgrades = AbilityWeaponUpgrade.MutuallyExclusiveUpgrades;
+	}
+
 	// Upgrade icons are set up in OPTC
 
 	return Template;
