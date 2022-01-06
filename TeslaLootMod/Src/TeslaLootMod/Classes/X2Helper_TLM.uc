@@ -158,6 +158,9 @@ static function UpdateWeaponUpgrade()
 	SetUpUpgradeIconsAndME('AmmoDeck', true);
 	SetUpUpgradeIconsAndME('BaseGLDeck', false);
 	SetUpUpgradeIconsAndME('AmmoGLDeck', true);
+	SetUpUpgradeIconsAndME('BaseDeckT1', false);
+	SetUpUpgradeIconsAndME('BaseDeckT2', false);
+	SetUpUpgradeIconsAndME('BaseDeckT3', false);
 }
 
 static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMutualExclusives)
@@ -207,9 +210,12 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 			}
 
 			// Sets up the attachment icon and items that its applicable to
-			foreach ItemTemplateNames(ItemTemplateName)
+			if (WUTemplate.UpgradeAttachments.Length <= 0)
 			{
-				WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, IconString);
+				foreach ItemTemplateNames(ItemTemplateName)
+				{
+					WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, IconString);
+				}
 			}
 			
 			// Sets up the mutual exclusive
@@ -460,6 +466,60 @@ static function AddAbilityBonusRadius()
 			}
 		}
 	}	
+}
+
+static function PatchStandardShot()
+{
+	local X2AbilityTemplateManager AbilityMgr;
+	local X2AbilityTemplate AbilityTemplate;
+	local X2Effect_ApplyWeaponDamage RuptureEffect;
+	local X2Condition_AbilityProperty OwnerAbilityCondition;
+	local RuptureAbilitiesData RuptureAbility;
+
+	AbilityMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+	AbilityTemplate = AbilityMgr.FindAbilityTemplate('StandardShot');
+	if (AbilityTemplate == none) return;
+
+	foreach class'X2Ability_TLM'.default.RuptureAbilities(RuptureAbility)
+	{
+		RuptureEffect = new class'X2Effect_ApplyWeaponDamage';
+		RuptureEffect.bIgnoreBaseDamage = true;
+		RuptureEffect.EffectDamageValue.Rupture = RuptureAbility.RuptureValue;
+		RuptureEffect.ApplyChance = RuptureAbility.ApplyChance;
+
+		OwnerAbilityCondition = new class'X2Condition_AbilityProperty';
+		OwnerAbilityCondition.OwnerHasSoldierAbilities.AddItem(RuptureAbility.AbilityName);
+		RuptureEffect.TargetConditions.AddItem(OwnerAbilityCondition);
+		AbilityTemplate.AddTargetEffect(RuptureEffect);
+	}
+}
+
+static function PatchWeaponUpgrades()
+{
+	local X2ItemTemplateManager ItemTemplateMan;
+	local array<X2DataTemplate> DataTemplates;
+	local X2DataTemplate DataTemplate;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local PatchWeaponUpgradesData PatchWeaponUpgrade;
+	local name WUTemplateName;
+
+	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	
+	foreach class'X2Item_TLMUpgrades'.default.PatchWeaponUpgrades(PatchWeaponUpgrade)
+	{
+		ItemTemplateMan.FindDataTemplateAllDifficulties(PatchWeaponUpgrade.UpgradeName, DataTemplates);
+
+		foreach DataTemplates(DataTemplate)
+		{
+			WUTemplate = X2WeaponUpgradeTemplate(DataTemplate);
+			if (WUTemplate == none) continue;
+
+			foreach PatchWeaponUpgrade.MutuallyExclusiveUpgrades(WUTemplateName)
+			{
+				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplateName);
+			}
+		}
+	}
 }
 
 // =============

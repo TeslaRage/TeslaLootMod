@@ -103,3 +103,16 @@ struct AbilityGivesGRadiusData
 	var name AbilityName;
 	var float GrenadeRadiusBonus;
 };
+
+struct RuptureAbilitiesData
+{
+	var name AbilityName;
+	var int RuptureValue;
+	var int ApplyChance;
+};
+
+struct PatchWeaponUpgradesData
+{
+	var name UpgradeName;
+	var array<name> MutuallyExclusiveUpgrades;
+};

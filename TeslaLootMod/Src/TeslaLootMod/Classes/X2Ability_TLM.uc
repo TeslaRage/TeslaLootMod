@@ -5,6 +5,7 @@ var config array<RefinementUpgradeAbilityData> RefinementUpgradeAbilities;
 var config array<AbilityGivesGRangeData> AbilityGivesGRange;
 var config array<AbilityGivesGRadiusData> AbilityGivesGRadius;
 var config array<name> GrenadeLaunchAbilities;
+var config array<RuptureAbilitiesData> RuptureAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -57,6 +58,9 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRadiusT1', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
 	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRadiusT2', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
 	Templates.AddItem(TLMPassiveAbility('TLMAbility_GrenadeRadiusT3', "img:///UILibrary_PerkIcons.UIPerk_grenade_launcher"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_RuptureT1', "img:///UILibrary_PerkIcons.UIPerk_bulletshred"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_RuptureT2', "img:///UILibrary_PerkIcons.UIPerk_bulletshred"));
+	Templates.AddItem(TLMPassiveAbility('TLMAbility_RuptureT3', "img:///UILibrary_PerkIcons.UIPerk_bulletshred"));
 
 	return Templates;
 }

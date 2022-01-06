@@ -21,6 +21,8 @@ static event OnPostTemplatesCreated()
 	class'X2Helper_TLM'.static.AddLootTables();	
 	class'X2Helper_TLM'.static.SetDelegatesToUpgradeDecks();
 	class'X2Helper_TLM'.static.AddAbilityBonusRadius();
+	class'X2Helper_TLM'.static.PatchStandardShot();
+	class'X2Helper_TLM'.static.PatchWeaponUpgrades();
 }
 
 static event OnLoadedSavedGameToStrategy()
@@ -253,6 +255,54 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		if (i != INDEX_NONE)
 		{
 			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			return true;
+		}
+		break;
+	case 'RuptureChanceT1':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].ApplyChance);
+			return true;
+		}
+		break;
+	case 'RuptureDamageT1':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].RuptureValue);
+			return true;
+		}
+		break;
+	case 'RuptureChanceT2':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].ApplyChance);
+			return true;
+		}
+		break;
+	case 'RuptureDamageT2':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].RuptureValue);
+			return true;
+		}
+		break;
+	case 'RuptureChanceT3':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].ApplyChance);
+			return true;
+		}
+		break;
+	case 'RuptureDamageT3':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].RuptureValue);
 			return true;
 		}
 		break;

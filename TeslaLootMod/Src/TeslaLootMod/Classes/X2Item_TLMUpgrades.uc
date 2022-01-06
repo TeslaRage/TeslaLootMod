@@ -1,6 +1,7 @@
 class X2Item_TLMUpgrades extends X2Item_DefaultUpgrades config (TLM);
 
 var config array<AbilityUpgradeData> AbilityWeaponUpgrades;
+var config array<PatchWeaponUpgradesData> PatchWeaponUpgrades;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
