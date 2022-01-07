@@ -43,6 +43,8 @@ struct RefinementUpgradeAbilityData
 	var int Pierce;
 	var int Shred;
 	var float CritDamageMultiplier;
+	var int MobilityDivisor;
+	var int DamagePerMobilityDivisor;
 };
 
 struct AbilityUpgradeData

@@ -306,6 +306,54 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		}
 		break;
+	case 'CritTrackerDmgT1':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].DamagePerMobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerDmgT2':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].DamagePerMobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerDmgT3':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].DamagePerMobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerMobT1':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].MobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerMobT2':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].MobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerMobT3':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].MobilityDivisor);
+			return true;
+		}
+		break;
 	}
 	return false;
 }

@@ -10,6 +10,8 @@ var int CritDamage;
 var float CritDamageMultiplier;
 var int BonusDamageAdventSoldier;
 var int BonusDamageAlien;
+var int MobilityDivisor;
+var int DamagePerMobilityDivisor;
 
 function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData, const int CurrentDamage, optional XComGameState NewGameState)
 {
@@ -52,6 +54,11 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 		{
 			if (Unit.GetMyTemplate().bIsAlien && !Unit.GetMyTemplate().bIsRobotic)
 				ExtraDamage += BonusDamageAlien;
+		}
+
+		if (AppliedData.AbilityResultContext.HitResult == eHit_Crit && MobilityDivisor > 0)
+		{			
+			ExtraDamage += ((Unit.GetCurrentStat(eStat_Mobility) / MobilityDivisor) * DamagePerMobilityDivisor);
 		}
 	}
 

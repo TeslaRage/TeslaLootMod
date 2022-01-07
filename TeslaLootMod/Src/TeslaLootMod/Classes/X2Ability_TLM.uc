@@ -181,7 +181,9 @@ static function X2DataTemplate RefinementAbility(RefinementUpgradeAbilityData Re
 	TLMEffect.CritDamage = RefinementUpgrade.Crit;
 	TLMEffect.CritDamageMultiplier = RefinementUpgrade.CritDamageMultiplier;
 	TLMEffect.Pierce = RefinementUpgrade.Pierce;
-	TLMEffect.Shred = RefinementUpgrade.Shred;
+	TLMEffect.Shred = RefinementUpgrade.Shred;	
+	TLMEffect.MobilityDivisor = RefinementUpgrade.MobilityDivisor;
+	TLMEffect.DamagePerMobilityDivisor = RefinementUpgrade.DamagePerMobilityDivisor;
 	TLMEffect.FriendlyName = Template.LocFriendlyName;
 	Template.AddTargetEffect(TLMEffect);	
 
