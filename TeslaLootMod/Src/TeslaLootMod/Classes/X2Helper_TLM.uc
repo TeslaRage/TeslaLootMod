@@ -499,7 +499,7 @@ static function PatchWeaponUpgrades()
 	local X2ItemTemplateManager ItemTemplateMan;
 	local array<X2DataTemplate> DataTemplates;
 	local X2DataTemplate DataTemplate;
-	local X2WeaponUpgradeTemplate WUTemplate;
+	local X2WeaponUpgradeTemplate WUTemplate, DonorTemplate;
 	local PatchWeaponUpgradesData PatchWeaponUpgrade;
 	local name WUTemplateName;
 
@@ -517,6 +517,15 @@ static function PatchWeaponUpgrades()
 			foreach PatchWeaponUpgrade.MutuallyExclusiveUpgrades(WUTemplateName)
 			{
 				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplateName);
+			}
+
+			if (PatchWeaponUpgrade.AttachmentsDonorTemplate != '')
+			{
+				DonorTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(PatchWeaponUpgrade.AttachmentsDonorTemplate));
+				if (DonorTemplate != none)
+				{
+					WUTemplate.UpgradeAttachments = DonorTemplate.UpgradeAttachments;
+				}
 			}
 		}
 	}

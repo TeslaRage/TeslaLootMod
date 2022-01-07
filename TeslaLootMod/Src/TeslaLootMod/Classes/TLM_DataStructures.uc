@@ -117,4 +117,5 @@ struct PatchWeaponUpgradesData
 {
 	var name UpgradeName;
 	var array<name> MutuallyExclusiveUpgrades;
+	var name AttachmentsDonorTemplate;
 };
