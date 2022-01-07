@@ -6,6 +6,7 @@ var config array<AbilityGivesGRangeData> AbilityGivesGRange;
 var config array<AbilityGivesGRadiusData> AbilityGivesGRadius;
 var config array<name> GrenadeLaunchAbilities;
 var config array<RuptureAbilitiesData> RuptureAbilities;
+var config array<SprintReloadAbilitiesData> SprintReloadAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -24,7 +25,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 	local AmmoConversionData AmmoConversion;
 	local array<AmmoConversionData> DistinctConvertAmmo;
-	local RefinementUpgradeAbilityData RefinementUpgradeAbility;	
+	local RefinementUpgradeAbilityData RefinementUpgradeAbility;
+	local SprintReloadAbilitiesData SprintReloadAbility;
 	local string AbilityName;
 
 	// Abilities for ammo upgrades are taken from CLAP mod
@@ -61,6 +63,11 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TLMPassiveAbility('TLMAbility_RuptureT1', "img:///UILibrary_PerkIcons.UIPerk_bulletshred"));
 	Templates.AddItem(TLMPassiveAbility('TLMAbility_RuptureT2', "img:///UILibrary_PerkIcons.UIPerk_bulletshred"));
 	Templates.AddItem(TLMPassiveAbility('TLMAbility_RuptureT3', "img:///UILibrary_PerkIcons.UIPerk_bulletshred"));
+
+	foreach default.SprintReloadAbilities(SprintReloadAbility)
+	{
+		Templates.AddItem(TLMSprintReload(SprintReloadAbility.AbilityName, SprintReloadAbility.Charges));
+	}
 
 	return Templates;
 }
@@ -647,6 +654,41 @@ static function X2AbilityTemplate TLMPassiveAbility(name AbilityName, string Abi
 	local X2AbilityTemplate Template;
 
 	Template = CreatePassiveAbility(AbilityName, AbilityIcon, '', false);
+
+	return Template;
+}
+
+static function X2AbilityTemplate TLMSprintReload(name AbilityName, float SprintReloadCharge)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_SetUnitValue SetInitialValue;
+	local X2Effect_TLMAbilityListener AbilityListener;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, AbilityName);
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
+	Template.AbilitySourceName = 'eAbilitySource_Item';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.bCrossClassEligible = false;
+
+	SetInitialValue = new class'X2Effect_SetUnitValue';
+	SetInitialValue.UnitName = 'TRSprintReloadCharge';
+	SetInitialValue.NewValueToSet = SprintReloadCharge;
+	SetInitialValue.CleanupType = eCleanup_BeginTactical;
+	Template.AddTargetEffect(SetInitialValue);
+	
+	AbilityListener = new class'X2Effect_TLMAbilityListener';
+	AbilityListener.BuildPersistentEffect(1, true, false);
+	AbilityListener.EffectName = 'TRSprintReloadEffect';
+	AbilityListener.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, false,, Template.AbilitySourceName);
+	AbilityListener.DuplicateResponse = eDupe_Ignore;
+	Template.AddTargetEffect(AbilityListener);	
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 
 	return Template;
 }

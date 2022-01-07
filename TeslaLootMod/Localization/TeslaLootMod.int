@@ -292,3 +292,7 @@ strPlus = "+"
 +RandomWeaponNickNames[64] = "Flashstriker"
 +RandomWeaponNickNames[65] = "SOPHIA"
 +RandomWeaponNickNames[66] = "Power Girl"
+
+[X2Effect_TLMAbilityListener]
+strSprintReload = "Sprint Reload"
+strChargesLeft = "charge(s) left"

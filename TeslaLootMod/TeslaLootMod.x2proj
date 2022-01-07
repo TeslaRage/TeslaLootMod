@@ -82,8 +82,14 @@
     <Content Include="Src\TeslaLootMod\Classes\X2BaseWeaponDeckTemplateManager.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2Condition_TLMAbilitySourceWeapon.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2DownloadableContentInfo_TeslaLootMod.uc" />
     <Content Include="Src\TeslaLootMod\Classes\X2DownloadableContentInfo_TeslaLootMod_Last.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\X2Effect_TLMAbilityListener.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2Effect_TLMEffects.uc">

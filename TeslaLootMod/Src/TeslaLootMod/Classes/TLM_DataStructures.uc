@@ -119,3 +119,9 @@ struct PatchWeaponUpgradesData
 	var array<name> MutuallyExclusiveUpgrades;
 	var name AttachmentsDonorTemplate;
 };
+
+struct SprintReloadAbilitiesData
+{
+	var name AbilityName;
+	var int Charges;
+};

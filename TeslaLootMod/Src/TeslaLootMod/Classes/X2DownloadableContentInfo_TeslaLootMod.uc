@@ -354,7 +354,31 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		}
 		break;
-	}
+	case 'SReloadChargeT1':
+		i = class'X2Ability_TLM'.default.SprintReloadAbilities.Find('AbilityName', 'TLMAbility_ReloadT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.SprintReloadAbilities[i].Charges);
+			return true;
+		}
+		break;
+	case 'SReloadChargeT2':
+		i = class'X2Ability_TLM'.default.SprintReloadAbilities.Find('AbilityName', 'TLMAbility_ReloadT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.SprintReloadAbilities[i].Charges);
+			return true;
+		}
+		break;
+	case 'SReloadChargeT3':
+		i = class'X2Ability_TLM'.default.SprintReloadAbilities.Find('AbilityName', 'TLMAbility_ReloadT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.SprintReloadAbilities[i].Charges);
+			return true;
+		}
+		break;
+	}	
 	return false;
 }
 
