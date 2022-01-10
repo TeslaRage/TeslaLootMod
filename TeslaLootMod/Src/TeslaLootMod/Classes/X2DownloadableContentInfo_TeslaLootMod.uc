@@ -378,6 +378,54 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		}
 		break;
+	case 'SRPerEnemyT1':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].AimBonusPerVisibleEnemy);
+			return true;
+		}
+		break;
+	case 'SRMaxAimT1':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].MaxAimBonus);
+			return true;
+		}
+		break;
+	case 'SRPerEnemyT2':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].AimBonusPerVisibleEnemy);
+			return true;
+		}
+		break;
+	case 'SRMaxAimT2':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].MaxAimBonus);
+			return true;
+		}
+		break;
+	case 'SRPerEnemyT3':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].AimBonusPerVisibleEnemy);
+			return true;
+		}
+		break;
+	case 'SRMaxAimT3':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].MaxAimBonus);
+			return true;
+		}
+		break;
 	}	
 	return false;
 }

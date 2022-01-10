@@ -125,3 +125,10 @@ struct SprintReloadAbilitiesData
 	var name AbilityName;
 	var int Charges;
 };
+
+struct ReflexStockAbilitiesData
+{
+	var name AbilityName;
+	var int AimBonusPerVisibleEnemy;
+	var int MaxAimBonus;
+};

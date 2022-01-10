@@ -1,6 +1,7 @@
 // This class is meant to house basic weapon altering effects
 class X2Effect_TLMEffects extends X2Effect_Persistent;
 
+// Individual properties
 var float DamageMultiplier;
 var int FlatBonusDamage;
 var int Pierce;
@@ -10,8 +11,15 @@ var int CritDamage;
 var float CritDamageMultiplier;
 var int BonusDamageAdventSoldier;
 var int BonusDamageAlien;
+
+// These should be used together
 var int MobilityDivisor;
 var int DamagePerMobilityDivisor;
+
+// These should be used together
+var int AimBonusPerVisibleEnemy;
+var int MaxAimBonus;
+var string FriendlyNameAimBonusPerVisibleEnemy;
 
 function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData, const int CurrentDamage, optional XComGameState NewGameState)
 {
@@ -94,6 +102,7 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 {
 	local ShotModifierInfo ModInfo;	
 	local XComGameState_Item SourceWeapon;
+	local int NumOfEnemies, AimBonus;
 
 	SourceWeapon = AbilityState.GetSourceWeapon();
 	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
@@ -104,6 +113,21 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 			ModInfo.Reason = FriendlyName;
 			ModInfo.Value = CritChance;
 			ShotModifiers.AddItem(ModInfo);
+		}
+
+		if (AimBonusPerVisibleEnemy != 0)
+		{			
+			NumOfEnemies = Attacker.GetNumVisibleEnemyUnits(true, false, false, -1, false, false, false);
+			if (NumOfEnemies > 0)
+			{
+				AimBonus = NumOfEnemies * AimBonusPerVisibleEnemy;
+				if (AimBonus > MaxAimBonus) AimBonus = MaxAimBonus;
+
+				ModInfo.ModType = eHit_Success;
+				ModInfo.Reason = FriendlyNameAimBonusPerVisibleEnemy == "" ? FriendlyName : FriendlyNameAimBonusPerVisibleEnemy;
+				ModInfo.Value = AimBonus;
+				ShotModifiers.AddItem(ModInfo);
+			}
 		}
 	}
 }

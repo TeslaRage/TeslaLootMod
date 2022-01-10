@@ -296,3 +296,6 @@ strPlus = "+"
 [X2Effect_TLMAbilityListener]
 strSprintReload = "Sprint Reload"
 strChargesLeft = "charge(s) left"
+
+[X2Ability_TLM]
+strAimBonusPerVisibleEnemy = "Reflex Stock"

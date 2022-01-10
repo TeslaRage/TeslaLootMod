@@ -7,6 +7,7 @@ var config array<AbilityGivesGRadiusData> AbilityGivesGRadius;
 var config array<name> GrenadeLaunchAbilities;
 var config array<RuptureAbilitiesData> RuptureAbilities;
 var config array<SprintReloadAbilitiesData> SprintReloadAbilities;
+var config array<ReflexStockAbilitiesData> ReflexStockAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -20,6 +21,8 @@ var config int FaceoffCooldown;
 var config int BonusDamageAdventSoldier;
 var config int BonusDamageAlien;
 
+var localized string strAimBonusPerVisibleEnemy;
+
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
@@ -27,6 +30,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<AmmoConversionData> DistinctConvertAmmo;
 	local RefinementUpgradeAbilityData RefinementUpgradeAbility;
 	local SprintReloadAbilitiesData SprintReloadAbility;
+	local ReflexStockAbilitiesData ReflexStockAbility;
 	local string AbilityName;
 
 	// Abilities for ammo upgrades are taken from CLAP mod
@@ -67,6 +71,11 @@ static function array<X2DataTemplate> CreateTemplates()
 	foreach default.SprintReloadAbilities(SprintReloadAbility)
 	{
 		Templates.AddItem(TLMSprintReload(SprintReloadAbility.AbilityName, SprintReloadAbility.Charges));
+	}
+
+	foreach default.ReflexStockAbilities(ReflexStockAbility)
+	{
+		Templates.AddItem(TLMReflexStock(ReflexStockAbility));
 	}
 
 	return Templates;
@@ -687,6 +696,33 @@ static function X2AbilityTemplate TLMSprintReload(name AbilityName, float Sprint
 	AbilityListener.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, false,, Template.AbilitySourceName);
 	AbilityListener.DuplicateResponse = eDupe_Ignore;
 	Template.AddTargetEffect(AbilityListener);	
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+
+	return Template;
+}
+
+static function X2AbilityTemplate TLMReflexStock (ReflexStockAbilitiesData ReflexStockAbility)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_TLMEffects ReflexStockEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, ReflexStockAbility.AbilityName);
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
+	Template.AbilitySourceName = 'eAbilitySource_Item';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.bCrossClassEligible = false;
+
+	ReflexStockEffect = new class'X2Effect_TLMEffects';
+	ReflexStockEffect.AimBonusPerVisibleEnemy = ReflexStockAbility.AimBonusPerVisibleEnemy;
+	ReflexStockEffect.MaxAimBonus = ReflexStockAbility.MaxAimBonus;
+	ReflexStockEffect.FriendlyNameAimBonusPerVisibleEnemy = default.strAimBonusPerVisibleEnemy;
+	Template.AddTargetEffect(ReflexStockEffect);
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 
