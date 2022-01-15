@@ -132,3 +132,10 @@ struct ReflexStockAbilitiesData
 	var int AimBonusPerVisibleEnemy;
 	var int MaxAimBonus;
 };
+
+struct FocusScopeAbilitiesData
+{
+	var name AbilityName;
+	var int SingleOutAimBonus;
+	var int SingleOutCritChanceBonus;
+};

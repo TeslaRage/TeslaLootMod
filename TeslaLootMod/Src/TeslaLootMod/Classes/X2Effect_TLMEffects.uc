@@ -21,6 +21,11 @@ var int AimBonusPerVisibleEnemy;
 var int MaxAimBonus;
 var string FriendlyNameAimBonusPerVisibleEnemy;
 
+// These should be used together
+var int SingleOutAimBonus;
+var int SingleOutCritChanceBonus;
+var string FriendlyNameSingleOut;
+
 function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData, const int CurrentDamage, optional XComGameState NewGameState)
 {
 	local float ExtraDamage;
@@ -126,6 +131,23 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 				ModInfo.ModType = eHit_Success;
 				ModInfo.Reason = FriendlyNameAimBonusPerVisibleEnemy == "" ? FriendlyName : FriendlyNameAimBonusPerVisibleEnemy;
 				ModInfo.Value = AimBonus;
+				ShotModifiers.AddItem(ModInfo);
+			}
+		}
+
+		if (SingleOutAimBonus != 0)
+		{
+			NumOfEnemies = Attacker.GetNumVisibleEnemyUnits(true, false, false, -1, false, false, false);
+			if (NumOfEnemies == 1)
+			{
+				ModInfo.ModType = eHit_Success;
+				ModInfo.Reason = FriendlyNameSingleOut == "" ? FriendlyName : FriendlyNameSingleOut;
+				ModInfo.Value = SingleOutAimBonus;
+				ShotModifiers.AddItem(ModInfo);
+
+				ModInfo.ModType = eHit_Crit;
+				ModInfo.Reason = FriendlyNameSingleOut == "" ? FriendlyName : FriendlyNameSingleOut;
+				ModInfo.Value = SingleOutCritChanceBonus;
 				ShotModifiers.AddItem(ModInfo);
 			}
 		}

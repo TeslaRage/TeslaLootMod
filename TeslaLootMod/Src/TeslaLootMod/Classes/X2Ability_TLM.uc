@@ -8,6 +8,7 @@ var config array<name> GrenadeLaunchAbilities;
 var config array<RuptureAbilitiesData> RuptureAbilities;
 var config array<SprintReloadAbilitiesData> SprintReloadAbilities;
 var config array<ReflexStockAbilitiesData> ReflexStockAbilities;
+var config array<FocusScopeAbilitiesData> FocusScopeAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -22,6 +23,7 @@ var config int BonusDamageAdventSoldier;
 var config int BonusDamageAlien;
 
 var localized string strAimBonusPerVisibleEnemy;
+var localized string strFriendlyNameSingleOut;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -31,6 +33,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local RefinementUpgradeAbilityData RefinementUpgradeAbility;
 	local SprintReloadAbilitiesData SprintReloadAbility;
 	local ReflexStockAbilitiesData ReflexStockAbility;
+	local FocusScopeAbilitiesData FocusScopeAbility;
 	local string AbilityName;
 
 	// Abilities for ammo upgrades are taken from CLAP mod
@@ -76,6 +79,11 @@ static function array<X2DataTemplate> CreateTemplates()
 	foreach default.ReflexStockAbilities(ReflexStockAbility)
 	{
 		Templates.AddItem(TLMReflexStock(ReflexStockAbility));
+	}
+
+	foreach default.FocusScopeAbilities(FocusScopeAbility)
+	{
+		Templates.AddItem(TLMFocusScope(FocusScopeAbility));
 	}
 
 	return Templates;
@@ -723,6 +731,33 @@ static function X2AbilityTemplate TLMReflexStock (ReflexStockAbilitiesData Refle
 	ReflexStockEffect.MaxAimBonus = ReflexStockAbility.MaxAimBonus;
 	ReflexStockEffect.FriendlyNameAimBonusPerVisibleEnemy = default.strAimBonusPerVisibleEnemy;
 	Template.AddTargetEffect(ReflexStockEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+
+	return Template;
+}
+
+static function X2AbilityTemplate TLMFocusScope (FocusScopeAbilitiesData FocusScopeAbility)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_TLMEffects FocusScopeEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, FocusScopeAbility.AbilityName);
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
+	Template.AbilitySourceName = 'eAbilitySource_Item';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.bCrossClassEligible = false;
+
+	FocusScopeEffect = new class'X2Effect_TLMEffects';
+	FocusScopeEffect.SingleOutAimBonus = FocusScopeAbility.SingleOutAimBonus;
+	FocusScopeEffect.SingleOutCritChanceBonus = FocusScopeAbility.SingleOutCritChanceBonus;
+	FocusScopeEffect.FriendlyNameSingleOut = default.strFriendlyNameSingleOut;
+	Template.AddTargetEffect(FocusScopeEffect);
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 

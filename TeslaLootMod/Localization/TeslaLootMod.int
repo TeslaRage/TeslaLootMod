@@ -299,3 +299,4 @@ strChargesLeft = "charge(s) left"
 
 [X2Ability_TLM]
 strAimBonusPerVisibleEnemy = "Reflex Stock"
+strFriendlyNameSingleOut = "Focus Scope"

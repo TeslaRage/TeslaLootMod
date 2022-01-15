@@ -426,6 +426,54 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		}
 		break;
+	case 'FSAimT1':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutAimBonus);
+			return true;
+		}
+		break;
+	case 'FSCritT1':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutCritChanceBonus);
+			return true;
+		}
+		break;
+	case 'FSAimT2':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutAimBonus);
+			return true;
+		}
+		break;
+	case 'FSCritT2':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutCritChanceBonus);
+			return true;
+		}
+		break;
+	case 'FSAimT3':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutAimBonus);
+			return true;
+		}
+		break;
+	case 'FSCritT3':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutCritChanceBonus);
+			return true;
+		}
+		break;
 	}	
 	return false;
 }
