@@ -11,6 +11,8 @@ var int CritDamage;
 var float CritDamageMultiplier;
 var int BonusDamageAdventSoldier;
 var int BonusDamageAlien;
+var int FullAmmoDamageModifier;
+var int NotFullAmmoDamageModifier;
 
 // These should be used together
 var int MobilityDivisor;
@@ -72,6 +74,22 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 		if (AppliedData.AbilityResultContext.HitResult == eHit_Crit && MobilityDivisor > 0)
 		{			
 			ExtraDamage += ((Unit.GetCurrentStat(eStat_Mobility) / MobilityDivisor) * DamagePerMobilityDivisor);
+		}
+
+		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && FullAmmoDamageModifier != 0)
+		{
+			if (SourceWeapon.Ammo == SourceWeapon.GetClipSize())
+			{
+				ExtraDamage += FullAmmoDamageModifier;
+			}			
+		}
+
+		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && NotFullAmmoDamageModifier != 0)
+		{
+			if (SourceWeapon.Ammo < SourceWeapon.GetClipSize())
+			{
+				ExtraDamage += NotFullAmmoDamageModifier;
+			}
 		}
 	}
 

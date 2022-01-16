@@ -9,6 +9,7 @@ var config array<RuptureAbilitiesData> RuptureAbilities;
 var config array<SprintReloadAbilitiesData> SprintReloadAbilities;
 var config array<ReflexStockAbilitiesData> ReflexStockAbilities;
 var config array<FocusScopeAbilitiesData> FocusScopeAbilities;
+var config array<FrontLoadAbilitiesData> FrontLoadAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -34,6 +35,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local SprintReloadAbilitiesData SprintReloadAbility;
 	local ReflexStockAbilitiesData ReflexStockAbility;
 	local FocusScopeAbilitiesData FocusScopeAbility;
+	local FrontLoadAbilitiesData FrontLoadAbility;
 	local string AbilityName;
 
 	// Abilities for ammo upgrades are taken from CLAP mod
@@ -84,6 +86,11 @@ static function array<X2DataTemplate> CreateTemplates()
 	foreach default.FocusScopeAbilities(FocusScopeAbility)
 	{
 		Templates.AddItem(TLMFocusScope(FocusScopeAbility));
+	}
+
+	foreach default.FrontLoadAbilities(FrontLoadAbility)
+	{
+		Templates.AddItem(TLMFrontLoadMag(FrontLoadAbility));
 	}
 
 	return Templates;
@@ -758,6 +765,33 @@ static function X2AbilityTemplate TLMFocusScope (FocusScopeAbilitiesData FocusSc
 	FocusScopeEffect.SingleOutCritChanceBonus = FocusScopeAbility.SingleOutCritChanceBonus;
 	FocusScopeEffect.FriendlyNameSingleOut = default.strFriendlyNameSingleOut;
 	Template.AddTargetEffect(FocusScopeEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+
+	return Template;
+}
+
+static function X2AbilityTemplate TLMFrontLoadMag (FrontLoadAbilitiesData FrontLoadAbility)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_TLMEffects FrontLoadEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, FrontLoadAbility.AbilityName);
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
+	Template.AbilitySourceName = 'eAbilitySource_Item';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.bCrossClassEligible = false;
+
+	FrontLoadEffect = new class'X2Effect_TLMEffects';
+	FrontLoadEffect.FullAmmoDamageModifier = FrontLoadAbility.FullAmmoDamageModifier;
+	FrontLoadEffect.NotFullAmmoDamageModifier = FrontLoadAbility.NotFullAmmoDamageModifier;
+	FrontLoadEffect.FriendlyName = Template.LocFriendlyName;
+	Template.AddTargetEffect(FrontLoadEffect);
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 

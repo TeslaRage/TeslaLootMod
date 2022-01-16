@@ -139,3 +139,10 @@ struct FocusScopeAbilitiesData
 	var int SingleOutAimBonus;
 	var int SingleOutCritChanceBonus;
 };
+
+struct FrontLoadAbilitiesData
+{
+	var name AbilityName;
+	var int FullAmmoDamageModifier;
+	var int NotFullAmmoDamageModifier;
+};

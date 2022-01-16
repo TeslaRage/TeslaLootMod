@@ -474,6 +474,62 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		}
 		break;
+	case 'FLMagDmgT1':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].FullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagDmgT2':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].FullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagDmgT3':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].FullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagDmgPenT2':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].NotFullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagAmmoT1':
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_FLoadMagT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
+	case 'FLMagAmmoT2':
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_FLoadMagT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
+	case 'FLMagAmmoT3':
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_FLoadMagT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
 	}	
 	return false;
 }
