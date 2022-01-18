@@ -18,9 +18,11 @@ var localized string strPlus;
 // =============
 static event OnPostTemplatesCreated()
 {
-	class'X2Helper_TLM'.static.AddLootTables();
-	class'X2Helper_TLM'.static.UpdateWeaponUpgrade();
+	class'X2Helper_TLM'.static.AddLootTables();	
 	class'X2Helper_TLM'.static.SetDelegatesToUpgradeDecks();
+	class'X2Helper_TLM'.static.AddAbilityBonusRadius();
+	class'X2Helper_TLM'.static.PatchStandardShot();
+	class'X2Helper_TLM'.static.PatchWeaponUpgrades();
 }
 
 static event OnLoadedSavedGameToStrategy()
@@ -208,7 +210,351 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'BonusDamageAlien':
 		OutString = string(class'X2Ability_TLM'.default.BonusDamageAlien);
 		return true;
-	}
+	case 'GrenadeRangeT1':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRange.Find('AbilityName', 'TLMAbility_GrenadeRangeT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRange[i].GrenadeRangeBonus);
+			return true;
+		}
+		break;
+	case 'GrenadeRangeT2':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRange.Find('AbilityName', 'TLMAbility_GrenadeRangeT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRange[i].GrenadeRangeBonus);
+			return true;
+		}
+		break;
+	case 'GrenadeRangeT3':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRange.Find('AbilityName', 'TLMAbility_GrenadeRangeT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRange[i].GrenadeRangeBonus);
+			return true;
+		}
+		break;
+	case 'GrenadeRadiusT1':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			return true;
+		}
+		break;
+	case 'GrenadeRadiusT2':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			return true;
+		}
+		break;
+	case 'GrenadeRadiusT3':
+		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			return true;
+		}
+		break;
+	case 'RuptureChanceT1':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].ApplyChance);
+			return true;
+		}
+		break;
+	case 'RuptureDamageT1':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].RuptureValue);
+			return true;
+		}
+		break;
+	case 'RuptureChanceT2':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].ApplyChance);
+			return true;
+		}
+		break;
+	case 'RuptureDamageT2':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].RuptureValue);
+			return true;
+		}
+		break;
+	case 'RuptureChanceT3':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].ApplyChance);
+			return true;
+		}
+		break;
+	case 'RuptureDamageT3':
+		i = class'X2Ability_TLM'.default.RuptureAbilities.Find('AbilityName', 'TLMAbility_RuptureT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RuptureAbilities[i].RuptureValue);
+			return true;
+		}
+		break;
+	case 'CritTrackerDmgT1':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].DamagePerMobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerDmgT2':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].DamagePerMobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerDmgT3':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].DamagePerMobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerMobT1':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].MobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerMobT2':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].MobilityDivisor);
+			return true;
+		}
+		break;
+	case 'CritTrackerMobT3':
+		i = class'X2Ability_TLM'.default.RefinementUpgradeAbilities.Find('AbilityName', 'TLMAbility_CritTrackerT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RefinementUpgradeAbilities[i].MobilityDivisor);
+			return true;
+		}
+		break;
+	case 'SReloadChargeT1':
+		i = class'X2Ability_TLM'.default.SprintReloadAbilities.Find('AbilityName', 'TLMAbility_ReloadT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.SprintReloadAbilities[i].Charges);
+			return true;
+		}
+		break;
+	case 'SReloadChargeT2':
+		i = class'X2Ability_TLM'.default.SprintReloadAbilities.Find('AbilityName', 'TLMAbility_ReloadT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.SprintReloadAbilities[i].Charges);
+			return true;
+		}
+		break;
+	case 'SReloadChargeT3':
+		i = class'X2Ability_TLM'.default.SprintReloadAbilities.Find('AbilityName', 'TLMAbility_ReloadT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.SprintReloadAbilities[i].Charges);
+			return true;
+		}
+		break;
+	case 'SRPerEnemyT1':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].AimBonusPerVisibleEnemy);
+			return true;
+		}
+		break;
+	case 'SRMaxAimT1':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].MaxAimBonus);
+			return true;
+		}
+		break;
+	case 'SRPerEnemyT2':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].AimBonusPerVisibleEnemy);
+			return true;
+		}
+		break;
+	case 'SRMaxAimT2':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].MaxAimBonus);
+			return true;
+		}
+		break;
+	case 'SRPerEnemyT3':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].AimBonusPerVisibleEnemy);
+			return true;
+		}
+		break;
+	case 'SRMaxAimT3':
+		i = class'X2Ability_TLM'.default.ReflexStockAbilities.Find('AbilityName', 'TLMAbility_StockT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.ReflexStockAbilities[i].MaxAimBonus);
+			return true;
+		}
+		break;
+	case 'FSAimT1':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutAimBonus);
+			return true;
+		}
+		break;
+	case 'FSCritT1':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutCritChanceBonus);
+			return true;
+		}
+		break;
+	case 'FSAimT2':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutAimBonus);
+			return true;
+		}
+		break;
+	case 'FSCritT2':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutCritChanceBonus);
+			return true;
+		}
+		break;
+	case 'FSAimT3':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutAimBonus);
+			return true;
+		}
+		break;
+	case 'FSCritT3':
+		i = class'X2Ability_TLM'.default.FocusScopeAbilities.Find('AbilityName', 'TLMAbility_ScopeT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FocusScopeAbilities[i].SingleOutCritChanceBonus);
+			return true;
+		}
+		break;
+	case 'FLMagDmgT1':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].FullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagDmgT2':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].FullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagDmgT3':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].FullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagDmgPenT2':
+		i = class'X2Ability_TLM'.default.FrontLoadAbilities.Find('AbilityName', 'TLMAbility_FLoadMagT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.FrontLoadAbilities[i].NotFullAmmoDamageModifier);
+			return true;
+		}
+		break;
+	case 'FLMagAmmoT1':
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_FLoadMagT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
+	case 'FLMagAmmoT2':
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_FLoadMagT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
+	case 'FLMagAmmoT3':
+		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_FLoadMagT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades[i].ClipSizeBonus);
+			return true;
+		}
+		break;
+	case 'RAltDmgT1':
+		i = class'X2Ability_TLM'.default.RepeaterAltAbilities.Find('AbilityName', 'TLMAbility_RepeaterAltT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RepeaterAltAbilities[i].BonusDamageWhenEffected);
+			return true;
+		}
+		break;
+	case 'RAltDmgT2':
+		i = class'X2Ability_TLM'.default.RepeaterAltAbilities.Find('AbilityName', 'TLMAbility_RepeaterAltT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RepeaterAltAbilities[i].BonusDamageWhenEffected);
+			return true;
+		}
+		break;
+	case 'RAltDmgT3':
+		i = class'X2Ability_TLM'.default.RepeaterAltAbilities.Find('AbilityName', 'TLMAbility_RepeaterAltT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RepeaterAltAbilities[i].BonusDamageWhenEffected);
+			return true;
+		}
+		break;
+	}	
 	return false;
 }
 

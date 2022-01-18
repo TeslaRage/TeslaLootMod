@@ -2,19 +2,19 @@ class X2Helper_TLM extends Object config(TLM) abstract;
 
 static function bool IsModLoaded(name DLCName)
 {
-    local XComOnlineEventMgr    EventManager;
-    local int                   Index;
+	local XComOnlineEventMgr EventManager;
+	local int Index;
 
-    EventManager = `ONLINEEVENTMGR;
+	EventManager = `ONLINEEVENTMGR;
 
-    for(Index = EventManager.GetNumDLC() - 1; Index >= 0; Index--)  
-    {
-        if(EventManager.GetDLCNames(Index) == DLCName)  
-        {
-            return true;
-        }
-    }
-    return false;
+	for(Index = EventManager.GetNumDLC() - 1; Index >= 0; Index--)  
+	{
+		if(EventManager.GetDLCNames(Index) == DLCName)  
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 static function CallUIAlert_TLM(const out DynamicPropertySet PropertySet)
@@ -122,6 +122,7 @@ static function UpdateWeaponUpgrade()
 				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMCRITDAMAGE", TLMEffect.CritDamage < 0 ? TLMEffect.CritDamage * -1 : TLMEffect.CritDamage);
 				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMPIERCE", TLMEffect.Pierce < 0 ? TLMEffect.Pierce * -1 : TLMEffect.Pierce);
 				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMSHRED", TLMEffect.Shred < 0 ? TLMEffect.Shred * -1 : TLMEffect.Shred);
+				WUTemplate.BriefSummary = Repl(WUTemplate.BriefSummary, "%TLMCRITMULT", TLMEffect.CritDamageMultiplier < 0 ? int(TLMEffect.CritDamageMultiplier * -100): int(TLMEffect.CritDamageMultiplier * 100));
 			}
 		}
 	}	
@@ -152,12 +153,17 @@ static function UpdateWeaponUpgrade()
 	}
 
 	// Setting up of upgrade icons and mutual exclusives
-	SetUpUpgradeIconsAndME('LegoDeck');
-	SetUpUpgradeIconsAndME('RefnDeck');
-	SetUpUpgradeIconsAndME('AmmoDeck');
+	SetUpUpgradeIconsAndME('LegoDeck', true);
+	SetUpUpgradeIconsAndME('RefnDeck', true);
+	SetUpUpgradeIconsAndME('AmmoDeck', true);
+	SetUpUpgradeIconsAndME('BaseGLDeck', false);
+	SetUpUpgradeIconsAndME('AmmoGLDeck', true);
+	SetUpUpgradeIconsAndME('BaseDeckT1', false);
+	SetUpUpgradeIconsAndME('BaseDeckT2', false);
+	SetUpUpgradeIconsAndME('BaseDeckT3', false);
 }
 
-static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName)
+static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMutualExclusives)
 {
 	local X2BaseWeaponDeckTemplateManager BWMan;
 	local X2UpgradeDeckTemplateManager UDMan;
@@ -204,13 +210,19 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName)
 			}
 
 			// Sets up the attachment icon and items that its applicable to
-			foreach ItemTemplateNames(ItemTemplateName)
+			if (WUTemplate.UpgradeAttachments.Length <= 0)
 			{
-				WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, IconString);
+				foreach ItemTemplateNames(ItemTemplateName)
+				{
+					WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, IconString);
+				}
 			}
 			
 			// Sets up the mutual exclusive
-			WUTemplate.MutuallyExclusiveUpgrades = WUTemplateNames;			
+			if (SetMutualExclusives)
+			{
+				WUTemplate.MutuallyExclusiveUpgrades = WUTemplateNames;
+			}
 		}
 	}
 }
@@ -428,6 +440,94 @@ static function AppendPatchedItems(out array<name> ItemTemplateNames)
 	foreach class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems(PatchItem)
 	{
 		ItemTemplateNames.AddItem(PatchItem.ItemTemplateName);
+	}
+}
+
+// Heavily inspired by Proficiency Class Pack Air Burst Grenades ability
+static function AddAbilityBonusRadius()
+{
+	local X2AbilityTemplateManager AbilityTemplateMgr;
+	local array<X2AbilityTemplate> AbilityTemplateArray;
+	local X2AbilityTemplate AbilityTemplate;
+	local AbilityGivesGRadiusData AbilityBonusRadius;
+	local name AbilityName;
+
+	AbilityTemplateMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+
+	foreach class'X2Ability_TLM'.default.GrenadeLaunchAbilities(AbilityName)
+	{
+		AbilityTemplateMgr.FindAbilityTemplateAllDifficulties(AbilityName, AbilityTemplateArray);
+
+		foreach class'X2Ability_TLM'.default.AbilityGivesGRadius(AbilityBonusRadius)
+		{
+			foreach AbilityTemplateArray(AbilityTemplate)
+			{
+				X2AbilityMultiTarget_Radius(AbilityTemplate.AbilityMultiTargetStyle).AddAbilityBonusRadius(AbilityBonusRadius.AbilityName, AbilityBonusRadius.GrenadeRadiusBonus);
+			}
+		}
+	}	
+}
+
+static function PatchStandardShot()
+{
+	local X2AbilityTemplateManager AbilityMgr;
+	local X2AbilityTemplate AbilityTemplate;
+	local X2Effect_ApplyWeaponDamage RuptureEffect;
+	local X2Condition_AbilityProperty OwnerAbilityCondition;
+	local RuptureAbilitiesData RuptureAbility;
+
+	AbilityMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+	AbilityTemplate = AbilityMgr.FindAbilityTemplate('StandardShot');
+	if (AbilityTemplate == none) return;
+
+	foreach class'X2Ability_TLM'.default.RuptureAbilities(RuptureAbility)
+	{
+		RuptureEffect = new class'X2Effect_ApplyWeaponDamage';
+		RuptureEffect.bIgnoreBaseDamage = true;
+		RuptureEffect.EffectDamageValue.Rupture = RuptureAbility.RuptureValue;
+		RuptureEffect.ApplyChance = RuptureAbility.ApplyChance;
+
+		OwnerAbilityCondition = new class'X2Condition_AbilityProperty';
+		OwnerAbilityCondition.OwnerHasSoldierAbilities.AddItem(RuptureAbility.AbilityName);
+		RuptureEffect.TargetConditions.AddItem(OwnerAbilityCondition);
+		AbilityTemplate.AddTargetEffect(RuptureEffect);
+	}
+}
+
+static function PatchWeaponUpgrades()
+{
+	local X2ItemTemplateManager ItemTemplateMan;
+	local array<X2DataTemplate> DataTemplates;
+	local X2DataTemplate DataTemplate;
+	local X2WeaponUpgradeTemplate WUTemplate, DonorTemplate;
+	local PatchWeaponUpgradesData PatchWeaponUpgrade;
+	local name WUTemplateName;
+
+	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	
+	foreach class'X2Item_TLMUpgrades'.default.PatchWeaponUpgrades(PatchWeaponUpgrade)
+	{
+		ItemTemplateMan.FindDataTemplateAllDifficulties(PatchWeaponUpgrade.UpgradeName, DataTemplates);
+
+		foreach DataTemplates(DataTemplate)
+		{
+			WUTemplate = X2WeaponUpgradeTemplate(DataTemplate);
+			if (WUTemplate == none) continue;
+
+			foreach PatchWeaponUpgrade.MutuallyExclusiveUpgrades(WUTemplateName)
+			{
+				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplateName);
+			}
+
+			if (PatchWeaponUpgrade.AttachmentsDonorTemplate != '')
+			{
+				DonorTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(PatchWeaponUpgrade.AttachmentsDonorTemplate));
+				if (DonorTemplate != none)
+				{
+					WUTemplate.UpgradeAttachments = DonorTemplate.UpgradeAttachments;
+				}
+			}
+		}
 	}
 }
 

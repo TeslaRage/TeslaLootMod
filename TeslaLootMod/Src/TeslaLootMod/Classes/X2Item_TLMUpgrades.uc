@@ -1,6 +1,7 @@
 class X2Item_TLMUpgrades extends X2Item_DefaultUpgrades config (TLM);
 
 var config array<AbilityUpgradeData> AbilityWeaponUpgrades;
+var config array<PatchWeaponUpgradesData> PatchWeaponUpgrades;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -80,6 +81,12 @@ static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUp
 	Template.Tier = AbilityWeaponUpgrade.Tier;
 
 	// Mutual exclusive setup is done in OPTC group by weapon upgrade deck
+	// or if this list from config is not blank
+	if (AbilityWeaponUpgrade.MutuallyExclusiveUpgrades.Length != 0)
+	{
+		Template.MutuallyExclusiveUpgrades = AbilityWeaponUpgrade.MutuallyExclusiveUpgrades;
+	}
+
 	// Upgrade icons are set up in OPTC
 
 	return Template;

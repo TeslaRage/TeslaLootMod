@@ -42,6 +42,9 @@ struct RefinementUpgradeAbilityData
 	var int Crit;
 	var int Pierce;
 	var int Shred;
+	var float CritDamageMultiplier;
+	var int MobilityDivisor;
+	var int DamagePerMobilityDivisor;
 };
 
 struct AbilityUpgradeData
@@ -51,6 +54,7 @@ struct AbilityUpgradeData
 	var string strImage;
 	var int ClipSizeBonus;
 	var int Tier;
+	var array<name> MutuallyExclusiveUpgrades;
 };
 
 struct BaseItemData{
@@ -88,4 +92,64 @@ struct PatchItemData
 	structdefaultproperties{
 		ApplyNick = true;
 	}
+};
+
+struct AbilityGivesGRangeData
+{
+	var name AbilityName;
+	var int GrenadeRangeBonus;
+};
+
+struct AbilityGivesGRadiusData
+{
+	var name AbilityName;
+	var float GrenadeRadiusBonus;
+};
+
+struct RuptureAbilitiesData
+{
+	var name AbilityName;
+	var int RuptureValue;
+	var int ApplyChance;
+};
+
+struct PatchWeaponUpgradesData
+{
+	var name UpgradeName;
+	var array<name> MutuallyExclusiveUpgrades;
+	var name AttachmentsDonorTemplate;
+};
+
+struct SprintReloadAbilitiesData
+{
+	var name AbilityName;
+	var int Charges;
+};
+
+struct ReflexStockAbilitiesData
+{
+	var name AbilityName;
+	var int AimBonusPerVisibleEnemy;
+	var int MaxAimBonus;
+};
+
+struct FocusScopeAbilitiesData
+{
+	var name AbilityName;
+	var int SingleOutAimBonus;
+	var int SingleOutCritChanceBonus;
+};
+
+struct FrontLoadAbilitiesData
+{
+	var name AbilityName;
+	var int FullAmmoDamageModifier;
+	var int NotFullAmmoDamageModifier;
+};
+
+struct RepeaterAltAbilitiesData
+{
+	var name AbilityName;
+	var int BonusDamageWhenEffected;
+	var array<name> EffectsToApplyBonusDamage;
 };

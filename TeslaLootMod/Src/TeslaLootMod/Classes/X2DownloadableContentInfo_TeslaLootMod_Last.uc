@@ -8,4 +8,5 @@ var config (TLM) array<PatchItemData> PatchItems;
 static event OnPostTemplatesCreated()
 {
 	class'X2Helper_TLM'.static.ApplyTLMTreatmentToItems();
+	class'X2Helper_TLM'.static.UpdateWeaponUpgrade();	
 }
