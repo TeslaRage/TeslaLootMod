@@ -146,3 +146,10 @@ struct FrontLoadAbilitiesData
 	var int FullAmmoDamageModifier;
 	var int NotFullAmmoDamageModifier;
 };
+
+struct RepeaterAltAbilitiesData
+{
+	var name AbilityName;
+	var int BonusDamageWhenEffected;
+	var array<name> EffectsToApplyBonusDamage;
+};

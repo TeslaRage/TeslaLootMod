@@ -530,6 +530,30 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		}
 		break;
+	case 'RAltDmgT1':
+		i = class'X2Ability_TLM'.default.RepeaterAltAbilities.Find('AbilityName', 'TLMAbility_RepeaterAltT1');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RepeaterAltAbilities[i].BonusDamageWhenEffected);
+			return true;
+		}
+		break;
+	case 'RAltDmgT2':
+		i = class'X2Ability_TLM'.default.RepeaterAltAbilities.Find('AbilityName', 'TLMAbility_RepeaterAltT2');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RepeaterAltAbilities[i].BonusDamageWhenEffected);
+			return true;
+		}
+		break;
+	case 'RAltDmgT3':
+		i = class'X2Ability_TLM'.default.RepeaterAltAbilities.Find('AbilityName', 'TLMAbility_RepeaterAltT3');
+		if (i != INDEX_NONE)
+		{
+			OutString = string(class'X2Ability_TLM'.default.RepeaterAltAbilities[i].BonusDamageWhenEffected);
+			return true;
+		}
+		break;
 	}	
 	return false;
 }

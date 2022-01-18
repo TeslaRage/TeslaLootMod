@@ -28,11 +28,16 @@ var int SingleOutAimBonus;
 var int SingleOutCritChanceBonus;
 var string FriendlyNameSingleOut;
 
+// These should be used together
+var int BonusDamageWhenEffected;
+var array<name> EffectsToApplyBonusDamage;
+
 function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGameState_Unit Attacker, Damageable TargetDamageable, XComGameState_Ability AbilityState, const out EffectAppliedData AppliedData, const int CurrentDamage, optional XComGameState NewGameState)
 {
 	local float ExtraDamage;
 	local XComGameState_Item SourceWeapon;
 	local XComGameState_Unit Unit;
+	local name QualifiedEffectName;
 
 	Unit = XComGameState_Unit(TargetDamageable);
 	SourceWeapon = AbilityState.GetSourceWeapon();
@@ -89,6 +94,18 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 			if (SourceWeapon.Ammo < SourceWeapon.GetClipSize())
 			{
 				ExtraDamage += NotFullAmmoDamageModifier;
+			}
+		}
+
+		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && BonusDamageWhenEffected != 0)
+		{
+			foreach EffectsToApplyBonusDamage(QualifiedEffectName)
+			{
+				if (Unit.IsUnitAffectedByEffectName(QualifiedEffectName))
+				{
+					ExtraDamage += BonusDamageWhenEffected;
+					break;
+				}
 			}
 		}
 	}

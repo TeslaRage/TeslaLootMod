@@ -10,6 +10,7 @@ var config array<SprintReloadAbilitiesData> SprintReloadAbilities;
 var config array<ReflexStockAbilitiesData> ReflexStockAbilities;
 var config array<FocusScopeAbilitiesData> FocusScopeAbilities;
 var config array<FrontLoadAbilitiesData> FrontLoadAbilities;
+var config array<RepeaterAltAbilitiesData> RepeaterAltAbilities;
 
 var config int RapidFireCharges;
 var config int RapidFireAimPenalty;
@@ -36,6 +37,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local ReflexStockAbilitiesData ReflexStockAbility;
 	local FocusScopeAbilitiesData FocusScopeAbility;
 	local FrontLoadAbilitiesData FrontLoadAbility;
+	local RepeaterAltAbilitiesData RepeaterAltAbility;
 	local string AbilityName;
 
 	// Abilities for ammo upgrades are taken from CLAP mod
@@ -91,6 +93,11 @@ static function array<X2DataTemplate> CreateTemplates()
 	foreach default.FrontLoadAbilities(FrontLoadAbility)
 	{
 		Templates.AddItem(TLMFrontLoadMag(FrontLoadAbility));
+	}
+
+	foreach default.RepeaterAltAbilities(RepeaterAltAbility)
+	{
+		Templates.AddItem(TLMRepeaterAlt(RepeaterAltAbility));
 	}
 
 	return Templates;
@@ -792,6 +799,33 @@ static function X2AbilityTemplate TLMFrontLoadMag (FrontLoadAbilitiesData FrontL
 	FrontLoadEffect.NotFullAmmoDamageModifier = FrontLoadAbility.NotFullAmmoDamageModifier;
 	FrontLoadEffect.FriendlyName = Template.LocFriendlyName;
 	Template.AddTargetEffect(FrontLoadEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+
+	return Template;
+}
+
+static function X2AbilityTemplate TLMRepeaterAlt (RepeaterAltAbilitiesData RepeaterAltAbility)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_TLMEffects RepeaterAltEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, RepeaterAltAbility.AbilityName);
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
+	Template.AbilitySourceName = 'eAbilitySource_Item';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.bCrossClassEligible = false;
+
+	RepeaterAltEffect = new class'X2Effect_TLMEffects';
+	RepeaterAltEffect.BonusDamageWhenEffected = RepeaterAltAbility.BonusDamageWhenEffected;
+	RepeaterAltEffect.EffectsToApplyBonusDamage = RepeaterAltAbility.EffectsToApplyBonusDamage;
+	RepeaterAltEffect.FriendlyName = Template.LocFriendlyName;
+	Template.AddTargetEffect(RepeaterAltEffect);
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 
