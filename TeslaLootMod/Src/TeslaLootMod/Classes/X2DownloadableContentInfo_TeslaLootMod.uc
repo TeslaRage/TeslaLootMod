@@ -238,7 +238,7 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT1');
 		if (i != INDEX_NONE)
 		{
-			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus);
 			return true;
 		}
 		break;
@@ -246,7 +246,7 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT2');
 		if (i != INDEX_NONE)
 		{
-			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus);
 			return true;
 		}
 		break;
@@ -254,7 +254,7 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		i = class'X2Ability_TLM'.default.AbilityGivesGRadius.Find('AbilityName', 'TLMAbility_GrenadeRadiusT3');
 		if (i != INDEX_NONE)
 		{
-			OutString = string(int(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus));
+			OutString = string(class'X2Ability_TLM'.default.AbilityGivesGRadius[i].GrenadeRadiusBonus);
 			return true;
 		}
 		break;
