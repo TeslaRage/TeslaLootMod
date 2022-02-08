@@ -106,7 +106,8 @@ static function bool CanApplyTLMUpgradeToWeapon(X2WeaponUpgradeTemplate UpgradeT
 	local X2WeaponUpgradeTemplate AttachedUpgrade;
 	local X2UpgradeDeckTemplateManager UDMan;
 	local array<X2UpgradeDeckTemplate> UDTemplates;
-	local UpgradeDeckData Upgrade;	
+	local UpgradeDeckData Upgrade;
+	local XComGameState_Unit Unit;
 	local name WeaponCat;
 	local int iSlot, Index;
 
@@ -140,7 +141,18 @@ static function bool CanApplyTLMUpgradeToWeapon(X2WeaponUpgradeTemplate UpgradeT
 			}
 		}
 	}
-	
+
+	// If the unit carries an ammo in utility slot, ammo upgrade should not be allowed to be attached
+	if (UpgradeTemplate.IsA('X2WeaponUpgradeTemplate_TLMAmmo'))
+	{
+		Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(Weapon.OwnerStateObject.ObjectID));
+
+		if (Unit != none && Unit.HasItemOfTemplateClass(class'X2AmmoTemplate'))
+		{
+			return false;
+		}
+	}
+
 	// The rest of this check was copied from CanApplyUpgradeToWeapon delegate from base game
 	AttachedUpgradeTemplates = Weapon.GetMyWeaponUpgradeTemplates();
 
