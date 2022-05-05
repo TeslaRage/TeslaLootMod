@@ -1,10 +1,12 @@
 class X2DownloadableContentInfo_TeslaLootMod extends X2DownloadableContentInfo;
 
 var config (TLM) array<LootTable> LootEntry;
+var config (TLM) array<LootTable> LootEntryAlt;
 var config (TLM) string strTier0Color;
 var config (TLM) string strTier1Color;
 var config (TLM) string strTier2Color;
 var config (TLM) string strTier3Color;
+var config (TLM) bool bUpgradesDropAsLoot;
 
 var localized array<String> RandomWeaponNickNames;
 var localized array<String> RandomArmorNickNames;

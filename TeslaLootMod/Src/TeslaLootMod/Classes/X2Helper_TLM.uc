@@ -39,15 +39,31 @@ static function AddLootTables()
 	
 	LootManager = X2LootTableManager(class'Engine'.static.FindClassDefaultObject("X2LootTableManager"));
 
-	foreach class'X2DownloadableContentInfo_TeslaLootMod'.default.LootEntry(LootBag)
+	if (class'X2DownloadableContentInfo_TeslaLootMod'.default.bUpgradesDropAsLoot)
 	{
-		if ( LootManager.default.LootTables.Find('TableName', LootBag.TableName) != INDEX_NONE )
+		foreach class'X2DownloadableContentInfo_TeslaLootMod'.default.LootEntryAlt(LootBag)
 		{
-			foreach LootBag.Loots(Entry)
+			if ( LootManager.default.LootTables.Find('TableName', LootBag.TableName) != INDEX_NONE )
 			{
-				class'X2LootTableManager'.static.AddEntryStatic(LootBag.TableName, Entry, false);
-			}
-		}	
+				foreach LootBag.Loots(Entry)
+				{
+					class'X2LootTableManager'.static.AddEntryStatic(LootBag.TableName, Entry, false);
+				}
+			}	
+		}
+	}
+	else
+	{
+		foreach class'X2DownloadableContentInfo_TeslaLootMod'.default.LootEntry(LootBag)
+		{
+			if ( LootManager.default.LootTables.Find('TableName', LootBag.TableName) != INDEX_NONE )
+			{
+				foreach LootBag.Loots(Entry)
+				{
+					class'X2LootTableManager'.static.AddEntryStatic(LootBag.TableName, Entry, false);
+				}
+			}	
+		}
 	}
 }
 
