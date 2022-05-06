@@ -83,7 +83,7 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 
 		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && FullAmmoDamageModifier != 0)
 		{
-			if (SourceWeapon.Ammo == SourceWeapon.GetClipSize())
+			if (SourceWeapon.Ammo == SourceWeapon.GetClipSize() && SourceWeapon.InventorySlot == eInvSlot_PrimaryWeapon)
 			{
 				ExtraDamage += FullAmmoDamageModifier;
 			}			

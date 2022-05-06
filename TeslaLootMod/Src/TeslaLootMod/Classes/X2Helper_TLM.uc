@@ -39,15 +39,31 @@ static function AddLootTables()
 	
 	LootManager = X2LootTableManager(class'Engine'.static.FindClassDefaultObject("X2LootTableManager"));
 
-	foreach class'X2DownloadableContentInfo_TeslaLootMod'.default.LootEntry(LootBag)
+	if (class'X2DownloadableContentInfo_TeslaLootMod'.default.bUpgradesDropAsLoot)
 	{
-		if ( LootManager.default.LootTables.Find('TableName', LootBag.TableName) != INDEX_NONE )
+		foreach class'X2DownloadableContentInfo_TeslaLootMod'.default.LootEntryAlt(LootBag)
 		{
-			foreach LootBag.Loots(Entry)
+			if ( LootManager.default.LootTables.Find('TableName', LootBag.TableName) != INDEX_NONE )
 			{
-				class'X2LootTableManager'.static.AddEntryStatic(LootBag.TableName, Entry, false);
-			}
-		}	
+				foreach LootBag.Loots(Entry)
+				{
+					class'X2LootTableManager'.static.AddEntryStatic(LootBag.TableName, Entry, false);
+				}
+			}	
+		}
+	}
+	else
+	{
+		foreach class'X2DownloadableContentInfo_TeslaLootMod'.default.LootEntry(LootBag)
+		{
+			if ( LootManager.default.LootTables.Find('TableName', LootBag.TableName) != INDEX_NONE )
+			{
+				foreach LootBag.Loots(Entry)
+				{
+					class'X2LootTableManager'.static.AddEntryStatic(LootBag.TableName, Entry, false);
+				}
+			}	
+		}
 	}
 }
 
@@ -95,7 +111,8 @@ static function UpdateWeaponUpgrade()
 	local X2AbilityTemplate AbilityTemplate;
 	local X2UpgradeDeckTemplate UDTemplate;
 	local X2Effect Effect;
-	local X2Effect_TLMEffects TLMEffect;	
+	local X2Effect_TLMEffects TLMEffect;
+	local DecksForAutoIconsAndMEData DeckForAutoIconsAndME;	
 	local string strColor;
 	local name AbilityName;
 
@@ -153,14 +170,10 @@ static function UpdateWeaponUpgrade()
 	}
 
 	// Setting up of upgrade icons and mutual exclusives
-	SetUpUpgradeIconsAndME('LegoDeck', true);
-	SetUpUpgradeIconsAndME('RefnDeck', true);
-	SetUpUpgradeIconsAndME('AmmoDeck', true);
-	SetUpUpgradeIconsAndME('BaseGLDeck', false);
-	SetUpUpgradeIconsAndME('AmmoGLDeck', true);
-	SetUpUpgradeIconsAndME('BaseDeckT1', false);
-	SetUpUpgradeIconsAndME('BaseDeckT2', false);
-	SetUpUpgradeIconsAndME('BaseDeckT3', false);
+	foreach class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.DecksForAutoIconsAndME(DeckForAutoIconsAndME)
+	{
+		SetUpUpgradeIconsAndME(DeckForAutoIconsAndME.UpgradeDeckTemplateName, DeckForAutoIconsAndME.SetMutualExclusives);
+	}
 }
 
 static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMutualExclusives)
@@ -172,6 +185,7 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 	local X2AbilityTemplate AbilityTemplate;
 	local X2WeaponUpgradeTemplate WUTemplate;
 	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local WeaponAttachment WAttachment;
 	local array<name> ItemTemplateNames, WUTemplateNames;	
 	local name AbilityName, ItemTemplateName;
 	local string IconString;
@@ -203,16 +217,30 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 				IconString = AbilityTemplate.IconImage;
 			}
 
-			// If there is no icon due to no ability or ability has no icon, we give default icon
+			// If no ability icon, then we try to grab from the upgrade template
+			// This works fine for base game upgrades or upgrades that have been properly set up with
+			// IconString for other weapons. This is not super accurate, but better than nothing
+			if (IconString == "")
+			{
+				foreach WUTemplate.UpgradeAttachments(WAttachment)
+				{
+					if (WAttachment.InventoryCategoryIcon != "")
+					{	
+						IconString = WAttachment.InventoryCategoryIcon;
+						break;
+					}
+				}
+			}
+
+			// If still no icon, then we give it a default one
 			if (IconString == "")
 			{
 				IconString = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip";
 			}
 
-			// Sets up the attachment icon and items that its applicable to
-			if (WUTemplate.UpgradeAttachments.Length <= 0)
+			foreach ItemTemplateNames(ItemTemplateName)
 			{
-				foreach ItemTemplateNames(ItemTemplateName)
+				if (WUTemplate.UpgradeAttachments.Find('ApplyToWeaponTemplate', ItemTemplateName) == INDEX_NONE)
 				{
 					WUTemplate.AddUpgradeAttachment('', '', "", "", ItemTemplateName, , "", WUTemplate.strImage, IconString);
 				}
