@@ -697,7 +697,6 @@ static function X2AbilityTemplate TLMSprintReload(name AbilityName, float Sprint
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, AbilityName);
 
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
 	Template.AbilitySourceName = 'eAbilitySource_Item';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;
@@ -731,7 +730,6 @@ static function X2AbilityTemplate TLMReflexStock (ReflexStockAbilitiesData Refle
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, ReflexStockAbility.AbilityName);
 
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
 	Template.AbilitySourceName = 'eAbilitySource_Item';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;
@@ -758,7 +756,6 @@ static function X2AbilityTemplate TLMFocusScope (FocusScopeAbilitiesData FocusSc
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, FocusScopeAbility.AbilityName);
 
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
 	Template.AbilitySourceName = 'eAbilitySource_Item';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;
@@ -785,7 +782,6 @@ static function X2AbilityTemplate TLMFrontLoadMag (FrontLoadAbilitiesData FrontL
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, FrontLoadAbility.AbilityName);
 
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
 	Template.AbilitySourceName = 'eAbilitySource_Item';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;
@@ -812,7 +808,6 @@ static function X2AbilityTemplate TLMRepeaterAlt (RepeaterAltAbilitiesData Repea
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, RepeaterAltAbility.AbilityName);
 
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_long_watch"; 
 	Template.AbilitySourceName = 'eAbilitySource_Item';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;

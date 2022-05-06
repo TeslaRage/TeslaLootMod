@@ -153,3 +153,9 @@ struct RepeaterAltAbilitiesData
 	var int BonusDamageWhenEffected;
 	var array<name> EffectsToApplyBonusDamage;
 };
+
+struct DecksForAutoIconsAndMEData
+{
+	var name UpgradeDeckTemplateName;
+	var bool SetMutualExclusives;
+};
