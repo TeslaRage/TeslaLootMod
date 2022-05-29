@@ -1,1 +1,1 @@
-﻿You created an XCOM 2 Mod Project!
+﻿Documentations of this mod are mainly in the configuration files.
