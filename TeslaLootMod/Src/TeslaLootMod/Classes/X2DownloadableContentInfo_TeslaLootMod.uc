@@ -678,3 +678,33 @@ exec function TLM_UpdateRarity(name RarityName)
 
 	class'Helpers'.static.OutputMsg("Item rarity updated to " $RarityName $". This has no gameplay changes just nick color when renaming.");
 }
+
+exec function TLM_PrintCurrentBaseItems(name RarityTemplateName)
+{
+	local XComGameState NewGameState;
+	local array<BaseItemData> QualifiedBaseItems;
+	local BaseItemData QualifiedBaseItem;
+	local X2BaseWeaponDeckTemplate BWTemplate;
+	local X2BaseWeaponDeckTemplateManager BWMan;
+	local X2RarityTemplate RarityTemplate;
+	local X2RarityTemplateManager RMan;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Print Current Base Items");
+
+	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
+	RMan = class'X2RarityTemplateManager'.static.GetRarityTemplateManager();
+
+	BWTemplate = BWMan.DetermineBaseWeaponDeck();
+	RarityTemplate = RMan.GetRarityTemplate(RarityTemplateName);
+	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
+
+	`XCOMHISTORY.CleanupPendingGameState(NewGameState);
+
+	class'Helpers'.static.OutputMsg("Base Item Deck:" @ BWTemplate.DataName);
+	class'Helpers'.static.OutputMsg("Tier:" @ BWTemplate.Tier);
+
+	foreach QualifiedBaseItems(QualifiedBaseItem)
+	{
+		class'Helpers'.static.OutputMsg("Template Name:" @ QualifiedBaseItem.TemplateName);
+	}
+}
