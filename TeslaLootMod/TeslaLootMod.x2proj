@@ -14,6 +14,7 @@
     <Folder Include="Config\Base Item Decks" />
     <Folder Include="Config\Item Patcher" />
     <Folder Include="Config\Base Item Decks - ABW" />
+    <Folder Include="Config\Base Item Decks - 5TWO" />
     <Folder Include="Config\Upgrade Decks - Armor" />
     <Folder Include="Config\Upgrade Decks - Melee" />
     <Folder Include="Config\Upgrade Decks - Shield" />
@@ -26,6 +27,9 @@
     <Folder Include="Src\TeslaLootMod\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\Base Item Decks - 5TWO\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\Base Item Decks - ABW\XComTLM.ini">
       <SubType>Content</SubType>
     </Content>
