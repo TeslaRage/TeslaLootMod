@@ -687,17 +687,22 @@ exec function TLM_PrintCurrentBaseItems(name RarityTemplateName)
 	local X2BaseWeaponDeckTemplate BWTemplate;
 	local X2BaseWeaponDeckTemplateManager BWMan;
 	local X2RarityTemplate RarityTemplate;
-	local X2RarityTemplateManager RMan;
-
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Print Current Base Items");
+	local X2RarityTemplateManager RMan;	
 
 	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
 	RMan = class'X2RarityTemplateManager'.static.GetRarityTemplateManager();
 
 	BWTemplate = BWMan.DetermineBaseWeaponDeck();
 	RarityTemplate = RMan.GetRarityTemplate(RarityTemplateName);
-	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
 
+	if (BWTemplate == none || RarityTemplate == none)
+	{
+		class'Helpers'.static.OutputMsg("Unable to determine base weapon deck OR bad rarity template provided");
+		return;
+	}
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Print Current Base Items");
+	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
 	`XCOMHISTORY.CleanupPendingGameState(NewGameState);
 
 	class'Helpers'.static.OutputMsg("Base Item Deck:" @ BWTemplate.DataName);
