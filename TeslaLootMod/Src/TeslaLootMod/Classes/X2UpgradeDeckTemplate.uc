@@ -66,14 +66,14 @@ function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_
 		return false;
 
 	// Does this upgrade have valid abilities?
-	if (HasInvalidAbilities(WUTemplate))
+	if (HasInvalidAbilities(WUTemplate, Upgrade))
 		return false;
 
 	// If we reach here, it means the upgrade is good for this item
 	return true;
 }
 
-static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate)
+static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate, UpgradeDeckData Upgrade)
 {
 	local X2AbilityTemplateManager AbilityMan;
 	local X2AbilityTemplate AbilityTemplate;
@@ -86,6 +86,13 @@ static function bool HasInvalidAbilities(X2WeaponUpgradeTemplate WUTemplate)
 		AbilityTemplate = AbilityMan.FindAbilityTemplate(AbilityName);
 
 		if (AbilityTemplate == none) return true;
+	}
+
+	// Issue #16
+	// If bMustHaveAbility is true, then the upgrade must have ability to be considered valid
+	if (Upgrade.bMustHaveAbility && WUTemplate.BonusAbilities.Length == 0)
+	{
+		return true;
 	}
 
 	return false;
