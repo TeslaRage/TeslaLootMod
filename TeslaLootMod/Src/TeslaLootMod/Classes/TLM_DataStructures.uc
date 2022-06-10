@@ -21,6 +21,7 @@ struct LootBoxData
 struct UpgradeDeckData
 {
 	var name UpgradeName;
+	var bool bMustHaveAbility;				// Set to True if TLM needs to check that this upgrade must have an ability
 	var array<name> AllowedWeaponCats;
 	var array<name> DisallowedWeaponCats;
 };
