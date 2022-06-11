@@ -79,6 +79,15 @@ function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_
 	if (HasInvalidAbilities(WUTemplate, Upgrade))
 		return false;
 
+	// Need to check UpgradeDeckData's AllowedWeaponCats and DisallowedWeaponCats
+	// Custom upgrades already check this via delegate CanApplyTLMUpgradeToWeapon
+	// so this manual check is meant for upgrades from other mods including base game's
+	if (Upgrade.AllowedWeaponCats.Length > 0
+		&& Upgrade.AllowedWeaponCats.Find(Item.GetWeaponCategory()) == INDEX_NONE)
+		return false;
+	else if (Upgrade.DisallowedWeaponCats.Find(Item.GetWeaponCategory()) != INDEX_NONE)
+		return false;
+
 	// If we reach here, it means the upgrade is good for this item
 	return true;
 }
