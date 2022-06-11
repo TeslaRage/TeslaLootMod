@@ -14,10 +14,13 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 	local X2WeaponUpgradeTemplate WUTemplate;
 	local array<X2WeaponUpgradeTemplate> WUTemplates, AppliedUpgrades;
 	local X2ItemTemplateManager ItemMan;
+	local array<ItemWeightData> ItemWeights;
+	local ItemWeightData ItemWeight;
 	local int Applied, Idx;
 
 	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
+	Idx = 0;
 	foreach Upgrades(Upgrade)
 	{
 		WUTemplate = X2WeaponUpgradeTemplate(ItemMan.FindItemTemplate(Upgrade.UpgradeName));
@@ -28,12 +31,19 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 		if (!CanApplyUpgrade(WUTemplate, Item, Upgrade)) continue;
 		
 		WUTemplates.AddItem(WUTemplate);
+		ItemWeight.Index = Idx;
+		ItemWeight.Weight = Upgrade.Weight;
+		ItemWeights.AddItem(ItemWeight);
+		Idx++;
 	}
 
 	// Pick upgrades and apply
 	while (WUTemplates.Length > 0 && Applied < Quantity)
 	{
-		Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
+		// Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
+		Idx = class'X2Helper_TLM'.static.GetWeightBasedIndex(ItemWeights);
+		if (Idx < 0) continue;
+
 		WUTemplate = WUTemplates[Idx];
 		
 		if (WUTemplate.CanApplyUpgradeToWeapon(Item, Item.GetMyWeaponUpgradeCount())

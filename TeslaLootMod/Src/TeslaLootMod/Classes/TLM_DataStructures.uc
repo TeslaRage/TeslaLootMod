@@ -21,9 +21,14 @@ struct LootBoxData
 struct UpgradeDeckData
 {
 	var name UpgradeName;
+	var int Weight;							// Must be a number greater than 0. Default is 5.
 	var bool bMustHaveAbility;				// Set to True if TLM needs to check that this upgrade must have an ability
 	var array<name> AllowedWeaponCats;
 	var array<name> DisallowedWeaponCats;
+
+	structdefaultproperties{
+		Weight = 5;
+	}
 };
 
 struct AmmoConversionData
@@ -59,9 +64,14 @@ struct AbilityUpgradeData
 };
 
 struct BaseItemData{
-	var name TemplateName;	
+	var name TemplateName;
+	var int Weight;							// Must be a number greater than 0. Default is 5.
 	var name ForcedRarity;
 	var string Image;
+
+	structdefaultproperties{
+		Weight = 5;
+	}
 };
 
 struct RarityDeckData
@@ -159,4 +169,10 @@ struct DecksForAutoIconsAndMEData
 {
 	var name UpgradeDeckTemplateName;
 	var bool SetMutualExclusives;
+};
+
+struct ItemWeightData
+{
+	var int Index;
+	var int Weight;
 };
