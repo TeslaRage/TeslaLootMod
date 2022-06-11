@@ -332,10 +332,13 @@ static function CreateTLMItemState(XComGameState NewGameState, XComGameState_Ite
 
 static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
 {		
-	local X2ItemTemplateManager ItemTemplateMan;	
-	local X2BaseWeaponDeckTemplateManager BWMan;	
-	local array<BaseItemData> QualifiedBaseItems;	
+	local X2ItemTemplateManager ItemTemplateMan;
+	local X2BaseWeaponDeckTemplateManager BWMan;
+	local array<BaseItemData> QualifiedBaseItems;
+	local array<ItemWeightData> ItemWeights;
+	local ItemWeightData ItemWeight;
 	local name ItemTemplateName;
+	local int i;
 
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
 	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
@@ -346,7 +349,24 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 		`LOG("TLM ERROR: Unable to determine base weapon deck template");
 
 	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
-	ItemTemplateName = QualifiedBaseItems[`SYNC_RAND_STATIC(QualifiedBaseItems.Length)].TemplateName;
+
+	for (i = 0; i < QualifiedBaseItems.Length; i++)
+	{
+		ItemWeight.Index = i;
+		ItemWeight.Weight = QualifiedBaseItems[i].Weight;
+		ItemWeights.AddItem(ItemWeight);
+	}
+
+	i = GetWeightBasedIndex(ItemWeights);
+	if (i < 0)
+	{
+		ItemTemplateName = QualifiedBaseItems[`SYNC_RAND_STATIC(QualifiedBaseItems.Length)].TemplateName;
+	}
+	else
+	{
+		ItemTemplateName = QualifiedBaseItems[i].TemplateName;
+	}
+
 	ItemTemplate = ItemTemplateMan.FindItemTemplate(ItemTemplateName);
 }
 
@@ -557,6 +577,40 @@ static function PatchWeaponUpgrades()
 			}
 		}
 	}
+}
+
+static function int GetWeightBasedIndex(array<ItemWeightData> ItemWeights)
+{
+	local int Rand, i, TotalWeight;	
+
+	// Calculate total weight
+	for (i = 0; i < ItemWeights.Length; i++)
+	{
+		// We cannot have 0 or less than that
+		if (ItemWeights[i].Weight <= 0)
+		{
+			ItemWeights[i].Weight = 1;
+		}
+		TotalWeight += ItemWeights[i].Weight;
+	}
+
+	Rand = `SYNC_RAND_STATIC(TotalWeight);
+
+	for (i = 0; i < ItemWeights.Length; i++)
+	{
+		if (Rand < ItemWeights[i].Weight)
+		{
+			return ItemWeights[i].Index;
+		}
+		else
+		{
+			Rand -= ItemWeights[i].Weight;
+		}
+	}
+
+	// Should not reach here
+	`RedScreen("GetWeightBasedIndex() failed to return a proper index");
+	return -1;
 }
 
 // =============
