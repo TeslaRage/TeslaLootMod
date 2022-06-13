@@ -4,27 +4,27 @@
 
 [UnlockRareBox X2TechTemplate_TLM]
 DisplayName="Unlock Rare Lockbox"
-Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+Summary="We have heard of these lockboxes but seeing one in person is surreal. This does not look like it was made by Advent. Seems safe to crack it open and anything we find could very well be useful."
 
 [UnlockEpicBox X2TechTemplate_TLM]
 DisplayName="Unlock Epic Lockbox"
-Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+Summary="Very similar to the more common ones we found. The inscription is illegible but seems to denote this equipment may be more powerful than common equipments we have gotten from these lockboxes."
 
 [UnlockLegoBox X2TechTemplate_TLM]
 DisplayName="Unlock Legendary Lockbox"
-Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+Summary="Reinforced. Complex locking mechanism. Very well built. The equipment in here must be very precious to someone."
 
 [UnlockRareBoxInstant X2TechTemplate_TLM]
 DisplayName="Unlock Rare Lockbox (Instant)"
-Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+Summary="We have heard of these lockboxes but seeing one in person is surreal. This does not look like it was made by Advent. Seems safe to crack it open and anything we find could very well be useful."
 
 [UnlockEpicBoxInstant X2TechTemplate_TLM]
 DisplayName="Unlock Epic Lockbox (Instant)"
-Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+Summary="Very similar to the more common ones we found. The inscription is illegible but seems to denote this equipment may be more powerful than common equipments we have gotten from these lockboxes."
 
 [UnlockLegoBoxInstant X2TechTemplate_TLM]
 DisplayName="Unlock Legendary Lockbox (Instant)"
-Summary="Our troops recovered a lockbox from the field, and there might be something useful in here..."
+Summary="Reinforced. Complex locking mechanism. Very well built. The equipment in here must be very precious to someone."
 
 ;============================================
 ; ITEM TEMPLATES
@@ -33,17 +33,17 @@ Summary="Our troops recovered a lockbox from the field, and there might be somet
 [RareBox X2ItemTemplate_LootBox]
 FriendlyName="Rare Lockbox"
 FriendlyNamePlural="Rare Lockboxes"
-BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Potentially..."
+BriefSummary="We have heard of these lockboxes but seeing one in person is surreal. This does not look like it was made by Advent. Seems safe to crack it open and anything we find could very well be useful."
 
 [EpicBox X2ItemTemplate_LootBox]
 FriendlyName="Epic Lockbox"
 FriendlyNamePlural="Epic Lockboxes"
-BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Potentially..."
+BriefSummary="Very similar to the more common ones we found. The inscription is illegible but seems to denote this equipment may be more powerful than common equipments we have gotten from these lockboxes."
 
 [LegoBox X2ItemTemplate_LootBox]
 FriendlyName="Legendary Lockbox"
 FriendlyNamePlural="Legendary Lockboxes"
-BriefSummary="A mysterious lockbox... Potentially containing useful stuff... Potentially..."
+BriefSummary="Reinforced. Complex locking mechanism. Very well built. The equipment in here must be very precious to someone."
 
 ;============================================
 ; AMMO UPGRADES - BASIC
