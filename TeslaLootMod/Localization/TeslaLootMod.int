@@ -127,6 +127,30 @@ FriendlyNamePlural="Acid Rounds"
 BriefSummary="Made by MrShadowCX Industries, these rounds burn the target for added damage."
 TinySummary="+Ammo Bonus, -Clip size"
 
+[TLMUpgrade_RedscreenRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Redscreen Rounds"
+FriendlyNamePlural="Redscreen Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds sacrifices the added damage output of Bluescreen Round but greatly lowers the hack defense of the robotic target."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_AshBlackIceRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Black ICE Rounds"
+FriendlyNamePlural="Black ICE Rounds"
+BriefSummary="Made by Ashlynne, a mysterious inventor, these rounds carry a weaponized version of the Black ICE Protocol that Shen has developed.  Upon delivery, the virus is capable of shutting down and causing severe internal damage to robotic and tech reliant enemies."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_AshViperRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Viper Rounds"
+FriendlyNamePlural="Viper Rounds"
+BriefSummary="Made by Ashlynne, a mysterious inventor, these rounds combine the mixtures found within a Viper's poison glands with our own experimental ammo, these are a more effective venom rounds."
+TinySummary="+Ammo Bonus, -Clip size"
+
+[TLMUpgrade_AshInfernoRounds X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Inferno Rounds"
+FriendlyNamePlural="Inferno Rounds"
+BriefSummary="Made by Ashlynne, a mysterious inventor, these rounds incorporate the mixtures found within a Flame Viper's glands into an explosive cap, a specialized round that inflicts substantial damage on impact as well as sets the target on fire."
+TinySummary="+Ammo Bonus, -Clip size"
+
 ;============================================
 ; AMMO UPGRADES - ADVANCED
 ;============================================
@@ -207,6 +231,30 @@ TinySummary="+Ammo Bonus, +Clip size"
 FriendlyName="Advanced Acid Rounds"
 FriendlyNamePlural="Acid Rounds"
 BriefSummary="Made by MrShadowCX Industries, these rounds burn the target for added damage."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_RedscreenRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Redscreen Rounds"
+FriendlyNamePlural="Redscreen Rounds"
+BriefSummary="Made by MrShadowCX Industries, these rounds sacrifices the added damage output of Bluescreen Round but greatly lowers the hack defense of the robotic target."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_AshBlackIceRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Black ICE Rounds"
+FriendlyNamePlural="Black ICE Rounds"
+BriefSummary="Made by Ashlynne, a mysterious inventor, these rounds carry a weaponized version of the Black ICE Protocol that Shen has developed.  Upon delivery, the virus is capable of shutting down and causing severe internal damage to robotic and tech reliant enemies."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_AshViperRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Viper Rounds"
+FriendlyNamePlural="Viper Rounds"
+BriefSummary="Made by Ashlynne, a mysterious inventor, these rounds combine the mixtures found within a Viper's poison glands with our own experimental ammo, these are a more effective venom rounds."
+TinySummary="+Ammo Bonus, +Clip size"
+
+[TLMUpgrade_AshInfernoRoundsAdv X2WeaponUpgradeTemplate_TLMAmmo]
+FriendlyName="Advanced Inferno Rounds"
+FriendlyNamePlural="Inferno Rounds"
+BriefSummary="Made by Ashlynne, a mysterious inventor, these rounds incorporate the mixtures found within a Flame Viper's glands into an explosive cap, a specialized round that inflicts substantial damage on impact as well as sets the target on fire."
 TinySummary="+Ammo Bonus, +Clip size"
 
 ;============================================
