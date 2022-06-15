@@ -15,6 +15,7 @@
     <Folder Include="Config\Item Patcher" />
     <Folder Include="Config\Base Item Decks - ABW" />
     <Folder Include="Config\Base Item Decks - 5TWO and LWotC" />
+    <Folder Include="Config\Upgrade Decks - PExM" />
     <Folder Include="Config\Upgrade Decks - Armor" />
     <Folder Include="Config\Upgrade Decks - Melee" />
     <Folder Include="Config\Upgrade Decks - Shield" />
@@ -46,6 +47,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\Upgrade Decks - Melee\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Upgrade Decks - PExM\XComTLM.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\Upgrade Decks - Shield\XComTLM.ini">
