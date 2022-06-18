@@ -20,8 +20,16 @@ static function X2DataTemplate CreateUnlockLockboxTemplate(TechData UnlockLootBo
 	local X2TechTemplate_TLM Template;	
 
 	`CREATE_X2TEMPLATE(class'X2TechTemplate_TLM', Template, UnlockLootBoxTech.TemplateName);
-	
-	Template.strImage = UnlockLootBoxTech.Image;	
+
+	if (class'X2Helper_TLM'.static.IsModLoaded(UnlockLootBoxTech.AltImage.DLC))
+	{
+		Template.strImage = UnlockLootBoxTech.AltImage.AltstrImage;
+	}
+	else
+	{
+		Template.strImage = UnlockLootBoxTech.Image;
+	}
+
 	Template.SortingTier = UnlockLootBoxTech.SortingTier;
 	Template.ResearchCompletedFn = UnlockLootBoxCompleted;
 

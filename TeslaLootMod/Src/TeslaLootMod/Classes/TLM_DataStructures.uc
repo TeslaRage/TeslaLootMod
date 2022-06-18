@@ -1,10 +1,17 @@
 class TLM_DataStructures extends Object;
 
+struct AltImageData
+{
+	var string AltstrImage;
+	var name DLC;
+};
+
 struct TechData
 {
 	var name TemplateName;
 	var int SortingTier;
 	var string Image;
+	var AltImageData AltImage;
 };
 
 struct LootBoxRarityData
@@ -16,6 +23,8 @@ struct LootBoxRarityData
 struct LootBoxData
 {
 	var name LootBoxName;
+	var string strImage;
+	var AltImageData AltImage;
 };
 
 struct UpgradeDeckData

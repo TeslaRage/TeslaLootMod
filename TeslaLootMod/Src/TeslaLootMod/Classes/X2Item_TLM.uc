@@ -9,7 +9,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	foreach default.LootBoxes(LootBox)
 	{
-		Resources.AddItem(CreateLockBox(LootBox.LootBoxName));
+		Resources.AddItem(CreateLockBox(LootBox));
 	}
     Resources.AddItem(CreateLockboxKey());
 
@@ -31,14 +31,23 @@ static function X2DataTemplate CreateLockboxKey()
 	return Template;
 }
 
-static function X2DataTemplate CreateLockBox(name TemplateName)
+static function X2DataTemplate CreateLockBox(LootBoxData LootBox)
 {
 	local X2ItemTemplate_LootBox Template;
 
-	`CREATE_X2TEMPLATE(class'X2ItemTemplate_LootBox', Template, TemplateName);
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate_LootBox', Template, LootBox.LootBoxName);
 
 	Template.LootStaticMesh = StaticMesh'UI_3D.Loot.AdventDatapad';
-	Template.strImage = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_Storage_Module";
+	
+	if (class'X2Helper_TLM'.static.IsModLoaded(LootBox.AltImage.DLC))
+	{
+		Template.strImage = LootBox.AltImage.AltstrImage;
+	}
+	else
+	{
+		Template.strImage = LootBox.strImage;
+	}
+	
 	Template.ItemCat = 'utility';
 	Template.CanBeBuilt = false;
 	Template.HideInInventory = false;

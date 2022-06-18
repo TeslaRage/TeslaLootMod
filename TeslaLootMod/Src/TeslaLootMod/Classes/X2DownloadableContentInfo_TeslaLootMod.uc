@@ -713,3 +713,28 @@ exec function TLM_PrintCurrentBaseItems(name RarityTemplateName)
 		class'Helpers'.static.OutputMsg("Template Name:" @ QualifiedBaseItem.TemplateName);
 	}
 }
+
+exec function TLM_PrintPotentialUpgrades()
+{
+	local X2UpgradeDeckTemplateManager UDMan;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local array<string> strOutput;
+	local string strTemp;
+
+	UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+	WUTemplates = UDMan.GetAllUpgradeTemplates();
+
+	foreach WUTemplates(WUTemplate)
+	{
+		strTemp = "Upgrade:" @ WUTemplate.GetItemFriendlyName() @"-" @ WUTemplate.GetItemBriefSummary();
+		if (strOutput.Find(strTemp) == INDEX_NONE)
+			strOutput.AddItem(strTemp);
+	}
+
+	foreach strOutput(strTemp)
+	{
+		class'Helpers'.static.OutputMsg(strTemp);
+		`LOG(strTemp, true, 'TLMPrint');
+	}
+}
