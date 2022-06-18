@@ -165,7 +165,8 @@ static function UpdateWeaponUpgrade()
 				break;
 		}
 
-		if (strColor != "")
+		// Only if coloring is configured, and only when the upgrade has not been colored
+		if (strColor != "" && InStr(WUTemplate.FriendlyName, "</font>") == INDEX_NONE)
 			WUTemplate.FriendlyName = "<font color='" $strColor $"'>" $WUTemplate.FriendlyName $"</font>";
 	}
 
