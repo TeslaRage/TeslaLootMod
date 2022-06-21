@@ -2,6 +2,7 @@ class X2UpgradeDeckTemplate extends X2DataTemplate config(TLM);
 
 var config ItemCatData AllowedItemCat;
 var config array<name> AllowedCats;
+var config array<name> RequiredAbilitiesOnEquipment;
 var config array<UpgradeDeckData> Upgrades;
 
 var Delegate<ModifyNickNameDelegate> ModifyNickNameFn;
@@ -68,6 +69,10 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 
 function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_Item Item, UpgradeDeckData Upgrade)
 {
+	local X2EquipmentTemplate EqTemplate;
+	local name AbilityName;
+	local bool bRequiredAbilityFound;
+
 	// Go through the basic validation first
 	if (!WUTemplate.CanApplyUpgradeToWeapon(Item, Item.GetMyWeaponUpgradeCount()))
 		return false;
@@ -87,6 +92,26 @@ function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_
 		return false;
 	else if (Upgrade.DisallowedWeaponCats.Find(Item.GetWeaponCategory()) != INDEX_NONE)
 		return false;
+
+	// Checks to make sure that the item has required ability before any upgrade from this
+	// deck can be applied. This is useful in cases where a weapon with built in ammo effect
+	// is part of the base item deck.
+	EqTemplate = X2EquipmentTemplate(Item.GetMyTemplate());
+
+	if (EqTemplate != none && RequiredAbilitiesOnEquipment.Length > 0)
+	{
+		foreach EqTemplate.Abilities(AbilityName)
+		{
+			if (RequiredAbilitiesOnEquipment.Find(AbilityName) != INDEX_NONE)
+			{
+				bRequiredAbilityFound = true;
+				break;
+			}
+		}
+
+		if (!bRequiredAbilityFound)
+			return false;
+	}
 
 	// If we reach here, it means the upgrade is good for this item
 	return true;
