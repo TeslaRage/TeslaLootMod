@@ -17,7 +17,7 @@ simulated function Name GetLibraryID()
 	{	
 	case 'eAlert_TLMItemRewarded': return 'Alert_ItemAvailable';
 	default:
-		return '';
+		return 'Alert_ItemAvailable';
 	}
 }
 

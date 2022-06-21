@@ -47,6 +47,9 @@ static function UnlockLootBoxCompleted(XComGameState NewGameState, XComGameState
 	local XComGameState_HeadquartersXCom XComHQ;		
 	local X2BaseWeaponDeckTemplate BWTemplate;
 	local XComGameState_Item Item;
+	local UIChooseClass_TLM ChooseItemScreen;
+	local UIAlert_TLM AlertScreen;
+	local XComHQPresentationLayer HQPres;
 
 	XComHQ = `XCOMHQ;	
 	
@@ -63,7 +66,14 @@ static function UnlockLootBoxCompleted(XComGameState NewGameState, XComGameState
 
 	class'X2Helper_TLM'.static.FindAndMakeTechInstant(NewGameState, TechState);
 
-	UIItemReceived(NewGameState, Item, BWTemplate);
+	HQPres = `HQPRES;
+	AlertScreen = HQPres.Spawn(class'UIAlert_TLM', HQPres);
+	ChooseItemScreen = HQPres.Spawn(class'UIChooseClass_TLM', HQPres);
+	ChooseItemScreen.m_arrItems.AddItem(Item);
+	HQPres.ScreenStack.Push(ChooseItemScreen);
+	HQPres.ScreenStack.Push(AlertScreen);
+
+	// UIItemReceived(NewGameState, Item, BWTemplate);
 }
 
 static function UIItemReceived(XComGameState NewGameState, XComGameState_Item Item, X2BaseWeaponDeckTemplate BWTemplate)
