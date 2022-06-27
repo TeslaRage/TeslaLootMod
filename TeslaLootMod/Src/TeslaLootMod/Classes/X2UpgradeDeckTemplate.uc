@@ -61,6 +61,8 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 		}		
 	}
 
+	ValidateItem(Item);
+
 	if (ModifyNickNameFn != none && bApplyNick)
 	{
 		Item.NickName = ModifyNickNameFn(AppliedUpgrades, Item);
@@ -188,4 +190,53 @@ function bool ValidateTemplate (out string strError)
 	}
 
 	return true;
+}
+
+function ValidateItem(XComGameState_Item Item)
+{
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local X2WeaponTemplate WTemplate;
+	local int i, ClipSize;
+	local bool bReapply;
+
+	// If the upgrades attached has caused the weapon to have clip size of less than 1,
+	// remove the upgrade from the weapon. This also means the weapon will end up with less
+	// upgrades than anticipated.
+
+	WTemplate = X2WeaponTemplate(Item.GetMyTemplate());
+
+	if (WTemplate != none && WTemplate.iClipSize > 0 && Item.GetClipSize() < 1)
+	{
+		ClipSize = Item.GetClipSize();
+
+		WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+
+		// Filter weapon upgrades, only saving the ones we need to reapply
+		for (i = 0; i < WUTemplates.Length; i++)
+		{
+			if (WUTemplates[i].ClipSizeBonus < 0)
+			{
+				ClipSize += (WUTemplates[i].ClipSizeBonus * -1);
+				WUTemplates.Remove(i, 1);
+				i--;
+				bReapply = true;
+
+				if (ClipSize > 0) break;
+
+				continue;
+			}
+		}
+
+		// Reapply as needed
+		if (bReapply)
+		{
+			Item.WipeUpgradeTemplates();
+
+			foreach WUTemplates(WUTemplate)
+			{
+				Item.ApplyWeaponUpgradeTemplate(WUTemplate);
+			}
+		}
+	}
 }

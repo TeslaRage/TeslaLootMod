@@ -153,6 +153,12 @@ static function bool CanApplyTLMUpgradeToWeapon(X2WeaponUpgradeTemplate UpgradeT
 		}
 	}
 
+	// If upgrade template to be attached will reduce the clip size to less than 1, don't allow it
+	if (Weapon.GetClipSize() + UpgradeTemplate.ClipSizeBonus <= 0)
+	{
+		return false;
+	}
+
 	// The rest of this check was copied from CanApplyUpgradeToWeapon delegate from base game
 	AttachedUpgradeTemplates = Weapon.GetMyWeaponUpgradeTemplates();
 
