@@ -85,6 +85,9 @@
     <Content Include="Src\TeslaLootMod\Classes\UIChooseClass_TLM.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\TeslaLootMod\Classes\UIScreenListener_TLMTech.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\TeslaLootMod\Classes\X2Ability_TLM.uc">
       <SubType>Content</SubType>
     </Content>

@@ -4,7 +4,7 @@ var config int Tier;
 var config StrategyRequirement Requirements;
 var config array<BaseItemData> BaseItems;
 
-function array<BaseItemData> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState NewGameState)
+function array<BaseItemData> GetBaseItems(X2RarityTemplate RarityTemplate, XComGameState NewGameState, optional name Category)
 {
 	local XComGameState_HeadquartersXCom XComHQ;
 	local X2ItemTemplateManager ItemMan;
@@ -12,6 +12,7 @@ function array<BaseItemData> GetBaseItems(X2RarityTemplate RarityTemplate, XComG
 	local array<BaseItemData> QualifiedBaseItems;
 	local X2ItemTemplate ItemTemplate, SchematicTemplate;
 	local StrategyRequirement ItemRequirements;
+	local X2WeaponTemplate WeaponTemplate;
 	local name ForcedRarityName;	
 
 	XComHQ = `XCOMHQ;
@@ -21,6 +22,20 @@ function array<BaseItemData> GetBaseItems(X2RarityTemplate RarityTemplate, XComG
 	{	
 		ItemTemplate = ItemMan.FindItemTemplate(BaseItem.TemplateName);
 		if (ItemTemplate == none) continue;
+
+		// Filter by category
+		if (Category != '')
+		{
+			WeaponTemplate = X2WeaponTemplate(ItemTemplate);
+			if (WeaponTemplate != none)
+			{
+				if (WeaponTemplate.WeaponCat != Category) continue;
+			}
+			else
+			{
+				if (ItemTemplate.ItemCat != Category) continue;
+			}
+		}
 
 		// Requirement wise, we only want to check RequiredTechs
 		ItemRequirements.RequiredTechs = ItemTemplate.Requirements.RequiredTechs;

@@ -287,17 +287,20 @@ static function SetDelegatesToUpgradeDecks()
 	}
 }
 
-static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, XComGameState_Tech Tech, out X2BaseWeaponDeckTemplate BWTemplate)
+static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, XComGameState_Tech Tech, out X2BaseWeaponDeckTemplate BWTemplate, optional name Category, optional X2RarityTemplate RarityTemplate)
 {
 	local X2ItemTemplateManager ItemMan;
 	local XComGameState_Item Item;
 	local X2ItemTemplate ItemTemplate;	
-	local X2RarityTemplate RarityTemplate;
+	// local X2RarityTemplate RarityTemplate;
 
-	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
-	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity();
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	if (RarityTemplate == none)
+	{
+		RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity();
+	}
 
-	GetBaseItem(BWTemplate, ItemTemplate, RarityTemplate, NewGameState);
+	GetBaseItem(BWTemplate, ItemTemplate, RarityTemplate, NewGameState, Category);
 	Item = ItemTemplate.CreateInstanceFromTemplate(NewGameState);	
 
 	if (Item == none)
@@ -331,7 +334,7 @@ static function CreateTLMItemState(XComGameState NewGameState, XComGameState_Ite
 	Item.AddComponentObject(Data);
 }
 
-static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
+static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState, optional name Category)
 {		
 	local X2ItemTemplateManager ItemTemplateMan;
 	local X2BaseWeaponDeckTemplateManager BWMan;
@@ -349,7 +352,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	if (BWTemplate == none)
 		`LOG("TLM ERROR: Unable to determine base weapon deck template");
 
-	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
+	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState, Category);
 
 	for (i = 0; i < QualifiedBaseItems.Length; i++)
 	{
