@@ -2,26 +2,36 @@ class TLM_DataStructures extends Object;
 
 enum ETLMCatType
 {
-	eCat_Shotgun,
-	eCat_Cannon,
-	eCat_Pistol,
-	eCat_SniperRifle,
+	// Base Game Primaries
 	eCat_Rifle,
-	eCat_VektorRifle,
-	eCat_Bullpup,
-	eCat_Sidearm,
-	eCat_SparkRifle,
-	eCat_Smg,
-	eCat_Gremlin,
+	eCat_Cannon,
+	eCat_Shotgun,
+	eCat_SniperRifle,
+	// Base Game Secondaries
 	eCat_GrenadeLauncher,
+	eCat_Gremlin,
+	eCat_Pistol,
 	eCat_PsiAmp,
 	eCat_Sword,
-	eCat_CombatKnife,
+	// WOTC Primaries
+	eCat_VektorRifle,
+	eCat_Bullpup,
 	eCat_Gauntlet,
+	// WOTC Secondaries
+	eCat_Sidearm,
 	eCat_Wristblade,
+	// DLC3 SPARKS
+	eCat_SparkRifle,
+	// Modded Common Primaries
+	eCat_Smg,
 	eCat_Glaive,
+	eCat_Chemthrower,
+	// Modded Common Secondaries
+	eCat_CombatKnife,
 	eCat_Shield,
 	eCat_SparkShield,
+	eCat_Canister,
+	// Other
 	eCat_Armor,
 	eCat_Rando,
 	// For additional categories
