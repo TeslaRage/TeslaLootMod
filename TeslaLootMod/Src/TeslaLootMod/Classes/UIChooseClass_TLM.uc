@@ -15,6 +15,7 @@ var X2RarityTemplate RarityTemplate;
 var XComGameState TempGameState;
 
 var config int NumOfCategoriesToChooseFrom;
+var config array<CatEnumData> CatToEnum;
 var array<name> SelectedCategories;
 
 var init localized string CatLabels[ETLMCatType.EnumCount]<BoundEnum=ETLMCatType>;
@@ -23,6 +24,7 @@ var init localized string CatImages[ETLMCatType.EnumCount]<BoundEnum=ETLMCatType
 
 var localized string m_strTitle, m_strSubTitleTitle;
 var localized string m_strInventoryLabel, m_strEmptyListTitle;
+var localized string m_strTopObtained, m_strEquippedOn, m_strAvailable;
 
 var XComGameStateHistory History;
 var XComGameState_HeadquartersXCom XComHQ;
@@ -78,6 +80,10 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 
 simulated function BuildScreen()
 {
+	local int MyX, MyY, MyW, MyH;
+
+	MyX = 430;  MyY = 150;  MyW = 1065;  MyH = 750;
+
 	//box to hold all the elements
 	ScreenContainer = Spawn(class'UIPanel', self);
 	ScreenContainer.InitPanel();
@@ -86,14 +92,14 @@ simulated function BuildScreen()
 	ScreenBG = Spawn(class'UIBGBox', ScreenContainer);
 	ScreenBG.bAnimateOnInit = false;
 	ScreenBG.InitPanel('BG1', class'UIUtilities_Controls'.const.MC_X2Background);
-	ScreenBG.SetSize(1440, 750);
-	ScreenBG.SetPosition(250, 150);
+	ScreenBG.SetSize(MyW, MyH);
+	ScreenBG.SetPosition(MyX, MyY);
 
 	//main title
 	TitleHeader = Spawn(class'UIX2PanelHeader', ScreenContainer);
 	TitleHeader.InitPanelHeader('TitleHeader', m_strTitle, m_strSubTitleTitle);
-	TitleHeader.SetHeaderWidth(1430);
-	TitleHeader.SetPosition(255, 155);
+	TitleHeader.SetHeaderWidth(MyW -10);
+	TitleHeader.SetPosition(MyX +5, MyY +5);
 	if( m_strTitle == "" && m_strSubTitleTitle == "" )
 	{
 		TitleHeader.Hide();
@@ -104,13 +110,13 @@ simulated function BuildScreen()
 	SplitLine.InitPanel('', class'UIUtilities_Controls'.const.MC_GenericPixel);
     SplitLine.SetColor( class'UIUtilities_Colors'.const.NORMAL_HTML_COLOR );
     SplitLine.SetAlpha( 15 );
-	SplitLine.SetSize( 1430, 2 );
-    SplitLine.SetPosition(255, 196);
+	SplitLine.SetSize( MyW -10, 2 );
+    SplitLine.SetPosition(MyX +5, MyY +46);
 
 	//box to hold the list
 	ListContainer = Spawn(class'UIPanel', self);
 	ListContainer.InitPanel('InventoryContainer');
-	ListContainer.SetPosition(255, 165);
+	ListContainer.SetPosition(MyX +5, MyY +15);
 
 	//the list
 	List = Spawn(class'UIList', ListContainer);
@@ -121,7 +127,7 @@ simulated function BuildScreen()
 	List.OnItemClicked = OnItemChoiceMade;
 	List.OnSelectionChanged = SelectedItemChanged;
 	List.bStickyHighlight = true;
-	List.SetSize(1400, 664);
+	List.SetSize(MyW -20, MyH -86);
 	List.ShrinkToFit();
 	List.SetPosition(15, 50);
 
@@ -302,13 +308,67 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 				
 				StatsComm.Title = CatType == eCat_Unknown ? string(SelectedCategories[i]) : CatLabels[CatType];
 				StatsComm.Image = "img:///" $ CatImages[CatType];
-				StatsComm.Desc = CatDescriptions[CatType];
+				StatsComm.Desc = CatDescriptions[CatType] $AppendAdditionalInfo(SelectedCategories[i]);
 				arrCommodoties.AddItem(StatsComm);
 			}
 		}
 	}
 
 	return arrCommodoties;
+}
+
+simulated function string AppendAdditionalInfo(name Category)
+{
+	local array<XComGameState_Item> Items;
+	local XComGameState_Item Item;
+	local XComGameState_Unit Unit;
+	local string AdditionalInfo, ItemIcon;
+
+	// Start build of details of items we currently own
+	Items = Class'X2Helper_TLM'.static.GetTLMItemsByCategory(Category);
+
+	if (Items.Length > 0)
+	{
+		ItemIcon = class'UIUtilities_Text'.static.InjectImage("img:///UILibrary_XPACK_StrategyImages.MissionIcon_SupplyDrop",  20, 20, -5);
+		AdditionalInfo @= m_strTopObtained;
+
+		foreach Items(Item)
+		{
+			// AdditionalInfo @= "<Bullet/>"; // does not show on screen
+			// Item template friendly name
+			AdditionalInfo $= ItemIcon @Item.GetMyTemplate().GetItemFriendlyName();
+
+			// If item has nickname, show it
+			if (Item.Nickname != "")
+			{
+				AdditionalInfo @= "(" $Item.Nickname $")";
+			}
+
+			// Show list of upgrades currently attached
+			// if (Item.GetMyWeaponUpgradeCount() > 0)
+			// {
+			// 	AdditionalInfo @= "- " $class'X2Helper_TLM'.static.GetWeaponUpgradesAsStr(Item, ", ");
+			// }
+
+			// If the item is currently equipped on someone, show it
+			if (Item.OwnerStateObject.ObjectID != 0)
+			{
+				Unit = XComGameState_Unit(History.GetGameStateForObjectID(Item.OwnerStateObject.ObjectID));
+				if (Unit != none)
+				{
+					AdditionalInfo @= "[" $m_strEquippedOn @Unit.GetFullName() $"]";
+				}
+			}
+			else
+			{
+				AdditionalInfo @= m_strAvailable;
+			}
+
+			AdditionalInfo $= "\n";
+		}
+	}
+
+	return AdditionalInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -385,34 +445,16 @@ function OnItemChoiceMade(UIList kList, int itemIndex)
 
 function ETLMCatType DetermineECAT(name Category)
 {
-	switch (Category)
+	local int Idx;
+
+	Idx = default.CatToEnum.Find('Category', Category);
+
+	if (Idx != INDEX_NONE)
 	{
-		case 'rifle': 				return eCat_Rifle; 				break;
-		case 'cannon': 				return eCat_Cannon; 			break;
-		case 'shotgun': 			return eCat_Shotgun; 			break;
-		case 'sniper_rifle': 		return eCat_SniperRifle; 		break;
-		case 'grenade_launcher':	return eCat_GrenadeLauncher;	break;
-		case 'gremlin': 			return eCat_Gremlin; 			break;
-		case 'pistol': 				return eCat_Pistol; 			break;
-		case 'psiamp': 				return eCat_PsiAmp; 			break;
-		case 'sword': 				return eCat_Sword; 				break;
-		case 'vektor_rifle': 		return eCat_VektorRifle; 		break;
-		case 'bullpup': 			return eCat_Bullpup; 			break;
-		case 'gauntlet': 			return eCat_Gauntlet; 			break;
-		case 'sidearm': 			return eCat_Sidearm; 			break;
-		case 'wristblade': 			return eCat_Wristblade; 		break;
-		case 'sparkrifle': 			return eCat_SparkRifle; 		break;
-		case 'smg': 				return eCat_Smg; 				break;
-		case 'glaive': 				return eCat_Glaive; 			break;
-		case 'chemthrower': 		return eCat_Chemthrower; 		break;
-		case 'combatknife': 		return eCat_CombatKnife; 		break;
-		case 'shield': 				return eCat_Shield; 			break;
-		case 'spark_shield': 		return eCat_SparkShield; 		break;
-		case 'canister': 			return eCat_Canister; 			break;
-		case 'armor': 				return eCat_Armor; 				break;
-		case 'TLMRandom': 			return eCat_Rando; 				break;
-		default: 					return eCat_Unknown;
+		return default.CatToEnum[Idx].CatType;
 	}
+
+	return eCat_Unknown;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

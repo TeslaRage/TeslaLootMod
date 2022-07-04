@@ -49,6 +49,12 @@ enum ETLMCatType
 	eCat_Unknown,
 };
 
+struct CatEnumData
+{
+	var name Category;
+	var ETLMCatType CatType;
+};
+
 struct AltImageData
 {
 	var string AltstrImage;
@@ -233,4 +239,10 @@ struct ItemWeightData
 {
 	var int Index;
 	var int Weight;
+};
+
+struct TopItemsData
+{
+	var XComGameState_Item Item;
+	var int Tier;
 };

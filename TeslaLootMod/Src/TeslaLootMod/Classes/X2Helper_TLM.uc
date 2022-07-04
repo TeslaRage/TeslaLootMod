@@ -617,6 +617,179 @@ static function int GetWeightBasedIndex(array<ItemWeightData> ItemWeights)
 	return -1;
 }
 
+static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+	local XComGameStateHistory History;
+	local StateObjectReference ItemRef, UnitRef;
+	local XComGameState_Item Item;
+	local XComGameState_Unit Unit;
+	local array<XComGameState_Item> Items;
+	local array<TopItemsData> TopItems;
+	local TopItemsData TopItem;
+	local int i;
+
+	XComHQ = `XCOMHQ;
+	History = `XCOMHISTORY;
+
+	foreach XComHQ.Inventory(ItemRef)
+	{
+		Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+		if (Item == none) continue;
+
+		if (!IsATLMItem(Item)) continue;
+
+		if (GetTLMItemCategory(Item) == Category)
+		{
+			// Items.AddItem(Item);
+			TopItem.Item = Item;
+			TopItem.Tier = Item.GetMyTemplate().Tier;
+			TopItems.AddItem(TopItem);
+		}
+	}
+
+	foreach XComHQ.Crew(UnitRef)
+	{
+		Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (Unit == none) continue;
+
+		foreach Unit.InventoryItems(ItemRef)
+		{
+			Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+			if (Item == none) continue;
+
+			if (!IsATLMItem(Item)) continue;
+
+			if (GetTLMItemCategory(Item) == Category)
+			{
+				// Items.AddItem(Item);
+				TopItem.Item = Item;
+				TopItem.Tier = Item.GetMyTemplate().Tier;
+				TopItems.AddItem(TopItem);
+			}
+		}
+	}
+
+	// `LOG("Category: " $Category $"==================================", true, 'TLMDEBUG');
+	// `LOG("Before sort:", true, 'TLMDEBUG');
+	// foreach TopItems(TopItem)
+	// {
+	// 	`LOG(TopItem.Item.GetMyTemplate().DataName $"|" $TopItem.Tier, true, 'TLMDEBUG');
+	// }
+
+	TopItems.Sort(SortByTier);
+
+	// `LOG("After sort:", true, 'TLMDEBUG');
+	// foreach TopItems(TopItem)
+	// {
+	// 	`LOG(TopItem.Item.GetMyTemplate().DataName $"|" $TopItem.Tier, true, 'TLMDEBUG');
+	// }
+
+	i = 0;
+	foreach TopItems(TopItem)
+	{
+		if (i >= 3) break;
+
+		Items.AddItem(TopItem.Item);
+		i++;
+	}
+
+	return Items;
+}
+
+static function bool IsATLMItem(XComGameState_Item Item)
+{
+	local XComGameState_ItemData Data;
+
+	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
+	if (Data != none) return true;
+
+	return false;
+}
+
+static function name GetTLMItemCategory(XComGameState_Item Item)
+{
+	local X2WeaponTemplate WTemplate;
+
+	if (Item.GetMyTemplate().IsA('X2WeaponTemplate'))
+	{
+		WTemplate = X2WeaponTemplate(Item.GetMyTemplate());
+		if (WTemplate != none)
+		{
+			return WTemplate.WeaponCat;
+		}
+	}
+	else
+	{
+		return Item.GetMyTemplate().ItemCat;
+	}
+
+	return '';
+}
+
+simulated function int SortByTier(TopItemsData A, TopItemsData B)
+{
+	local int TierA, TierB;
+
+	TierA = A.Tier;
+	TierB = B.Tier;
+
+	if (TierA > TierB)
+	{
+		return 1;
+	}
+	else if (TierA < TierB)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+static function string GetWeaponUpgradesAsStr(XComGameState_Item Item, string Separator)
+{
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local array<string> ItemsFriendlyNames;
+	local int i;
+	local string strWeaponUpgrades;
+
+	if (Item != none)
+	{
+		if (Item.GetMyWeaponUpgradeCount() > 0)
+		{
+			WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+
+			for (i = 0; i < WUTemplates.Length; i++)
+			{
+				ItemsFriendlyNames.AddItem(WUTemplates[i].GetItemFriendlyName());
+			}
+			
+			class'Object'.static.JoinArray(ItemsFriendlyNames, strWeaponUpgrades, Separator);
+		}
+	}
+	return strWeaponUpgrades;
+}
+
+// TODO: Finish this up
+static function GetSoldiersCanEquipCat(name Category)
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+	local XComGameStateHistory History;
+	local StateObjectReference UnitRef;
+	local XComGameState_Unit Unit;
+
+	XComHQ = `XCOMHQ;
+	History = `XCOMHISTORY;
+
+	foreach XComHQ.Crew(UnitRef)
+	{
+		Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (Unit == none) continue;
+
+		// if (Unit.CanAddItemToInventory())
+	}
+}
+
 // =============
 // DELEGATES
 // =============

@@ -31,6 +31,10 @@ simulated function UIListItemString_TLM InitTLMListItem(optional name InitName,
 														optional string InitDescription,
 														optional string InitHexColor)
 {
+	local int MyX, MyY, MyW, MyH;
+
+	MyX = 0;  MyY = 0;  MyW = 330;  MyH = 660;
+	
 	InitPanel(InitName);
 
 	strHexColor = InitHexColor;
@@ -40,48 +44,48 @@ simulated function UIListItemString_TLM InitTLMListItem(optional name InitName,
 	BoundingBox.bAnimateOnInit = false;
 	BoundingBox.InitBG('BoundingBox');
 	BoundingBox.SetOutline(true);
-	BoundingBox.SetSize(325, 650);
+	BoundingBox.SetSize(Myw -5, MyH -10);
 	BoundingBox.SetColor(class'UIUtilities_Colors'.const.FADED_HTML_COLOR);
 	BoundingBox.SetAlpha(33);
 
 	//the item image
 	Image = Spawn(class'UIImage', self);
 	Image.InitImage('EntryImage1', InitImage);
-	Image.SetSize(256, 128); //half the size of the standard image file
-    Image.SetPosition(42,5);
+	Image.SetSize(256, 128); //half the size of the standard image file, needs to be a 2:1 ratio! hardset!
+	Image.SetPosition(MyX +((MyW - 256) /2), MyY +5); //37,5
 
 	//setup a 'linebreak'
 	SplitLine1 = Spawn(class'UIPanel', self);
 	SplitLine1.InitPanel('', class'UIUtilities_Controls'.const.MC_GenericPixel);
-	SplitLine1.SetSize( 303, 2 );
-    SplitLine1.SetPosition(10, 142);
+	SplitLine1.SetSize( MyW - 27, 2 );
+	SplitLine1.SetPosition(MyX +10, MyY +142);
 
-    //setup the text panel title
+	//setup the text panel title
 	TitleHeader = Spawn(class'UIX2PanelHeader', self);
 	TitleHeader.bAnimateOnInit = false;
 	TitleHeader.InitPanelHeader('EntryTitle', InitTitle, "");
-	TitleHeader.SetHeaderWidth(303);
+	TitleHeader.SetHeaderWidth(MyW -27);
 	TitleHeader.bRealizeOnSetText = true;	//allows recolouring of the title
-	TitleHeader.SetPosition(10, 140);
+	TitleHeader.SetPosition(MyX +10, MyY +140);
 
 	//setup a 'linebreak'
 	SplitLine2 = Spawn(class'UIPanel', self);
 	SplitLine2.InitPanel('', class'UIUtilities_Controls'.const.MC_GenericPixel);
-	SplitLine2.SetSize( 303, 2 );
-    SplitLine2.SetPosition(10, 180);
+	SplitLine2.SetSize( MyW -27, 2 );
+	SplitLine2.SetPosition(MyX +10, MyY +180);
 
-    //setup the text background panel
-    TextBG = Spawn(class'UIBGBox', self);
-    TextBG.LibID = class'UIUtilities_Controls'.const.MC_X2Background;
-    TextBG.InitBG('EntryText_BG', 4, 185, 315, 464); // pos x, pos y , width, height
+	//setup the text background panel
+	TextBG = Spawn(class'UIBGBox', self);
+	TextBG.LibID = class'UIUtilities_Controls'.const.MC_X2Background;
+	TextBG.InitBG('EntryText_BG',MyX +4, MyY +185, MyW -15, MyH -196); // pos x, pos y , width, height
 
-    //setup the main body description text, size and position
-    TextDescription = Spawn(class'UITextContainer', self);
+	//setup the main body description text, size and position
+	TextDescription = Spawn(class'UITextContainer', self);
 	TextDescription.scrollbarPadding = 8;	//never going to have a scrollbar for this element, so meh
-    TextDescription.InitTextContainer();
-    TextDescription.bAutoScroll = true;		//allow box to autoscroll as the twin scrollbar setup is busted
-    TextDescription.SetSize(303, 440);
-    TextDescription.SetPosition(10, 195);
+	TextDescription.InitTextContainer();
+	TextDescription.bAutoScroll = true;		//set box to autoscroll as the twin scrollbar setup is busted
+	TextDescription.SetSize(MyW -27, MyH -220);
+	TextDescription.SetPosition(MyX +10, MyY +195);
 	TextBG.ProcessMouseEvents(TextDescription.OnChildMouseEvent);
 
 	//perform initiation tasks
@@ -90,13 +94,13 @@ simulated function UIListItemString_TLM InitTLMListItem(optional name InitName,
 
 	if(strHexColor != "")
 	{
-    	SplitLine1.SetColor( strHexColor );	SplitLine1.SetAlpha( 15 );
-    	SplitLine2.SetColor( strHexColor );	SplitLine2.SetAlpha( 15 );
+		SplitLine1.SetColor( strHexColor );	SplitLine1.SetAlpha( 15 );
+		SplitLine2.SetColor( strHexColor );	SplitLine2.SetAlpha( 15 );
 	}
 	else
 	{
-	   	SplitLine1.SetColor( class'UIUtilities_Colors'.const.NORMAL_HTML_COLOR );	SplitLine1.SetAlpha( 15 );
-    	SplitLine2.SetColor( class'UIUtilities_Colors'.const.NORMAL_HTML_COLOR );	SplitLine2.SetAlpha( 15 );
+		SplitLine1.SetColor( class'UIUtilities_Colors'.const.NORMAL_HTML_COLOR );	SplitLine1.SetAlpha( 15 );
+		SplitLine2.SetColor( class'UIUtilities_Colors'.const.NORMAL_HTML_COLOR );	SplitLine2.SetAlpha( 15 );
 	}
 
 	//ensure the outline box is above anything else so it looks correct on highlight
