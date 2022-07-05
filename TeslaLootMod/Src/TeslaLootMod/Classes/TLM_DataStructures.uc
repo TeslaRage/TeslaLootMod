@@ -240,9 +240,3 @@ struct ItemWeightData
 	var int Index;
 	var int Weight;
 };
-
-struct TopItemsData
-{
-	var XComGameState_Item Item;
-	var int Tier;
-};

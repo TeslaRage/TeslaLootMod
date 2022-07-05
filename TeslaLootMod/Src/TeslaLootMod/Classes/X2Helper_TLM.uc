@@ -625,9 +625,6 @@ static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
 	local XComGameState_Item Item;
 	local XComGameState_Unit Unit;
 	local array<XComGameState_Item> Items;
-	local array<TopItemsData> TopItems;
-	local TopItemsData TopItem;
-	local int i;
 
 	XComHQ = `XCOMHQ;
 	History = `XCOMHISTORY;
@@ -641,10 +638,7 @@ static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
 
 		if (GetTLMItemCategory(Item) == Category)
 		{
-			// Items.AddItem(Item);
-			TopItem.Item = Item;
-			TopItem.Tier = Item.GetMyTemplate().Tier;
-			TopItems.AddItem(TopItem);
+			Items.AddItem(Item);
 		}
 	}
 
@@ -662,37 +656,12 @@ static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
 
 			if (GetTLMItemCategory(Item) == Category)
 			{
-				// Items.AddItem(Item);
-				TopItem.Item = Item;
-				TopItem.Tier = Item.GetMyTemplate().Tier;
-				TopItems.AddItem(TopItem);
+				Items.AddItem(Item);
 			}
 		}
 	}
 
-	// `LOG("Category: " $Category $"==================================", true, 'TLMDEBUG');
-	// `LOG("Before sort:", true, 'TLMDEBUG');
-	// foreach TopItems(TopItem)
-	// {
-	// 	`LOG(TopItem.Item.GetMyTemplate().DataName $"|" $TopItem.Tier, true, 'TLMDEBUG');
-	// }
-
-	TopItems.Sort(SortByTier);
-
-	// `LOG("After sort:", true, 'TLMDEBUG');
-	// foreach TopItems(TopItem)
-	// {
-	// 	`LOG(TopItem.Item.GetMyTemplate().DataName $"|" $TopItem.Tier, true, 'TLMDEBUG');
-	// }
-
-	i = 0;
-	foreach TopItems(TopItem)
-	{
-		if (i >= 3) break;
-
-		Items.AddItem(TopItem.Item);
-		i++;
-	}
+	Items.Sort(SortByTier);
 
 	return Items;
 }
@@ -707,6 +676,7 @@ static function bool IsATLMItem(XComGameState_Item Item)
 	return false;
 }
 
+// TLM categories either comes from `X2ItemTemplate.Tier` or `X2WeaponTemplate.WeaponCat`
 static function name GetTLMItemCategory(optional XComGameState_Item Item, optional X2ItemTemplate ItemTemplate)
 {
 	if (Item.ObjectID != 0)
@@ -734,25 +704,6 @@ static function name GetTLMItemCategory(optional XComGameState_Item Item, option
 	}
 
 	return '';
-}
-
-simulated function int SortByTier(TopItemsData A, TopItemsData B)
-{
-	local int TierA, TierB;
-
-	TierA = A.Tier;
-	TierB = B.Tier;
-
-	if (TierA > TierB)
-	{
-		return 1;
-	}
-	else if (TierA < TierB)
-	{
-		return -1;
-	}
-
-	return 0;
 }
 
 static function string GetWeaponUpgradesAsStr(XComGameState_Item Item, string Separator)
@@ -826,25 +777,6 @@ static function array<XComGameState_Unit> GetSoldiersCanEquipCat(name Category, 
 	return Units;
 }
 
-static function int SortByRank(XComGameState_Unit A, XComGameState_Unit B)
-{
-	local int RankA, RankB;
-
-	RankA = A.GetRank();
-	RankB = B.GetRank();
-
-	if (RankA > RankB)
-	{
-		return 1;
-	}
-	else if (RankA < RankB)
-	{
-		return -1;
-	}
-
-	return 0;
-}
-
 // =============
 // DELEGATES
 // =============
@@ -897,4 +829,42 @@ static function bool OnItemAcquired_TLM(XComGameState NewGameState, XComGameStat
 	CreateTLMItemState(NewGameState, ItemState, RarityTemplate.DataName);
 
 	return true;
+}
+
+simulated function int SortByTier(XComGameState_Item A, XComGameState_Item B)
+{
+	local int TierA, TierB;
+
+	TierA = A.GetMyTemplate().Tier;
+	TierB = B.GetMyTemplate().Tier;
+
+	if (TierA > TierB)
+	{
+		return 1;
+	}
+	else if (TierA < TierB)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+static function int SortByRank(XComGameState_Unit A, XComGameState_Unit B)
+{
+	local int RankA, RankB;
+
+	RankA = A.GetRank();
+	RankB = B.GetRank();
+
+	if (RankA > RankB)
+	{
+		return 1;
+	}
+	else if (RankA < RankB)
+	{
+		return -1;
+	}
+
+	return 0;
 }

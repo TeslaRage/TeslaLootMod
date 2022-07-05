@@ -226,17 +226,24 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 	local array<X2ItemTemplate> ItemTemplates;
 	local BaseItemData BaseItem;
 	local X2ItemTemplate ItemTemplate;
-	local X2WeaponTemplate WeaponTemplate;
 
 	local array<Commodity> arrCommodoties;
 	local Commodity StatsComm;
 
 	local ETLMCatType CatType;
 	local array<name> Categories;
-	local int i, Idx;
+	local int i, Idx, NumOfCategories;
 
 	BWMan = class'X2BaseWeaponDeckTemplateManager'.static.GetBaseWeaponDeckTemplateManager();
 	BWTemplate = BWMan.DetermineBaseWeaponDeck();
+
+	// Determine num of categories to fill
+	NumOfCategories = default.NumOfCategoriesToChooseFrom;
+
+	if (NumOfCategories < 0)
+	{
+		NumOfCategories = 1000; // Show all
+	}
 	
 	if (BWTemplate != none)
 	{
@@ -246,7 +253,7 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 		if (RarityTemplate != none)
 		{
 			// If the setup is to pick up no categories, skip this block
-			if (default.NumOfCategoriesToChooseFrom != 0)
+			if (NumOfCategories > 0)
 			{
 				NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Generate Items (TEMP)");
 				BaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
@@ -259,49 +266,21 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 					if (ItemTemplate == none) continue;
 
 					ItemTemplates.AddItem(ItemTemplate);
-
-					if (ItemTemplate.ItemCat == 'weapon')
-					{
-						WeaponTemplate = X2WeaponTemplate(ItemTemplate);
-
-						if (WeaponTemplate != none)
-						{
-							if (Categories.Find(WeaponTemplate.WeaponCat) == INDEX_NONE)
-								Categories.AddItem(WeaponTemplate.WeaponCat);
-						}
-					}
-					else
-					{
-						if (Categories.Find(ItemTemplate.ItemCat) == INDEX_NONE)
-							Categories.AddItem(ItemTemplate.ItemCat);
-					}
+					Categories.AddItem(class'X2Helper_TLM'.static.GetTLMItemCategory(, ItemTemplate));
 				}
 			}
 
 			// Full random is always the first option
 			SelectedCategories.AddItem('TLMRandom');
+			i = 0;
 
-			// < 0 means show all categories. 0 means just the Random.
-			if (default.NumOfCategoriesToChooseFrom < 0)
+			// While we have less categories than we want, add more until either full or no more categories
+			while (i < NumOfCategories && Categories.Length > 0)
 			{
-				for (i = 0; i < Categories.Length; i++)
-				{
-					SelectedCategories.AddItem(Categories[i]);
-				}
-			}
-			else
-			{
-				// Init
-				i = 0;
-
-				// While we have less categories than we want, add more until either full or no more categories
-				while (i < default.NumOfCategoriesToChooseFrom && Categories.Length > 0)
-				{
-					Idx = `SYNC_RAND_STATIC(Categories.Length);
-					SelectedCategories.AddItem(Categories[Idx]);
-					Categories.Remove(Idx, 1);
-					i++;
-				}
+				Idx = `SYNC_RAND_STATIC(Categories.Length);
+				SelectedCategories.AddItem(Categories[Idx]);
+				Categories.Remove(Idx, 1);
+				i++;
 			}
 
 			// Convert selected cats into commodity items to return
@@ -323,9 +302,7 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 simulated function string AppendAdditionalInfo(name Category, array<X2ItemTemplate> ItemTemplates)
 {
 	local array<XComGameState_Item> Items;
-	local XComGameState_Item Item;
 	local array<XComGameState_Unit> Units;
-	local XComGameState_Unit Unit;
 	local string AdditionalInfo, ItemIcon, RankIcon, ClassIcon;
 	local int i;
 
@@ -339,37 +316,19 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 		ItemIcon = class'UIUtilities_Text'.static.InjectImage("img:///UILibrary_XPACK_StrategyImages.MissionIcon_SupplyDrop", 20, 20, -5);
 		AdditionalInfo $= m_strTopObtained;
 
-		foreach Items(Item)
+		// foreach Items(Item)
+		for (i = 0; i < Items.Length; i++)
 		{
-			// AdditionalInfo @= "<Bullet/>"; // does not show on screen
+			if (i >= 3) break;
+			
 			// Item template friendly name
-			AdditionalInfo $= ItemIcon @Item.GetMyTemplate().GetItemFriendlyName();
+			AdditionalInfo $= ItemIcon @Items[i].GetMyTemplate().GetItemFriendlyName();
 
 			// If item has nickname, show it
-			if (Item.Nickname != "")
+			if (Items[i].Nickname != "")
 			{
-				AdditionalInfo @= "(" $Item.Nickname $")";
+				AdditionalInfo @= "(" $Items[i].Nickname $")";
 			}
-
-			// Show list of upgrades currently attached
-			// if (Item.GetMyWeaponUpgradeCount() > 0)
-			// {
-			// 	AdditionalInfo @= "- " $class'X2Helper_TLM'.static.GetWeaponUpgradesAsStr(Item, ", ");
-			// }
-
-			// If the item is currently equipped on someone, show it
-			// if (Item.OwnerStateObject.ObjectID != 0)
-			// {
-			// 	Unit = XComGameState_Unit(History.GetGameStateForObjectID(Item.OwnerStateObject.ObjectID));
-			// 	if (Unit != none)
-			// 	{
-			// 		AdditionalInfo @= "[" $m_strEquippedOn @Unit.GetFullName() $"]";
-			// 	}
-			// }
-			// else
-			// {
-			// 	AdditionalInfo @= m_strAvailable;
-			// }
 
 			AdditionalInfo $= "\n";
 		}
@@ -387,15 +346,14 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 	if (Units.Length > 0)
 	{
 		AdditionalInfo $= m_strSoldierAbleToEquip;
-		i = 0;
 
-		foreach Units(Unit)
+		for (i = 0; i < Units.Length; i++)
 		{
 			if (i >= 5) break;
-			RankIcon = class'UIUtilities_Text'.static.InjectImage(Unit.GetSoldierRankIcon(), 20, 20, -10);
-			ClassIcon = class'UIUtilities_Text'.static.InjectImage(Unit.GetSoldierClassIcon(), 20, 20, -10); 
-			AdditionalInfo $= RankIcon $Unit.GetFullName() @ClassIcon $"\n";
-			i++;
+
+			RankIcon = class'UIUtilities_Text'.static.InjectImage(Units[i].GetSoldierRankIcon(), 20, 20, -10);
+			ClassIcon = class'UIUtilities_Text'.static.InjectImage(Units[i].GetSoldierClassIcon(), 20, 20, -10); 
+			AdditionalInfo $= RankIcon $Units[i].GetFullName() @ClassIcon $"\n";
 		}
 	}
 
