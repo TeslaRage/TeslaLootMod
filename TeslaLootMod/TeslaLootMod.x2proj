@@ -23,6 +23,7 @@
     <Folder Include="Config\Upgrade Decks - WIO" />
     <Folder Include="Config\Upgrade Decks" />
     <Folder Include="Localization\" />
+    <Folder Include="Content" />
     <Folder Include="Src\" />
     <Folder Include="Src\TeslaLootMod\" />
     <Folder Include="Src\TeslaLootMod\Classes\" />
@@ -68,6 +69,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComTLM.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_InvCatImages.upk">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Localization\TeslaLootMod.int">

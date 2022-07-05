@@ -24,7 +24,7 @@ var init localized string CatImages[ETLMCatType.EnumCount]<BoundEnum=ETLMCatType
 
 var localized string m_strTitle, m_strSubTitleTitle;
 var localized string m_strInventoryLabel, m_strEmptyListTitle;
-var localized string m_strTopObtained, m_strEquippedOn, m_strAvailable;
+var localized string m_strTopObtained, m_strEquippedOn, m_strAvailable, m_strSoldierAbleToEquip;
 
 var XComGameStateHistory History;
 var XComGameState_HeadquartersXCom XComHQ;
@@ -223,6 +223,7 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 	local X2ItemTemplateManager ItemMan;
 
 	local array<BaseItemData> BaseItems;
+	local array<X2ItemTemplate> ItemTemplates;
 	local BaseItemData BaseItem;
 	local X2ItemTemplate ItemTemplate;
 	local X2WeaponTemplate WeaponTemplate;
@@ -256,6 +257,8 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 					ItemTemplate = ItemMan.FindItemTemplate(BaseItem.TemplateName);
 
 					if (ItemTemplate == none) continue;
+
+					ItemTemplates.AddItem(ItemTemplate);
 
 					if (ItemTemplate.ItemCat == 'weapon')
 					{
@@ -308,7 +311,7 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 				
 				StatsComm.Title = CatType == eCat_Unknown ? string(SelectedCategories[i]) : CatLabels[CatType];
 				StatsComm.Image = "img:///" $ CatImages[CatType];
-				StatsComm.Desc = CatDescriptions[CatType] $AppendAdditionalInfo(SelectedCategories[i]);
+				StatsComm.Desc = CatDescriptions[CatType] $AppendAdditionalInfo(SelectedCategories[i], ItemTemplates);
 				arrCommodoties.AddItem(StatsComm);
 			}
 		}
@@ -317,20 +320,24 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 	return arrCommodoties;
 }
 
-simulated function string AppendAdditionalInfo(name Category)
+simulated function string AppendAdditionalInfo(name Category, array<X2ItemTemplate> ItemTemplates)
 {
 	local array<XComGameState_Item> Items;
 	local XComGameState_Item Item;
+	local array<XComGameState_Unit> Units;
 	local XComGameState_Unit Unit;
-	local string AdditionalInfo, ItemIcon;
+	local string AdditionalInfo, ItemIcon, RankIcon, ClassIcon;
+	local int i;
+
+	if (DetermineECAT(Category) == eCat_Rando) return AdditionalInfo;
 
 	// Start build of details of items we currently own
 	Items = Class'X2Helper_TLM'.static.GetTLMItemsByCategory(Category);
 
 	if (Items.Length > 0)
 	{
-		ItemIcon = class'UIUtilities_Text'.static.InjectImage("img:///UILibrary_XPACK_StrategyImages.MissionIcon_SupplyDrop",  20, 20, -5);
-		AdditionalInfo @= m_strTopObtained;
+		ItemIcon = class'UIUtilities_Text'.static.InjectImage("img:///UILibrary_XPACK_StrategyImages.MissionIcon_SupplyDrop", 20, 20, -5);
+		AdditionalInfo $= m_strTopObtained;
 
 		foreach Items(Item)
 		{
@@ -351,20 +358,44 @@ simulated function string AppendAdditionalInfo(name Category)
 			// }
 
 			// If the item is currently equipped on someone, show it
-			if (Item.OwnerStateObject.ObjectID != 0)
-			{
-				Unit = XComGameState_Unit(History.GetGameStateForObjectID(Item.OwnerStateObject.ObjectID));
-				if (Unit != none)
-				{
-					AdditionalInfo @= "[" $m_strEquippedOn @Unit.GetFullName() $"]";
-				}
-			}
-			else
-			{
-				AdditionalInfo @= m_strAvailable;
-			}
+			// if (Item.OwnerStateObject.ObjectID != 0)
+			// {
+			// 	Unit = XComGameState_Unit(History.GetGameStateForObjectID(Item.OwnerStateObject.ObjectID));
+			// 	if (Unit != none)
+			// 	{
+			// 		AdditionalInfo @= "[" $m_strEquippedOn @Unit.GetFullName() $"]";
+			// 	}
+			// }
+			// else
+			// {
+			// 	AdditionalInfo @= m_strAvailable;
+			// }
 
 			AdditionalInfo $= "\n";
+		}
+	}
+
+	if (Items.Length == 0)
+	{
+		AdditionalInfo $= "\n";
+	}
+
+	// Start building relevant soldiers for this category
+	// Currently only supports X2ArmorTemplate and X2WeaponTemplate
+	Units = class'X2Helper_TLM'.static.GetSoldiersCanEquipCat(Category, ItemTemplates);
+
+	if (Units.Length > 0)
+	{
+		AdditionalInfo $= m_strSoldierAbleToEquip;
+		i = 0;
+
+		foreach Units(Unit)
+		{
+			if (i >= 5) break;
+			RankIcon = class'UIUtilities_Text'.static.InjectImage(Unit.GetSoldierRankIcon(), 20, 20, -10);
+			ClassIcon = class'UIUtilities_Text'.static.InjectImage(Unit.GetSoldierClassIcon(), 20, 20, -10); 
+			AdditionalInfo $= RankIcon $Unit.GetFullName() @ClassIcon $"\n";
+			i++;
 		}
 	}
 

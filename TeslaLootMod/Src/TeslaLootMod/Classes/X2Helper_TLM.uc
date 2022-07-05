@@ -707,21 +707,30 @@ static function bool IsATLMItem(XComGameState_Item Item)
 	return false;
 }
 
-static function name GetTLMItemCategory(XComGameState_Item Item)
+static function name GetTLMItemCategory(optional XComGameState_Item Item, optional X2ItemTemplate ItemTemplate)
 {
-	local X2WeaponTemplate WTemplate;
-
-	if (Item.GetMyTemplate().IsA('X2WeaponTemplate'))
+	if (Item.ObjectID != 0)
 	{
-		WTemplate = X2WeaponTemplate(Item.GetMyTemplate());
-		if (WTemplate != none)
+		if (Item.GetMyTemplate().IsA('X2WeaponTemplate'))
 		{
-			return WTemplate.WeaponCat;
+			return X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat;
+		}
+		else
+		{
+			return Item.GetMyTemplate().ItemCat;
 		}
 	}
-	else
+
+	if (ItemTemplate != none)
 	{
-		return Item.GetMyTemplate().ItemCat;
+		if (ItemTemplate.IsA('X2WeaponTemplate'))
+		{
+			return X2WeaponTemplate(ItemTemplate).WeaponCat;
+		}
+		else
+		{
+			return ItemTemplate.ItemCat;
+		}
 	}
 
 	return '';
@@ -770,24 +779,70 @@ static function string GetWeaponUpgradesAsStr(XComGameState_Item Item, string Se
 	return strWeaponUpgrades;
 }
 
-// TODO: Finish this up
-static function GetSoldiersCanEquipCat(name Category)
+static function array<XComGameState_Unit> GetSoldiersCanEquipCat(name Category, array<X2ItemTemplate> ItemTemplates)
 {
 	local XComGameState_HeadquartersXCom XComHQ;
 	local XComGameStateHistory History;
 	local StateObjectReference UnitRef;
+	local array<XComGameState_Unit> Units;
+	local array<X2ItemTemplate> ItemTemplatesToCheck;
 	local XComGameState_Unit Unit;
+	local X2ItemTemplate ItemTemplate;
+	local int i;
 
 	XComHQ = `XCOMHQ;
 	History = `XCOMHISTORY;
+
+	for (i = 0; i < ItemTemplates.Length; i++)
+	{
+		if (GetTLMItemCategory(, ItemTemplates[i]) == Category)
+		{
+			ItemTemplatesToCheck.AddItem(ItemTemplates[i]);
+		}
+	}
 
 	foreach XComHQ.Crew(UnitRef)
 	{
 		Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
 		if (Unit == none) continue;
 
-		// if (Unit.CanAddItemToInventory())
+		foreach ItemTemplatesToCheck(ItemTemplate)
+		{
+			if (ItemTemplate.IsA('X2ArmorTemplate') && Unit.GetSoldierClassTemplate().IsArmorAllowedByClass(X2ArmorTemplate(ItemTemplate)))
+			{
+				Units.AddItem(Unit);
+				break;
+			}
+			else if (ItemTemplate.IsA('X2WeaponTemplate') && Unit.GetSoldierClassTemplate().IsWeaponAllowedByClass(X2WeaponTemplate(ItemTemplate)))
+			{
+				Units.AddItem(Unit);
+				break;
+			}
+		}
 	}
+
+	Units.Sort(SortByRank);
+
+	return Units;
+}
+
+static function int SortByRank(XComGameState_Unit A, XComGameState_Unit B)
+{
+	local int RankA, RankB;
+
+	RankA = A.GetRank();
+	RankB = B.GetRank();
+
+	if (RankA > RankB)
+	{
+		return 1;
+	}
+	else if (RankA < RankB)
+	{
+		return -1;
+	}
+
+	return 0;
 }
 
 // =============
