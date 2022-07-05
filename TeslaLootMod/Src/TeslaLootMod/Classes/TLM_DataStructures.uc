@@ -31,8 +31,11 @@ enum ETLMCatType
 	eCat_Shield,
 	eCat_SparkShield,
 	eCat_Canister,
+	eCat_Arcthrower,
+	eCat_SawedOffShotgun,
 	// Other
 	eCat_Armor,
+	eCat_Medikit,
 	eCat_Rando,
 	// For additional categories
 	eCatCustom1,
