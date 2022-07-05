@@ -388,7 +388,7 @@ static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTe
 		Item.NickName = GetInitialNickName(Item);
 	}
 	
-	Decks = RarityTemplate.GetDecksToRoll(Item);	
+	Decks = RarityTemplate.GetDecksToRoll(Item.GetMyTemplate());
 
 	foreach Decks(Deck)
 	{

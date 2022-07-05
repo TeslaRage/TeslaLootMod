@@ -24,7 +24,8 @@ var init localized string CatImages[ETLMCatType.EnumCount]<BoundEnum=ETLMCatType
 
 var localized string m_strTitle, m_strSubTitleTitle;
 var localized string m_strInventoryLabel, m_strEmptyListTitle;
-var localized string m_strTopObtained, m_strEquippedOn, m_strAvailable, m_strSoldierAbleToEquip;
+var localized string m_strTopObtained, m_strEquippedOn, m_strAvailable, m_strSoldierAbleToEquip,
+					 m_strUpgrades, m_strUpgrade, m_strPrctChance;
 
 var XComGameStateHistory History;
 var XComGameState_HeadquartersXCom XComHQ;
@@ -303,7 +304,10 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 {
 	local array<XComGameState_Item> Items;
 	local array<XComGameState_Unit> Units;
-	local string AdditionalInfo, ItemIcon, RankIcon, ClassIcon;
+	local array<RarityDeckData> Decks;
+	local X2ItemTemplate ItemTemplate;
+	local X2UpgradeDeckTemplateManager UDMan;
+	local string AdditionalInfo, ItemIcon, RankIcon, ClassIcon, RarityFriendlyName, DeckFriendlyName, Upgrade;
 	local int i;
 
 	if (DetermineECAT(Category) == eCat_Rando) return AdditionalInfo;
@@ -354,6 +358,41 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 			RankIcon = class'UIUtilities_Text'.static.InjectImage(Units[i].GetSoldierRankIcon(), 20, 20, -10);
 			ClassIcon = class'UIUtilities_Text'.static.InjectImage(Units[i].GetSoldierClassIcon(), 20, 20, -10); 
 			AdditionalInfo $= RankIcon $Units[i].GetFullName() @ClassIcon $"\n";
+		}
+	}
+
+	// Start build potential upgrade decks
+	// Find a template that matches category
+	foreach ItemTemplates(ItemTemplate)
+	{
+		if (class'X2Helper_TLM'.static.GetTLMItemCategory(, ItemTemplate) == Category)
+		{
+			break;
+		}
+	}
+
+	if (ItemTemplate != none)
+	{
+		UDMan = class'X2UpgradeDeckTemplateManager'.static.GetUpgradeDeckTemplateManager();
+		Decks = RarityTemplate.GetDecksToRoll(ItemTemplate, true);
+		RarityFriendlyName = RarityTemplate.FriendlyName == "" ? string(RarityTemplate.DataName) : RarityTemplate.FriendlyName;
+
+		AdditionalInfo $= "\n" $RarityFriendlyName $"\n";
+
+		for (i = 0; i < Decks.Length; i++)
+		{
+			DeckFriendlyName = UDMan.GetUpgradeDeckTemplate(Decks[i].UpgradeDeckName).FriendlyName;
+			if (DeckFriendlyName == "") DeckFriendlyName = string(Decks[i].UpgradeDeckName);
+			Upgrade =  Decks[i].Quantity > 1 ? m_strUpgrades : m_strUpgrade;
+			
+			AdditionalInfo $= Decks[i].Quantity @"x" @DeckFriendlyName @Upgrade;
+
+			if (Decks[i].Chance < 100)
+			{
+				AdditionalInfo @= "(" $Decks[i].Chance $m_strPrctChance $")";
+			}
+
+			AdditionalInfo $= "\n";
 		}
 	}
 
