@@ -1,5 +1,63 @@
 class TLM_DataStructures extends Object;
 
+enum ETLMCatType
+{
+	// Base Game Primaries
+	eCat_Rifle,
+	eCat_Cannon,
+	eCat_Shotgun,
+	eCat_SniperRifle,
+	// Base Game Secondaries
+	eCat_GrenadeLauncher,
+	eCat_Gremlin,
+	eCat_Pistol,
+	eCat_PsiAmp,
+	eCat_Sword,
+	// WOTC Primaries
+	eCat_VektorRifle,
+	eCat_Bullpup,
+	eCat_Gauntlet,
+	// WOTC Secondaries
+	eCat_Sidearm,
+	eCat_Wristblade,
+	// DLC3 SPARKS
+	eCat_SparkRifle,
+	// Modded Common Primaries
+	eCat_Smg,
+	eCat_Glaive,
+	eCat_Chemthrower,
+	// Modded Common Secondaries
+	eCat_CombatKnife,
+	eCat_Shield,
+	eCat_SparkShield,
+	eCat_Canister,
+	eCat_Arcthrower,
+	eCat_SawedOffShotgun,
+	// Other
+	eCat_Armor,
+	eCat_Medikit,
+	eCat_Rando,
+	// For additional categories
+	eCatCustom1,
+	eCatCustom2,
+	eCatCustom3,
+	eCatCustom4,
+	eCatCustom5,
+	eCatCustom6,
+	eCatCustom7,
+	eCatCustom8,
+	eCatCustom9,
+	eCatCustom10,
+	// end additional categories
+	eCat_Unknown,
+};
+
+struct CatEnumData
+{
+	var name Category;
+	var ETLMCatType CatType;
+};
+
 struct AltImageData
 {
 	var string AltstrImage;

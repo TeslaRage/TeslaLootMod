@@ -155,36 +155,16 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 
 	switch(Type)
 	{
-	case 'RapidFireCharges':
-		OutString = string(class'X2Ability_TLM'.default.RapidFireCharges);
-		return true;
-	case 'RapidFireAimPenalty':
-		OutString = string(class'X2Ability_TLM'.default.RapidFireAimPenalty * -1);
-		return true;
-	case 'RapidFireCooldown':
-		OutString = string(class'X2Ability_TLM'.default.RapidFireCooldown);
-		return true;
-	case 'HailOfBulletsCharges':
-		OutString = string(class'X2Ability_TLM'.default.HailOfBulletsCharges);
-		return true;
-	case 'HailOfBulletsCooldown':
-		OutString = string(class'X2Ability_TLM'.default.HailOfBulletsCooldown);
-		return true;
-	case 'KillZoneCharges':
-		OutString = string(class'X2Ability_TLM'.default.KillZoneCharges);
-		return true;
-	case 'KillZoneCooldown':
-		OutString = string(class'X2Ability_TLM'.default.KillZoneCooldown);
-		return true;
-	case 'FaceoffCharges':
-		OutString = string(class'X2Ability_TLM'.default.FaceoffCharges);
-		return true;
-	case 'FaceoffCooldown':
-		OutString = string(class'X2Ability_TLM'.default.FaceoffCooldown);
-		return true;
-	case 'BonusDamageAdventSoldier':
-		OutString = string(class'X2Ability_TLM'.default.BonusDamageAdventSoldier);
-		return true;
+	case 'RapidFireCharges': 			OutString = string(class'X2Ability_TLM'.default.RapidFireCharges);			return true;
+	case 'RapidFireAimPenalty':			OutString = string(class'X2Ability_TLM'.default.RapidFireAimPenalty * -1);	return true;
+	case 'RapidFireCooldown':			OutString = string(class'X2Ability_TLM'.default.RapidFireCooldown);			return true;
+	case 'HailOfBulletsCharges':		OutString = string(class'X2Ability_TLM'.default.HailOfBulletsCharges);		return true;
+	case 'HailOfBulletsCooldown':		OutString = string(class'X2Ability_TLM'.default.HailOfBulletsCooldown);		return true;
+	case 'KillZoneCharges':				OutString = string(class'X2Ability_TLM'.default.KillZoneCharges);			return true;
+	case 'KillZoneCooldown':			OutString = string(class'X2Ability_TLM'.default.KillZoneCooldown);			return true;
+	case 'FaceoffCharges':				OutString = string(class'X2Ability_TLM'.default.FaceoffCharges);			return true;
+	case 'FaceoffCooldown':				OutString = string(class'X2Ability_TLM'.default.FaceoffCooldown);			return true;
+	case 'BonusDamageAdventSoldier':	OutString = string(class'X2Ability_TLM'.default.BonusDamageAdventSoldier);	return true;
 	case 'RapidFireClipSizeBonus':		
 		i = class'X2Item_TLMUpgrades'.default.AbilityWeaponUpgrades.Find('UpgradeName', 'TLMUpgrade_RapidFire');
 		if (i != INDEX_NONE)
@@ -737,4 +717,22 @@ exec function TLM_PrintPotentialUpgrades()
 		class'Helpers'.static.OutputMsg(strTemp);
 		`LOG(strTemp, true, 'TLMPrint');
 	}
+}
+
+exec function TLM_QuickTestDebug()
+{
+	local WorldInfo WI;
+	local int i;
+
+	WI = class'WorldInfo'.static.GetWorldInfo();
+
+	WI.ConsoleCommand("givetech modularweapons");
+	WI.ConsoleCommand("givetech unlockrarebox");
+
+	for (i = 0 ; i < 10 ; i++)
+	{
+		WI.ConsoleCommand("additem rarebox");
+		WI.ConsoleCommand("additem lockboxkey");
+	}
+
 }

@@ -1,5 +1,7 @@
 class X2UpgradeDeckTemplate extends X2DataTemplate config(TLM);
 
+var localized string FriendlyName;
+
 var config ItemCatData AllowedItemCat;
 var config array<name> AllowedCats;
 var config array<name> RequiredAbilitiesOnEquipment;

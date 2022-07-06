@@ -287,17 +287,20 @@ static function SetDelegatesToUpgradeDecks()
 	}
 }
 
-static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, XComGameState_Tech Tech, out X2BaseWeaponDeckTemplate BWTemplate)
+static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, XComGameState_Tech Tech, out X2BaseWeaponDeckTemplate BWTemplate, optional name Category, optional X2RarityTemplate RarityTemplate)
 {
 	local X2ItemTemplateManager ItemMan;
 	local XComGameState_Item Item;
 	local X2ItemTemplate ItemTemplate;	
-	local X2RarityTemplate RarityTemplate;
+	// local X2RarityTemplate RarityTemplate;
 
-	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();	
-	RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity();
+	ItemMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	if (RarityTemplate == none)
+	{
+		RarityTemplate = X2ItemTemplate_LootBox(ItemMan.FindItemTemplate(X2TechTemplate_TLM(Tech.GetMyTemplate()).LootBoxToUse)).RollRarity();
+	}
 
-	GetBaseItem(BWTemplate, ItemTemplate, RarityTemplate, NewGameState);
+	GetBaseItem(BWTemplate, ItemTemplate, RarityTemplate, NewGameState, Category);
 	Item = ItemTemplate.CreateInstanceFromTemplate(NewGameState);	
 
 	if (Item == none)
@@ -331,7 +334,7 @@ static function CreateTLMItemState(XComGameState NewGameState, XComGameState_Ite
 	Item.AddComponentObject(Data);
 }
 
-static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState)
+static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemTemplate ItemTemplate, X2RarityTemplate RarityTemplate, XComGameState NewGameState, optional name Category)
 {		
 	local X2ItemTemplateManager ItemTemplateMan;
 	local X2BaseWeaponDeckTemplateManager BWMan;
@@ -349,7 +352,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	if (BWTemplate == none)
 		`LOG("TLM ERROR: Unable to determine base weapon deck template");
 
-	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState);
+	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState, Category);
 
 	for (i = 0; i < QualifiedBaseItems.Length; i++)
 	{
@@ -385,7 +388,7 @@ static function ApplyUpgrades(XComGameState_Item Item, X2RarityTemplate RarityTe
 		Item.NickName = GetInitialNickName(Item);
 	}
 	
-	Decks = RarityTemplate.GetDecksToRoll(Item);	
+	Decks = RarityTemplate.GetDecksToRoll(Item.GetMyTemplate());
 
 	foreach Decks(Deck)
 	{
@@ -614,6 +617,166 @@ static function int GetWeightBasedIndex(array<ItemWeightData> ItemWeights)
 	return -1;
 }
 
+static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+	local XComGameStateHistory History;
+	local StateObjectReference ItemRef, UnitRef;
+	local XComGameState_Item Item;
+	local XComGameState_Unit Unit;
+	local array<XComGameState_Item> Items;
+
+	XComHQ = `XCOMHQ;
+	History = `XCOMHISTORY;
+
+	foreach XComHQ.Inventory(ItemRef)
+	{
+		Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+		if (Item == none) continue;
+
+		if (!IsATLMItem(Item)) continue;
+
+		if (GetTLMItemCategory(Item) == Category)
+		{
+			Items.AddItem(Item);
+		}
+	}
+
+	foreach XComHQ.Crew(UnitRef)
+	{
+		Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (Unit == none) continue;
+
+		foreach Unit.InventoryItems(ItemRef)
+		{
+			Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+			if (Item == none) continue;
+
+			if (!IsATLMItem(Item)) continue;
+
+			if (GetTLMItemCategory(Item) == Category)
+			{
+				Items.AddItem(Item);
+			}
+		}
+	}
+
+	Items.Sort(SortByTier);
+
+	return Items;
+}
+
+static function bool IsATLMItem(XComGameState_Item Item)
+{
+	local XComGameState_ItemData Data;
+
+	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
+	if (Data != none) return true;
+
+	return false;
+}
+
+// TLM categories either comes from `X2ItemTemplate.Tier` or `X2WeaponTemplate.WeaponCat`
+static function name GetTLMItemCategory(optional XComGameState_Item Item, optional X2ItemTemplate ItemTemplate)
+{
+	if (Item.ObjectID != 0)
+	{
+		if (Item.GetMyTemplate().IsA('X2WeaponTemplate'))
+		{
+			return X2WeaponTemplate(Item.GetMyTemplate()).WeaponCat;
+		}
+		else
+		{
+			return Item.GetMyTemplate().ItemCat;
+		}
+	}
+
+	if (ItemTemplate != none)
+	{
+		if (ItemTemplate.IsA('X2WeaponTemplate'))
+		{
+			return X2WeaponTemplate(ItemTemplate).WeaponCat;
+		}
+		else
+		{
+			return ItemTemplate.ItemCat;
+		}
+	}
+
+	return '';
+}
+
+static function string GetWeaponUpgradesAsStr(XComGameState_Item Item, string Separator)
+{
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local array<string> ItemsFriendlyNames;
+	local int i;
+	local string strWeaponUpgrades;
+
+	if (Item != none)
+	{
+		if (Item.GetMyWeaponUpgradeCount() > 0)
+		{
+			WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+
+			for (i = 0; i < WUTemplates.Length; i++)
+			{
+				ItemsFriendlyNames.AddItem(WUTemplates[i].GetItemFriendlyName());
+			}
+			
+			class'Object'.static.JoinArray(ItemsFriendlyNames, strWeaponUpgrades, Separator);
+		}
+	}
+	return strWeaponUpgrades;
+}
+
+static function array<XComGameState_Unit> GetSoldiersCanEquipCat(name Category, array<X2ItemTemplate> ItemTemplates)
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+	local XComGameStateHistory History;
+	local StateObjectReference UnitRef;
+	local array<XComGameState_Unit> Units;
+	local array<X2ItemTemplate> ItemTemplatesToCheck;
+	local XComGameState_Unit Unit;
+	local X2ItemTemplate ItemTemplate;
+	local int i;
+
+	XComHQ = `XCOMHQ;
+	History = `XCOMHISTORY;
+
+	for (i = 0; i < ItemTemplates.Length; i++)
+	{
+		if (GetTLMItemCategory(, ItemTemplates[i]) == Category)
+		{
+			ItemTemplatesToCheck.AddItem(ItemTemplates[i]);
+		}
+	}
+
+	foreach XComHQ.Crew(UnitRef)
+	{
+		Unit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (Unit == none) continue;
+
+		foreach ItemTemplatesToCheck(ItemTemplate)
+		{
+			if (ItemTemplate.IsA('X2ArmorTemplate') && Unit.GetSoldierClassTemplate().IsArmorAllowedByClass(X2ArmorTemplate(ItemTemplate)))
+			{
+				Units.AddItem(Unit);
+				break;
+			}
+			else if (ItemTemplate.IsA('X2WeaponTemplate') && Unit.GetSoldierClassTemplate().IsWeaponAllowedByClass(X2WeaponTemplate(ItemTemplate)))
+			{
+				Units.AddItem(Unit);
+				break;
+			}
+		}
+	}
+
+	Units.Sort(SortByRank);
+
+	return Units;
+}
+
 // =============
 // DELEGATES
 // =============
@@ -666,4 +829,42 @@ static function bool OnItemAcquired_TLM(XComGameState NewGameState, XComGameStat
 	CreateTLMItemState(NewGameState, ItemState, RarityTemplate.DataName);
 
 	return true;
+}
+
+simulated function int SortByTier(XComGameState_Item A, XComGameState_Item B)
+{
+	local int TierA, TierB;
+
+	TierA = A.GetMyTemplate().Tier;
+	TierB = B.GetMyTemplate().Tier;
+
+	if (TierA > TierB)
+	{
+		return 1;
+	}
+	else if (TierA < TierB)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+static function int SortByRank(XComGameState_Unit A, XComGameState_Unit B)
+{
+	local int RankA, RankB;
+
+	RankA = A.GetRank();
+	RankB = B.GetRank();
+
+	if (RankA > RankB)
+	{
+		return 1;
+	}
+	else if (RankA < RankB)
+	{
+		return -1;
+	}
+
+	return 0;
 }

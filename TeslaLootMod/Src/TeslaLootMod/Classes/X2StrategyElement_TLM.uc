@@ -44,26 +44,12 @@ static function X2DataTemplate CreateUnlockLockboxTemplate(TechData UnlockLootBo
 
 static function UnlockLootBoxCompleted(XComGameState NewGameState, XComGameState_Tech TechState)
 {	
-	local XComGameState_HeadquartersXCom XComHQ;		
-	local X2BaseWeaponDeckTemplate BWTemplate;
-	local XComGameState_Item Item;
-
-	XComHQ = `XCOMHQ;	
-	
-	XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));	
-
-	Item = class'X2Helper_TLM'.static.GenerateTLMItem(NewGameState, TechState, BWTemplate);
-	
-	XComHQ.PutItemInInventory(NewGameState, Item);
-	`XEVENTMGR.TriggerEvent('ItemConstructionCompleted', Item, Item, NewGameState);
-
-	TechState.ItemRewards.Length = 0; 						// Reset the item rewards array in case the tech is repeatable
-	TechState.ItemRewards.AddItem(Item.GetMyTemplate());	// Needed for UI Alert display info
-	TechState.bSeenResearchCompleteScreen = false; 			// Reset the research report for techs that are repeatable
-
 	class'X2Helper_TLM'.static.FindAndMakeTechInstant(NewGameState, TechState);
 
-	UIItemReceived(NewGameState, Item, BWTemplate);
+	// If this save game has the old tech, then this needs to be updated
+	// Else the popup won't show and UIScreenListener_TLMTech won't spawn the new UI
+	TechState.ItemRewards.Length = 0;
+	TechState.bSeenResearchCompleteScreen = false;
 }
 
 static function UIItemReceived(XComGameState NewGameState, XComGameState_Item Item, X2BaseWeaponDeckTemplate BWTemplate)
