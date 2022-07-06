@@ -2,6 +2,7 @@ class X2UpgradeDeckTemplate extends X2DataTemplate config(TLM);
 
 var config ItemCatData AllowedItemCat;
 var config array<name> AllowedCats;
+var config array<name> RequiredAbilitiesOnEquipment;
 var config array<UpgradeDeckData> Upgrades;
 
 var Delegate<ModifyNickNameDelegate> ModifyNickNameFn;
@@ -60,6 +61,8 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 		}		
 	}
 
+	ValidateItem(Item);
+
 	if (ModifyNickNameFn != none && bApplyNick)
 	{
 		Item.NickName = ModifyNickNameFn(AppliedUpgrades, Item);
@@ -68,6 +71,10 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 
 function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_Item Item, UpgradeDeckData Upgrade)
 {
+	local X2EquipmentTemplate EqTemplate;
+	local name AbilityName;
+	local bool bRequiredAbilityFound;
+
 	// Go through the basic validation first
 	if (!WUTemplate.CanApplyUpgradeToWeapon(Item, Item.GetMyWeaponUpgradeCount()))
 		return false;
@@ -87,6 +94,26 @@ function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_
 		return false;
 	else if (Upgrade.DisallowedWeaponCats.Find(Item.GetWeaponCategory()) != INDEX_NONE)
 		return false;
+
+	// Checks to make sure that the item has required ability before any upgrade from this
+	// deck can be applied. This is useful in cases where a weapon with built in ammo effect
+	// is part of the base item deck.
+	EqTemplate = X2EquipmentTemplate(Item.GetMyTemplate());
+
+	if (EqTemplate != none && RequiredAbilitiesOnEquipment.Length > 0)
+	{
+		foreach EqTemplate.Abilities(AbilityName)
+		{
+			if (RequiredAbilitiesOnEquipment.Find(AbilityName) != INDEX_NONE)
+			{
+				bRequiredAbilityFound = true;
+				break;
+			}
+		}
+
+		if (!bRequiredAbilityFound)
+			return false;
+	}
 
 	// If we reach here, it means the upgrade is good for this item
 	return true;
@@ -163,4 +190,53 @@ function bool ValidateTemplate (out string strError)
 	}
 
 	return true;
+}
+
+function ValidateItem(XComGameState_Item Item)
+{
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local X2WeaponTemplate WTemplate;
+	local int i, ClipSize;
+	local bool bReapply;
+
+	// If the upgrades attached has caused the weapon to have clip size of less than 1,
+	// remove the upgrade from the weapon. This also means the weapon will end up with less
+	// upgrades than anticipated.
+
+	WTemplate = X2WeaponTemplate(Item.GetMyTemplate());
+
+	if (WTemplate != none && WTemplate.iClipSize > 0 && Item.GetClipSize() < 1)
+	{
+		ClipSize = Item.GetClipSize();
+
+		WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+
+		// Filter weapon upgrades, only saving the ones we need to reapply
+		for (i = 0; i < WUTemplates.Length; i++)
+		{
+			if (WUTemplates[i].ClipSizeBonus < 0)
+			{
+				ClipSize += (WUTemplates[i].ClipSizeBonus * -1);
+				WUTemplates.Remove(i, 1);
+				i--;
+				bReapply = true;
+
+				if (ClipSize > 0) break;
+
+				continue;
+			}
+		}
+
+		// Reapply as needed
+		if (bReapply)
+		{
+			Item.WipeUpgradeTemplates();
+
+			foreach WUTemplates(WUTemplate)
+			{
+				Item.ApplyWeaponUpgradeTemplate(WUTemplate);
+			}
+		}
+	}
 }
