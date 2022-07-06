@@ -16,6 +16,7 @@ var XComGameState TempGameState;
 
 var config int NumOfCategoriesToChooseFrom;
 var config array<CatEnumData> CatToEnum;
+var config int NumOfPreviousItems, NumOfEquipSoldiers;
 var array<name> SelectedCategories;
 
 var init localized string CatLabels[ETLMCatType.EnumCount]<BoundEnum=ETLMCatType>;
@@ -323,7 +324,7 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 		// foreach Items(Item)
 		for (i = 0; i < Items.Length; i++)
 		{
-			if (i >= 3) break;
+			if (i >= default.NumOfPreviousItems) break;
 			
 			// Item template friendly name
 			AdditionalInfo $= ItemIcon @Items[i].GetMyTemplate().GetItemFriendlyName();
@@ -353,7 +354,7 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 
 		for (i = 0; i < Units.Length; i++)
 		{
-			if (i >= 5) break;
+			if (i >= default.NumOfEquipSoldiers) break;
 
 			RankIcon = class'UIUtilities_Text'.static.InjectImage(Units[i].GetSoldierRankIcon(), 20, 20, -10);
 			ClassIcon = class'UIUtilities_Text'.static.InjectImage(Units[i].GetSoldierClassIcon(), 20, 20, -10); 
@@ -377,7 +378,7 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 		Decks = RarityTemplate.GetDecksToRoll(ItemTemplate, true);
 		RarityFriendlyName = RarityTemplate.FriendlyName == "" ? string(RarityTemplate.DataName) : RarityTemplate.FriendlyName;
 
-		AdditionalInfo $= "\n" $RarityFriendlyName $"\n";
+		AdditionalInfo $= "\n" $RarityFriendlyName @CatLabels[DetermineECAT(Category)] $"\n";
 
 		for (i = 0; i < Decks.Length; i++)
 		{
