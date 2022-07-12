@@ -43,7 +43,6 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 	// Pick upgrades and apply
 	while (WUTemplates.Length > 0 && Applied < Quantity)
 	{
-		// Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
 		Idx = class'X2Helper_TLM'.static.GetWeightBasedIndex(ItemWeights);
 		if (Idx < 0) continue;
 
@@ -55,12 +54,14 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 			Item.ApplyWeaponUpgradeTemplate(WUTemplate);
 			AppliedUpgrades.AddItem(WUTemplate);
 			WUTemplates.Remove(Idx, 1);
+			ItemWeights.Remove(Idx, 1);
 			Applied++;
 		}
 		else
 		{
 			WUTemplates.Remove(Idx, 1);
-		}		
+			ItemWeights.Remove(Idx, 1);
+		}
 	}
 
 	ValidateItem(Item);
