@@ -795,3 +795,39 @@ exec function TLM_DestroyItem(optional bool bTLMItem = true)
 
 	class'Helpers'.static.OutputMsg(Item.GetMyTemplateName() @"removed from the game. You will never get it back.");
 }
+
+exec function TLM_GiveItem(name Category, name RarityName)
+{
+	local XComGameState NewGameState;
+	local XComGameState_Item Item;
+	local XComGameState_Tech Tech;
+	local X2BaseWeaponDeckTemplate BWTemplate;
+	local X2RarityTemplate RarityTemplate;
+	local X2RarityTemplateManager RMan;
+	local XComGameState_HeadquartersXCom XComHQ;
+
+	XComHQ = `XCOMHQ;
+	RMan = class'X2RarityTemplateManager'.static.GetRarityTemplateManager();
+	RarityTemplate = RMan.GetRarityTemplate(RarityName);
+
+	if (RarityTemplate == none)
+	{
+		class'Helpers'.static.OutputMsg("Invalid Rarity name");
+		return;
+	}
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Give Item (Cheat)");
+
+	Tech = none; // Compiler warning
+	// Tech is none, but not used in GenerateTLMItem as long as RarityTemplate is not none
+	Item = class'X2Helper_TLM'.static.GenerateTLMItem(NewGameState, Tech, BWTemplate, Category, RarityTemplate);
+
+	XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
+	XComHQ.PutItemInInventory(NewGameState, Item);
+
+	`XEVENTMGR.TriggerEvent('ItemConstructionCompleted', Item, Item, NewGameState);
+	class'X2StrategyElement_TLM'.static.UIItemReceived(NewGameState, Item, BWTemplate);
+
+	`GAMERULES.SubmitGameState(NewGameState);
+	class'Helpers'.static.OutputMsg(Item.GetMyTemplateName() @"(" $Item.NickName $")" @"added to HQ inventory.");
+}
