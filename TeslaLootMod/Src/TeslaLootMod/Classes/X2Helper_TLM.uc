@@ -196,6 +196,7 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
 	ItemTemplateNames = BWMan.GetAllItemTemplateNames();
 	AppendPatchedItems(ItemTemplateNames);
+	AppendItemsFromUpgrade(ItemTemplateNames);
 
 	UDTemplate = UDMan.GetUpgradeDeckTemplate(UpgradeDeckTemplateName);
 	if (UDTemplate != none)
@@ -205,6 +206,8 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 
 		foreach WUTemplates(WUTemplate)
 		{
+			IconString = ""; //Init
+
 			// Get an ability from the weapon upgrade
 			foreach WUTemplate.BonusAbilities(AbilityName)
 			{
@@ -234,10 +237,7 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 			}
 
 			// If still no icon, then we give it a default one
-			if (IconString == "")
-			{
-				IconString = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip";
-			}
+			IconString = IconString == "" ? "img:///UILibrary_PerkIcons.UIPerk_maximumordanance" : IconString;
 
 			foreach ItemTemplateNames(ItemTemplateName)
 			{
@@ -495,6 +495,26 @@ static function AppendPatchedItems(out array<name> ItemTemplateNames)
 	}
 }
 
+// The purpose of this is to grab any other weapon templates that need to be considered.
+// Ghost Templates like the ones from Iridar's Laser/Coil Weapons can be used to reskin
+// base game weapons and the base game upgrades are updated to reflect these new templates.
+// If this is not done, reskinned weapons via WSR will look janky in armory description.
+static function AppendItemsFromUpgrade(out array<name> ItemTemplateNames)
+{
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local WeaponAttachment Attach;
+
+	WUTemplate = X2WeaponUpgradeTemplate(class'X2ItemTemplateManager'.static.GetItemTemplateManager().FindItemTemplate('AimUpgrade_Bsc'));
+
+	foreach WUTemplate.UpgradeAttachments(Attach)
+	{
+		if (ItemTemplateNames.Find(Attach.ApplyToWeaponTemplate) == INDEX_NONE)
+		{
+			ItemTemplateNames.AddItem(Attach.ApplyToWeaponTemplate);
+		}
+	}
+}
+
 // Heavily inspired by Proficiency Class Pack Air Burst Grenades ability
 static function AddAbilityBonusRadius()
 {
@@ -553,7 +573,6 @@ static function PatchWeaponUpgrades()
 	local X2DataTemplate DataTemplate;
 	local X2WeaponUpgradeTemplate WUTemplate, DonorTemplate;
 	local PatchWeaponUpgradesData PatchWeaponUpgrade;
-	local name WUTemplateName;
 
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	
@@ -566,9 +585,9 @@ static function PatchWeaponUpgrades()
 			WUTemplate = X2WeaponUpgradeTemplate(DataTemplate);
 			if (WUTemplate == none) continue;
 
-			foreach PatchWeaponUpgrade.MutuallyExclusiveUpgrades(WUTemplateName)
+			if (PatchWeaponUpgrade.MutuallyExclusiveUpgrades.Length > 0)
 			{
-				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplateName);
+				WUTemplate.MutuallyExclusiveUpgrades = PatchWeaponUpgrade.MutuallyExclusiveUpgrades;
 			}
 
 			if (PatchWeaponUpgrade.AttachmentsDonorTemplate != '')
