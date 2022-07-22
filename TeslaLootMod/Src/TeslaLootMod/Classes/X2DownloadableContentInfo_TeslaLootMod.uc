@@ -8,6 +8,8 @@ var config (TLM) string strTier2Color;
 var config (TLM) string strTier3Color;
 var config (TLM) bool bUpgradesDropAsLoot;
 
+var config (Engine) bool bLog;
+
 var localized array<String> RandomWeaponNickNames;
 var localized array<String> RandomArmorNickNames;
 var localized string strHasAmmoAlreadyEquipped;
