@@ -310,7 +310,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 
 	if (Item == none)
 	{
-		`LOG("TLM ERROR: Failed to get base weapon");
+		`REDSCREEN("TLM ERROR: Failed to get base weapon");
 		return Item; // Blank item i.e. get nothing when tech completes	
 	}
 	
@@ -355,7 +355,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	BWTemplate = BWMan.DetermineBaseWeaponDeck();
 
 	if (BWTemplate == none)
-		`LOG("TLM ERROR: Unable to determine base weapon deck template");
+		`REDSCREEN("TLM ERROR: Unable to determine base weapon deck template");
 
 	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState, Category);
 
