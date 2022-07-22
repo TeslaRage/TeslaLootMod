@@ -41,7 +41,6 @@ static function EventListenerReturn GiveMovementActionPoints(Object EventData, O
 
 	if (AbilityState.GetMyTemplateName() != 'Reload') return ELR_NoInterrupt;
 
-	`LOG("Reloading " @UnitState.GetFullName());	
 	WUTemplates = UnitState.GetPrimaryWeapon().GetMyWeaponUpgradeTemplates();
 
 	foreach WUTemplates(WUTemplate)
