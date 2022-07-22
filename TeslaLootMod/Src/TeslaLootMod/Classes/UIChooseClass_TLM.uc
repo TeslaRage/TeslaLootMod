@@ -314,7 +314,7 @@ simulated function string AppendAdditionalInfo(name Category, array<X2ItemTempla
 	if (DetermineECAT(Category) == eCat_Rando) return AdditionalInfo;
 
 	// Start build of details of items we currently own
-	Items = Class'X2Helper_TLM'.static.GetTLMItemsByCategory(Category);
+	Items = Class'X2Helper_TLM'.static.GetTLMItems(Category);
 
 	if (Items.Length > 0)
 	{

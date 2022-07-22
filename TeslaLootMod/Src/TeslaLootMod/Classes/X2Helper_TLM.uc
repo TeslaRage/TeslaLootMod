@@ -77,6 +77,11 @@ static function CreateTechsMidCampaign()
 	local array<name> TechsToCreate;
 	local name TechName;	
 
+	if (class'X2StrategyElement_TLM'.default.bEnableSalvageTech)
+	{
+		TechsToCreate.AddItem('TLM_Salvage');
+	}
+
 	foreach class'X2StrategyElement_TLM'.default.UnlockLootBoxTechs(UnlockLootBoxTech)
 	{
 		TechsToCreate.AddItem(UnlockLootBoxTech.TemplateName);
@@ -573,6 +578,7 @@ static function PatchWeaponUpgrades()
 	local X2DataTemplate DataTemplate;
 	local X2WeaponUpgradeTemplate WUTemplate, DonorTemplate;
 	local PatchWeaponUpgradesData PatchWeaponUpgrade;
+	local name WUTemplateName;
 
 	ItemTemplateMan = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	
@@ -585,9 +591,9 @@ static function PatchWeaponUpgrades()
 			WUTemplate = X2WeaponUpgradeTemplate(DataTemplate);
 			if (WUTemplate == none) continue;
 
-			if (PatchWeaponUpgrade.MutuallyExclusiveUpgrades.Length > 0)
+			foreach PatchWeaponUpgrade.MutuallyExclusiveUpgrades(WUTemplateName)
 			{
-				WUTemplate.MutuallyExclusiveUpgrades = PatchWeaponUpgrade.MutuallyExclusiveUpgrades;
+				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplateName);
 			}
 
 			if (PatchWeaponUpgrade.AttachmentsDonorTemplate != '')
@@ -636,7 +642,7 @@ static function int GetWeightBasedIndex(array<ItemWeightData> ItemWeights)
 	return -1;
 }
 
-static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
+static function array<XComGameState_Item> GetTLMItems(optional name Category, optional bool bExcludePatchItems)
 {
 	local XComGameState_HeadquartersXCom XComHQ;
 	local XComGameStateHistory History;
@@ -650,10 +656,20 @@ static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
 
 	foreach XComHQ.Inventory(ItemRef)
 	{
-		Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+		Item = XComGameState_Item(History.GetGameStateForObjectID(ItemRef.ObjectID));
 		if (Item == none) continue;
 
 		if (!IsATLMItem(Item)) continue;
+
+		if (bExcludePatchItems &&
+			class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems.Find('ItemTemplateName', Item.GetMyTemplateName()) != INDEX_NONE)
+			continue;
+
+		if (Category == '')
+		{
+			Items.AddItem(Item);
+			continue;
+		}
 
 		if (GetTLMItemCategory(Item) == Category)
 		{
@@ -668,10 +684,20 @@ static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
 
 		foreach Unit.InventoryItems(ItemRef)
 		{
-			Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+			Item = XComGameState_Item(History.GetGameStateForObjectID(ItemRef.ObjectID));
 			if (Item == none) continue;
 
 			if (!IsATLMItem(Item)) continue;
+
+			if (bExcludePatchItems &&
+				class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems.Find('ItemTemplateName', Item.GetMyTemplateName()) != INDEX_NONE)
+				continue;
+
+			if (Category == '')
+			{
+				Items.AddItem(Item);
+				continue;
+			}
 
 			if (GetTLMItemCategory(Item) == Category)
 			{
