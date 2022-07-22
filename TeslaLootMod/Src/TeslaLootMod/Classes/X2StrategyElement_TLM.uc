@@ -1,6 +1,7 @@
 class X2StrategyElement_TLM extends X2StrategyElement config(TLM);
 
 var config array<TechData> UnlockLootBoxTechs;
+var config bool bEnableSalvageTech;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -10,7 +11,12 @@ static function array<X2DataTemplate> CreateTemplates()
 	foreach default.UnlockLootBoxTechs(UnlockLootBoxTech)
 	{
 		Techs.AddItem(CreateUnlockLockboxTemplate(UnlockLootBoxTech));
-	}	
+	}
+
+	if (default.bEnableSalvageTech)
+	{
+		Techs.AddItem(CreateSalvageTemplate());
+	}
 
 	return Techs;
 }
@@ -50,6 +56,42 @@ static function UnlockLootBoxCompleted(XComGameState NewGameState, XComGameState
 	// Else the popup won't show and UIScreenListener_TLMTech won't spawn the new UI
 	TechState.ItemRewards.Length = 0;
 	TechState.bSeenResearchCompleteScreen = false;
+}
+
+static function X2DataTemplate CreateSalvageTemplate()
+{
+	local X2TechTemplate Template;
+
+	`CREATE_X2TEMPLATE(class'X2TechTemplate', Template, 'TLM_Salvage');
+	// Template.PointsToComplete = class'X2StrategyElement_DefaultTechs'.static.StafferXDays(1, 5);
+	Template.strImage = "img:///UILibrary_StrategyImages.ResearchTech.TECH_Modular_Weapons";
+	Template.bProvingGround = true;
+	Template.bRepeatable = true;
+	Template.SortingTier = 1;
+	Template.ResearchCompletedFn = SalvageItemCompleted;
+	Template.Requirements.SpecialRequirementsFn = TLM_SalvageSpecialRequirements;
+
+	return Template;
+}
+
+static function SalvageItemCompleted(XComGameState NewGameState, XComGameState_Tech TechState)
+{
+	TechState.ItemRewards.Length = 0;
+	TechState.bSeenResearchCompleteScreen = false;
+}
+
+static function bool TLM_SalvageSpecialRequirements()
+{
+	local array<XComGameState_Item> Items;
+
+	Items = class'X2Helper_TLM'.static.GetTLMItems(, true);
+
+	if (Items.Length <= 0)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 static function UIItemReceived(XComGameState NewGameState, XComGameState_Item Item, X2BaseWeaponDeckTemplate BWTemplate)

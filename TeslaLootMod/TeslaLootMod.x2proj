@@ -68,6 +68,9 @@
     <Content Include="Config\XComMetaData.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Config\XComStrategyTuning.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComTLM.ini">
       <SubType>Content</SubType>
     </Content>
@@ -90,6 +93,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\UIChooseClass_TLM.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\TeslaLootMod\Classes\UIChooseClass_TLMSalvage.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\TeslaLootMod\Classes\UIListItemString_TLM.uc">
