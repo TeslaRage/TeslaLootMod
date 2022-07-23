@@ -233,6 +233,7 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 	local Commodity StatsComm;
 
 	local ETLMCatType CatType;
+	local name ItemCategory;
 	local array<name> Categories;
 	local int i, Idx, NumOfCategories;
 
@@ -268,7 +269,12 @@ simulated function array<Commodity> ConvertOptionsToCommodities()
 					if (ItemTemplate == none) continue;
 
 					ItemTemplates.AddItem(ItemTemplate);
-					Categories.AddItem(class'X2Helper_TLM'.static.GetTLMItemCategory(, ItemTemplate));
+					ItemCategory = class'X2Helper_TLM'.static.GetTLMItemCategory(, ItemTemplate);
+
+					if (Categories.Find(ItemCategory) == INDEX_NONE)
+					{
+						Categories.AddItem(ItemCategory);
+					}
 				}
 			}
 
