@@ -77,6 +77,11 @@ static function CreateTechsMidCampaign()
 	local array<name> TechsToCreate;
 	local name TechName;	
 
+	if (class'X2StrategyElement_TLM'.default.bEnableSalvageTech)
+	{
+		TechsToCreate.AddItem('TLM_Salvage');
+	}
+
 	foreach class'X2StrategyElement_TLM'.default.UnlockLootBoxTechs(UnlockLootBoxTech)
 	{
 		TechsToCreate.AddItem(UnlockLootBoxTech.TemplateName);
@@ -196,6 +201,7 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 	AbilityMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
 	ItemTemplateNames = BWMan.GetAllItemTemplateNames();
 	AppendPatchedItems(ItemTemplateNames);
+	AppendItemsFromUpgrade(ItemTemplateNames);
 
 	UDTemplate = UDMan.GetUpgradeDeckTemplate(UpgradeDeckTemplateName);
 	if (UDTemplate != none)
@@ -205,6 +211,8 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 
 		foreach WUTemplates(WUTemplate)
 		{
+			IconString = ""; //Init
+
 			// Get an ability from the weapon upgrade
 			foreach WUTemplate.BonusAbilities(AbilityName)
 			{
@@ -234,10 +242,7 @@ static function SetUpUpgradeIconsAndME(name UpgradeDeckTemplateName, bool SetMut
 			}
 
 			// If still no icon, then we give it a default one
-			if (IconString == "")
-			{
-				IconString = "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip";
-			}
+			IconString = IconString == "" ? "img:///UILibrary_PerkIcons.UIPerk_maximumordanance" : IconString;
 
 			foreach ItemTemplateNames(ItemTemplateName)
 			{
@@ -305,7 +310,7 @@ static function XComGameState_Item GenerateTLMItem(XComGameState NewGameState, X
 
 	if (Item == none)
 	{
-		`LOG("TLM ERROR: Failed to get base weapon");
+		`REDSCREEN("TLM ERROR: Failed to get base weapon");
 		return Item; // Blank item i.e. get nothing when tech completes	
 	}
 	
@@ -350,7 +355,7 @@ static function GetBaseItem(out X2BaseWeaponDeckTemplate BWTemplate, out X2ItemT
 	BWTemplate = BWMan.DetermineBaseWeaponDeck();
 
 	if (BWTemplate == none)
-		`LOG("TLM ERROR: Unable to determine base weapon deck template");
+		`REDSCREEN("TLM ERROR: Unable to determine base weapon deck template");
 
 	QualifiedBaseItems = BWTemplate.GetBaseItems(RarityTemplate, NewGameState, Category);
 
@@ -495,6 +500,26 @@ static function AppendPatchedItems(out array<name> ItemTemplateNames)
 	}
 }
 
+// The purpose of this is to grab any other weapon templates that need to be considered.
+// Ghost Templates like the ones from Iridar's Laser/Coil Weapons can be used to reskin
+// base game weapons and the base game upgrades are updated to reflect these new templates.
+// If this is not done, reskinned weapons via WSR will look janky in armory description.
+static function AppendItemsFromUpgrade(out array<name> ItemTemplateNames)
+{
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local WeaponAttachment Attach;
+
+	WUTemplate = X2WeaponUpgradeTemplate(class'X2ItemTemplateManager'.static.GetItemTemplateManager().FindItemTemplate('AimUpgrade_Bsc'));
+
+	foreach WUTemplate.UpgradeAttachments(Attach)
+	{
+		if (ItemTemplateNames.Find(Attach.ApplyToWeaponTemplate) == INDEX_NONE)
+		{
+			ItemTemplateNames.AddItem(Attach.ApplyToWeaponTemplate);
+		}
+	}
+}
+
 // Heavily inspired by Proficiency Class Pack Air Burst Grenades ability
 static function AddAbilityBonusRadius()
 {
@@ -617,7 +642,7 @@ static function int GetWeightBasedIndex(array<ItemWeightData> ItemWeights)
 	return -1;
 }
 
-static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
+static function array<XComGameState_Item> GetTLMItems(optional name Category, optional bool bExcludePatchItems)
 {
 	local XComGameState_HeadquartersXCom XComHQ;
 	local XComGameStateHistory History;
@@ -631,10 +656,20 @@ static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
 
 	foreach XComHQ.Inventory(ItemRef)
 	{
-		Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+		Item = XComGameState_Item(History.GetGameStateForObjectID(ItemRef.ObjectID));
 		if (Item == none) continue;
 
 		if (!IsATLMItem(Item)) continue;
+
+		if (bExcludePatchItems &&
+			class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems.Find('ItemTemplateName', Item.GetMyTemplateName()) != INDEX_NONE)
+			continue;
+
+		if (Category == '')
+		{
+			Items.AddItem(Item);
+			continue;
+		}
 
 		if (GetTLMItemCategory(Item) == Category)
 		{
@@ -649,10 +684,20 @@ static function array<XComGameState_Item> GetTLMItemsByCategory(name Category)
 
 		foreach Unit.InventoryItems(ItemRef)
 		{
-			Item = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemRef.ObjectID));
+			Item = XComGameState_Item(History.GetGameStateForObjectID(ItemRef.ObjectID));
 			if (Item == none) continue;
 
 			if (!IsATLMItem(Item)) continue;
+
+			if (bExcludePatchItems &&
+				class'X2DownloadableContentInfo_TeslaLootMod_Last'.default.PatchItems.Find('ItemTemplateName', Item.GetMyTemplateName()) != INDEX_NONE)
+				continue;
+
+			if (Category == '')
+			{
+				Items.AddItem(Item);
+				continue;
+			}
 
 			if (GetTLMItemCategory(Item) == Category)
 			{

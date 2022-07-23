@@ -8,6 +8,8 @@ var config (TLM) string strTier2Color;
 var config (TLM) string strTier3Color;
 var config (TLM) bool bUpgradesDropAsLoot;
 
+var config (Engine) bool bLog;
+
 var localized array<String> RandomWeaponNickNames;
 var localized array<String> RandomArmorNickNames;
 var localized string strHasAmmoAlreadyEquipped;
@@ -735,4 +737,99 @@ exec function TLM_QuickTestDebug()
 		WI.ConsoleCommand("additem lockboxkey");
 	}
 
+}
+
+exec function TLM_DestroyItem(optional bool bTLMItem = true)
+{
+	local XComGameState NewGameState;
+	local UIArmory_WeaponUpgrade Armory_WeaponUpgrade;
+	local XComGameState_Item Item;
+	local XComGameState_ItemData Data;
+	local XComGameState_Unit Unit;
+	local XComGameStateHistory History;
+	local bool bUpdate;
+
+	Armory_WeaponUpgrade = UIArmory_WeaponUpgrade(`SCREENSTACK.GetFirstInstanceOf(class'UIArmory_WeaponUpgrade'));
+	History = `XCOMHISTORY;
+
+	if (Armory_WeaponUpgrade == none)
+	{
+		class'Helpers'.static.OutputMsg("Need to be in item upgrade screen");
+		return;
+	}
+
+	Item = XComGameState_Item(History.GetGameStateforObjectID(Armory_WeaponUpgrade.WeaponRef.ObjectID));
+
+	if (Item == none)
+	{
+		class'Helpers'.static.OutputMsg("No item selected");
+		return;
+	}
+
+	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
+
+	if (Data == none && bTLMItem)
+	{
+		class'Helpers'.static.OutputMsg("Not a TLM item");
+		return;
+	}
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Destroy Item");
+
+	Item = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', Item.ObjectID));
+	Unit = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', Item.OwnerStateObject.ObjectID));
+
+	if (Unit.RemoveItemFromInventory(Item, NewGameState))
+	{
+		bUpdate = true;
+		NewGameState.RemoveStateObject(Item.ObjectID);
+		Unit.ApplyBestGearLoadout(NewGameState);
+	}
+
+	if (bUpdate)
+	{
+		`GAMERULES.SubmitGameState(NewGameState);
+	}
+	else
+	{
+		`XCOMHISTORY.CleanupPendingGameState(NewGameState);
+	}
+
+	class'Helpers'.static.OutputMsg(Item.GetMyTemplateName() @"removed from the game. You will never get it back.");
+}
+
+exec function TLM_GiveItem(name Category, name RarityName)
+{
+	local XComGameState NewGameState;
+	local XComGameState_Item Item;
+	local XComGameState_Tech Tech;
+	local X2BaseWeaponDeckTemplate BWTemplate;
+	local X2RarityTemplate RarityTemplate;
+	local X2RarityTemplateManager RMan;
+	local XComGameState_HeadquartersXCom XComHQ;
+
+	XComHQ = `XCOMHQ;
+	RMan = class'X2RarityTemplateManager'.static.GetRarityTemplateManager();
+	RarityTemplate = RMan.GetRarityTemplate(RarityName);
+
+	if (RarityTemplate == none)
+	{
+		class'Helpers'.static.OutputMsg("Invalid Rarity name");
+		return;
+	}
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("TLM: Give Item (Cheat)");
+
+	Tech = none; // Compiler warning
+	// Tech is none, but not used in GenerateTLMItem as long as RarityTemplate is not none
+	Item = class'X2Helper_TLM'.static.GenerateTLMItem(NewGameState, Tech, BWTemplate, Category, RarityTemplate);
+
+	XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
+	XComHQ.PutItemInInventory(NewGameState, Item);
+
+	`XEVENTMGR.TriggerEvent('ItemConstructionCompleted', Item, Item, NewGameState);
+	class'X2StrategyElement_TLM'.static.UIItemReceived(NewGameState, Item, BWTemplate);
+
+	`GAMERULES.SubmitGameState(NewGameState);
+	class'Helpers'.static.OutputMsg(Item.GetMyTemplateName() @"(" $Item.NickName $")" @"added to HQ inventory.");
 }

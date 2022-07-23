@@ -206,7 +206,7 @@ static function X2DataTemplate RefinementAbility(RefinementUpgradeAbilityData Re
 	Template.AbilitySourceName = 'eAbilitySource_Item';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_hunter";
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_aggression";
 
 	Template.AbilityToHitCalc = default.DeadEye;
 	Template.AbilityTargetStyle = default.SelfTarget;

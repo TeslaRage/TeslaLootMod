@@ -43,7 +43,6 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 	// Pick upgrades and apply
 	while (WUTemplates.Length > 0 && Applied < Quantity)
 	{
-		// Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
 		Idx = class'X2Helper_TLM'.static.GetWeightBasedIndex(ItemWeights);
 		if (Idx < 0) continue;
 
@@ -55,12 +54,14 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 			Item.ApplyWeaponUpgradeTemplate(WUTemplate);
 			AppliedUpgrades.AddItem(WUTemplate);
 			WUTemplates.Remove(Idx, 1);
+			ItemWeights.Remove(Idx, 1);
 			Applied++;
 		}
 		else
 		{
 			WUTemplates.Remove(Idx, 1);
-		}		
+			ItemWeights.Remove(Idx, 1);
+		}
 	}
 
 	ValidateItem(Item);
@@ -76,26 +77,46 @@ function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_
 	local X2EquipmentTemplate EqTemplate;
 	local name AbilityName;
 	local bool bRequiredAbilityFound;
+	local bool bLog;
+
+	bLog = class'X2DownloadableContentInfo_TeslaLootMod'.default.bLog;
+
+	`LOG(Item.GetMyTemplateName() @"against" @WUTemplate.DataName, bLog, 'TLMDEBUG');
 
 	// Go through the basic validation first
 	if (!WUTemplate.CanApplyUpgradeToWeapon(Item, Item.GetMyWeaponUpgradeCount()))
+	{
+		`LOG("Failed CanApplyUpgradeToWeapon", bLog, 'TLMDEBUG');
 		return false;
+	}
 
 	if (!Item.CanWeaponApplyUpgrade(WUTemplate))
+	{
+		`LOG("Failed CanWeaponApplyUpgrade", bLog, 'TLMDEBUG');
 		return false;
+	}
 
 	// Does this upgrade have valid abilities?
 	if (HasInvalidAbilities(WUTemplate, Upgrade))
+	{
+		`LOG("Failed HasInvalidAbilities", bLog, 'TLMDEBUG');
 		return false;
+	}
 
 	// Need to check UpgradeDeckData's AllowedWeaponCats and DisallowedWeaponCats
 	// Custom upgrades already check this via delegate CanApplyTLMUpgradeToWeapon
 	// so this manual check is meant for upgrades from other mods including base game's
 	if (Upgrade.AllowedWeaponCats.Length > 0
 		&& Upgrade.AllowedWeaponCats.Find(Item.GetWeaponCategory()) == INDEX_NONE)
+	{
+		`LOG("Failed AllowedWeaponCats", bLog, 'TLMDEBUG');
 		return false;
+	}
 	else if (Upgrade.DisallowedWeaponCats.Find(Item.GetWeaponCategory()) != INDEX_NONE)
+	{
+		`LOG("Failed DisallowedWeaponCats", bLog, 'TLMDEBUG');
 		return false;
+	}
 
 	// Checks to make sure that the item has required ability before any upgrade from this
 	// deck can be applied. This is useful in cases where a weapon with built in ammo effect
@@ -114,7 +135,10 @@ function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_
 		}
 
 		if (!bRequiredAbilityFound)
+		{
+			`LOG("Failed bRequiredAbilityFound", bLog, 'TLMDEBUG');
 			return false;
+		}
 	}
 
 	// If we reach here, it means the upgrade is good for this item
