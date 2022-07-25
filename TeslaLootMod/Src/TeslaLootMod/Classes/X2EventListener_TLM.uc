@@ -2,6 +2,7 @@ class X2EventListener_TLM extends X2EventListener config (TLM);
 
 var localized string strSlotLocked;
 var config bool bAllowRemoveUpgrade;
+var config array<int> UpgradeSellTier;
 
 var UIArmory_WeaponUpgrade ScreenChange;
 
@@ -27,6 +28,7 @@ static final function CHEventListenerTemplate CreateStrategyListener()
 	// Template.AddCHEvent('OverrideNumUpgradeSlots', OverrideNumUpgradeSlots_OpenSlots, ELD_OnStateSubmitted, 60);
 	Template.AddCHEvent('UIArmory_WeaponUpgrade_SlotsUpdated', UIArmory_WeaponUpgrade_SlotsUpdated, ELD_Immediate);
 	Template.AddCHEvent('UIArmory_WeaponUpgrade_SlotsUpdated', UIArmory_WeaponUpgrade_SlotsUpdated_GiveColor, ELD_OnStateSubmitted);
+	Template.AddCHEvent('InfluenceBuyPrices', InfluenceBuyPrices, ELD_Immediate);
 
 	return Template; 
 }
@@ -201,6 +203,62 @@ static function EventListenerReturn OnGetItemRange(Object EventData, Object Even
 
 			OverrideTuple.Data[1].i = class'X2Ability_TLM'.default.AbilityGivesGRange[Index].GrenadeRangeBonus;
 			return ELR_NoInterrupt;
+		}
+	}
+
+	return ELR_NoInterrupt;
+}
+
+static function EventListenerReturn InfluenceBuyPrices(Object EventData, Object EventSource, XComGameState NewGameState, Name EventID, Object CallbackObject)
+{	
+	local XComLWTuple OverrideTuple;
+	local XComGameState_Item Item;
+	local XComGameState_BlackMarket BlackMarket;
+	local XComGameStateHistory History;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local bool bLog;
+	local array<int> ItemObjectIDs;
+	local int i, WUPrice;
+
+	bLog = class'X2DownloadableContentInfo_TeslaLootMod'.default.bLog;
+
+	// Get info we need
+	OverrideTuple = XComLWTuple(EventData);
+	if(OverrideTuple == none) return ELR_NoInterrupt;
+
+	History = `XCOMHISTORY;
+	ItemObjectIDs = OverrideTuple.Data[0].ai;
+
+	BlackMarket = XComGameState_BlackMarket(History.GetSingleGameStateObjectForClass(class'XComGameState_BlackMarket'));
+	if(BlackMarket == none) return ELR_NoInterrupt; // Impossible to happen unless the game is broken
+
+	for (i = 0; i < ItemObjectIDs.Length; i++)
+	{
+		Item = XComGameState_Item(History.GetGameStateForObjectID(ItemObjectIDs[i]));
+		if (Item == none) continue;
+
+		// Only interested with items that has upgrades
+		if (Item.GetMyWeaponUpgradeCount() > 0)
+		{
+			WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+
+			`LOG("Item: " $Item.GetMyTemplateName() $"|| " $ItemObjectIDs[i], bLog, 'TLMDEBUG');
+			`LOG("Before: " $OverrideTuple.Data[1].ai[i], bLog, 'TLMDEBUG');
+			foreach WUTemplates(WUTemplate)
+			{
+				WUPrice = default.UpgradeSellTier[WUTemplate.Tier];
+				WUPrice = WUPrice == 0 ? 1 : WUPrice;
+
+				if(BlackMarket.InterestTemplates.Find(WUTemplate.DataName) != INDEX_NONE)
+				{
+					WUPrice *= `ScaleStrategyArrayInt(BlackMarket.default.InterestPriceMultiplier);
+				}
+
+				OverrideTuple.Data[1].ai[i] += WUPrice;
+				`LOG("WUPrice: " $WUPrice, bLog, 'TLMDEBUG');
+			}
+			`LOG("After: " $OverrideTuple.Data[1].ai[i], bLog, 'TLMDEBUG');
 		}
 	}
 
