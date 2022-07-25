@@ -596,6 +596,12 @@ static function PatchWeaponUpgrades()
 				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplateName);
 			}
 
+			// Make sure to add itself if not already there
+			if (WUTemplate.MutuallyExclusiveUpgrades.Find(WUTemplate.DataName) == INDEX_NONE)
+			{
+				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplate.DataName);
+			}
+
 			if (PatchWeaponUpgrade.AttachmentsDonorTemplate != '')
 			{
 				DonorTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(PatchWeaponUpgrade.AttachmentsDonorTemplate));

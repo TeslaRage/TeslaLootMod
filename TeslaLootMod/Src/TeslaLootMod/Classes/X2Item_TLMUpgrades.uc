@@ -87,6 +87,12 @@ static function X2DataTemplate AbilityUpgrade(AbilityUpgradeData AbilityWeaponUp
 		Template.MutuallyExclusiveUpgrades = AbilityWeaponUpgrade.MutuallyExclusiveUpgrades;
 	}
 
+	// Make sure to add itself if not already there
+	if (Template.MutuallyExclusiveUpgrades.Find(AbilityWeaponUpgrade.UpgradeName) == INDEX_NONE)
+	{
+		Template.MutuallyExclusiveUpgrades.AddItem(AbilityWeaponUpgrade.UpgradeName);
+	}
+
 	// Upgrade icons are set up in OPTC
 
 	return Template;
