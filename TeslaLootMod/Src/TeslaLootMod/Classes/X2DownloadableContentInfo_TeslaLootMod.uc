@@ -833,3 +833,26 @@ exec function TLM_GiveItem(name Category, name RarityName)
 	`GAMERULES.SubmitGameState(NewGameState);
 	class'Helpers'.static.OutputMsg(Item.GetMyTemplateName() @"(" $Item.NickName $")" @"added to HQ inventory.");
 }
+
+exec function TLM_PrintMutualExclusives(name TemplateName)
+{
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local name WUName;
+
+	WUTemplate = X2WeaponUpgradeTemplate(class'X2ItemTemplateManager'.static.GetItemTemplateManager().FindItemTemplate(TemplateName));
+
+	if (WUTemplate == none)
+	{
+		class'Helpers'.static.OutputMsg(string(TemplateName) @"is not an X2WeaponUpgradeTemplate");
+		return;
+	}
+	else
+	{
+		class'Helpers'.static.OutputMsg(string(TemplateName) @"is mutually exclusive with:");
+
+		foreach WUTemplate.MutuallyExclusiveUpgrades(WUName)
+		{
+			class'Helpers'.static.OutputMsg(string(WUName));
+		}
+	}
+}
