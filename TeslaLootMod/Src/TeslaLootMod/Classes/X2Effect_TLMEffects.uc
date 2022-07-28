@@ -38,6 +38,12 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 	local XComGameState_Item SourceWeapon;
 	local XComGameState_Unit Unit;
 	local name QualifiedEffectName;
+	local bool bLog;
+
+	bLog = class'X2DownloadableContentInfo_TeslaLootMod'.default.bLog;
+
+	`LOG("IsHitResultHit:" $class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult), bLog, 'TLMDEBUG');
+	`LOG("HitResult:" $class'X2TacticalGameRulesetDataStructures'.default.m_aAbilityHitResultStrings[AppliedData.AbilityResultContext.HitResult], bLog, 'TLMDEBUG');
 
 	Unit = XComGameState_Unit(TargetDamageable);
 	SourceWeapon = AbilityState.GetSourceWeapon();
