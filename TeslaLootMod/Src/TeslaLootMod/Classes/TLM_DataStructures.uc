@@ -33,6 +33,7 @@ enum ETLMCatType
 	eCat_Canister,
 	eCat_Arcthrower,
 	eCat_SawedOffShotgun,
+	eCat_HoloTargeter,
 	// Other
 	eCat_Armor,
 	eCat_Medikit,
