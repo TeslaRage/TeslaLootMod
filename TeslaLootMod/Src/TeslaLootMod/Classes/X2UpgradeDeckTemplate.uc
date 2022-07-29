@@ -43,10 +43,19 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 	// Pick upgrades and apply
 	while (WUTemplates.Length > 0 && Applied < Quantity)
 	{
+		ItemWeights = RebuildIndexTable(WUTemplates);
 		Idx = class'X2Helper_TLM'.static.GetWeightBasedIndex(ItemWeights);
 		if (Idx < 0) continue;
 
 		WUTemplate = WUTemplates[Idx];
+
+		if (WUTemplate == none)
+		{
+			`REDSCREEN("TLM ERROR: Accessed invalid index");
+			Idx = `SYNC_RAND_STATIC(WUTemplates.Length);
+			WUTemplate = WUTemplates[Idx];
+			if (WUTemplate == none) break;
+		}
 		
 		if (WUTemplate.CanApplyUpgradeToWeapon(Item, Item.GetMyWeaponUpgradeCount())
 			&& Item.CanWeaponApplyUpgrade(WUTemplate))
@@ -54,13 +63,11 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 			Item.ApplyWeaponUpgradeTemplate(WUTemplate);
 			AppliedUpgrades.AddItem(WUTemplate);
 			WUTemplates.Remove(Idx, 1);
-			ItemWeights.Remove(Idx, 1);
 			Applied++;
 		}
 		else
 		{
 			WUTemplates.Remove(Idx, 1);
-			ItemWeights.Remove(Idx, 1);
 		}
 	}
 
@@ -70,6 +77,26 @@ function RollUpgrades(XComGameState_Item Item, int Quantity, optional bool bAppl
 	{
 		Item.NickName = ModifyNickNameFn(AppliedUpgrades, Item);
 	}
+}
+
+function array<ItemWeightData> RebuildIndexTable(array<X2WeaponUpgradeTemplate> WUTemplates)
+{
+	local array<ItemWeightData> ItemWeights;
+	local ItemWeightData ItemWeight;
+	local int i, WeightIdx;
+
+	if (WUTemplates.Length == 0) return ItemWeights;
+
+	for (i = 0; i < WUTemplates.Length; i++)
+	{
+		WeightIdx = Upgrades.Find('UpgradeName', WUTemplates[i].DataName);
+
+		ItemWeight.Index = i;
+		ItemWeight.Weight = WeightIdx == INDEX_NONE ? 1 : Upgrades[WeightIdx].Weight;
+		ItemWeights.AddItem(ItemWeight);
+	}
+
+	return ItemWeights;
 }
 
 function bool CanApplyUpgrade(X2WeaponUpgradeTemplate WUTemplate, XComGameState_Item Item, UpgradeDeckData Upgrade)

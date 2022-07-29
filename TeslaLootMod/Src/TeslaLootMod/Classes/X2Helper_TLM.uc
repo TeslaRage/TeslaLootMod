@@ -610,7 +610,10 @@ static function PatchWeaponUpgrades()
 
 static function int GetWeightBasedIndex(array<ItemWeightData> ItemWeights)
 {
-	local int Rand, i, TotalWeight;	
+	local int Rand, i, TotalWeight;
+	local bool bLog;
+
+	bLog = class'X2DownloadableContentInfo_TeslaLootMod'.default.bLog;
 
 	// Calculate total weight
 	for (i = 0; i < ItemWeights.Length; i++)
@@ -621,19 +624,23 @@ static function int GetWeightBasedIndex(array<ItemWeightData> ItemWeights)
 			ItemWeights[i].Weight = 1;
 		}
 		TotalWeight += ItemWeights[i].Weight;
+		`LOG("TotalWeight: " $TotalWeight, bLog, 'TLMDEBUG');
 	}
 
 	Rand = `SYNC_RAND_STATIC(TotalWeight);
+	`LOG("Rand: " $Rand, bLog, 'TLMDEBUG');
 
 	for (i = 0; i < ItemWeights.Length; i++)
 	{
 		if (Rand < ItemWeights[i].Weight)
 		{
+			`LOG("Returning index: " $ItemWeights[i].Index, bLog, 'TLMDEBUG');
 			return ItemWeights[i].Index;
 		}
 		else
 		{
 			Rand -= ItemWeights[i].Weight;
+			`LOG("Rand: " $Rand, bLog, 'TLMDEBUG');
 		}
 	}
 
