@@ -542,6 +542,23 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	return false;
 }
 
+static function OverrideItemImage_Improved(out array<string> imagePath, const EInventorySlot Slot, const X2ItemTemplate ItemTemplate, XComGameState_Unit UnitState, const XComGameState_Item ItemState)
+{
+	local XComGameState_ItemData Data;
+	local X2RarityTemplate RarityTemplate;
+
+	Data = none; // Compiler warning
+
+	if (class'X2Helper_TLM'.static.IsATLMItem(ItemState, Data))
+	{
+		RarityTemplate = class'X2RarityTemplateManager'.static.GetRarityTemplateManager().GetRarityTemplate(Data.RarityName);
+		if (RarityTemplate != none && RarityTemplate.RarityIcon != "")
+		{
+			imagePath.AddItem(RarityTemplate.RarityIcon);
+		}
+	}
+}
+
 // =============
 // CONSOLE COMMANDS
 // =============

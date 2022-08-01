@@ -717,10 +717,8 @@ static function array<XComGameState_Item> GetTLMItems(optional name Category, op
 	return Items;
 }
 
-static function bool IsATLMItem(XComGameState_Item Item)
+static function bool IsATLMItem(XComGameState_Item Item, out optional XComGameState_ItemData Data)
 {
-	local XComGameState_ItemData Data;
-
 	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
 	if (Data != none) return true;
 
