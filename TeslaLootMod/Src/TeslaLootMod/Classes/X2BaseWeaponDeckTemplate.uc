@@ -62,6 +62,15 @@ function array<BaseItemData> GetBaseItems(X2RarityTemplate RarityTemplate, XComG
 			}
 		}
 
+		// Additional check for `BaseItems` requirement
+		// Looking back: I dunno why only RequiredTechs are checked. Maybe one day
+		// future Tesla knows the answer
+		ItemRequirements.RequiredTechs = BaseItem.Requirements.RequiredTechs;
+		if (!XComHQ.MeetsAllStrategyRequirements(ItemRequirements))
+		{
+			continue;
+		}
+
 		ForcedRarityName = GetForcedRarity(ItemTemplate.DataName);
 		if (ForcedRarityName != '' && ForcedRarityName != RarityTemplate.DataName) continue;
 		

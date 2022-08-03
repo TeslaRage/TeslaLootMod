@@ -133,6 +133,7 @@ struct AbilityUpgradeData
 
 struct BaseItemData{
 	var name TemplateName;
+	var StrategyRequirement Requirements;
 	var int Weight;							// Must be a number greater than 0. Default is 5.
 	var name ForcedRarity;
 	var string Image;
