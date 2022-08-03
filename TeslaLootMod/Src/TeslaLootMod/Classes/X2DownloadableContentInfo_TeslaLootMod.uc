@@ -27,6 +27,7 @@ static event OnPostTemplatesCreated()
 	class'X2Helper_TLM'.static.AddAbilityBonusRadius();
 	class'X2Helper_TLM'.static.PatchStandardShot();
 	class'X2Helper_TLM'.static.PatchWeaponUpgrades();
+	class'X2Helper_TLM'.static.PatchHotLoadAmmo();
 }
 
 static event OnLoadedSavedGameToStrategy()
@@ -39,7 +40,8 @@ static event OnLoadedSavedGameToTactical()
 	class'X2Helper_TLM'.static.CreateTechsMidCampaign();
 }
 
-static function bool CanAddItemToInventory_CH_Improved(
+// No longer used. Renamed to DISABLED_CanAddItemToInventory_CH_Improved
+static function bool DISABLED_CanAddItemToInventory_CH_Improved(
 	out int bCanAddItem,						// out value for XComGameState_Unit
 	const EInventorySlot Slot,					// Inventory Slot you're trying to equip the Item into
 	const X2ItemTemplate ItemTemplate,			// Item Template of the Item you're trying to equip

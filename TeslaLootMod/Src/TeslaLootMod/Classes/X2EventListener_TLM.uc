@@ -1,6 +1,7 @@
 class X2EventListener_TLM extends X2EventListener config (TLM);
 
 var localized string strSlotLocked;
+var localized string strAmmoEquipped, strAmmoEquippedMessage, strAmmoUpgradeExistMessage;
 var config bool bAllowRemoveUpgrade;
 
 var UIArmory_WeaponUpgrade ScreenChange;
@@ -27,6 +28,7 @@ static final function CHEventListenerTemplate CreateStrategyListener()
 	// Template.AddCHEvent('OverrideNumUpgradeSlots', OverrideNumUpgradeSlots_OpenSlots, ELD_OnStateSubmitted, 60);
 	Template.AddCHEvent('UIArmory_WeaponUpgrade_SlotsUpdated', UIArmory_WeaponUpgrade_SlotsUpdated, ELD_Immediate);
 	Template.AddCHEvent('UIArmory_WeaponUpgrade_SlotsUpdated', UIArmory_WeaponUpgrade_SlotsUpdated_GiveColor, ELD_OnStateSubmitted);
+	Template.AddCHEvent('ItemAddedToSlot', ItemAddedToSlot_RemoveAmmo, ELD_Immediate);
 
 	return Template; 
 }
@@ -42,6 +44,101 @@ static final function CHEventListenerTemplate CreateTacticalListener()
 	Template.AddCHEvent('OnGetItemRange', OnGetItemRange, ELD_Immediate);
 
 	return Template; 
+}
+
+static function EventListenerReturn ItemAddedToSlot_RemoveAmmo(Object EventData, Object EventSource, XComGameState NewGameState, Name EventID, Object CallbackObject)
+{
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local array<XComGameState_Item> Items;
+	local XComGameState_Item Item, AmmoItem;
+	local XComGameState_Unit Unit;
+	local array<string> WeaponNames, AmmoUpgradeNames;
+	local string tmpMessage, AmmoName, AmmoUpgradeName;
+	local bool bWeaponHasAmmoUpgrade, bLog;
+	local int i;
+
+	bLog = class'X2DownloadableContentInfo_TeslaLootMod'.default.bLog;
+
+	`LOG("ItemAddedToSlot_RemoveAmmo", bLog, 'TLMDEBUG');
+
+	// Get the info we need
+	Item = XComGameState_Item(EventData);
+	Unit = XComGameState_Unit(EventSource);
+	if (Item == none || Unit == none) return ELR_NoInterrupt;
+
+	// Scenario #1: Equipping a weapon when a utility ammo is already equipped
+	if (Item.GetMyWeaponUpgradeCount() > 0)
+	{
+		WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+		foreach WUTemplates(WUTemplate)
+		{
+			if (WUTemplate.IsA('X2WeaponUpgradeTemplate_TLMAmmo'))
+			{
+				bWeaponHasAmmoUpgrade = true;
+				AmmoUpgradeName = WUTemplate.GetItemFriendlyName();
+				break;
+			}
+		}
+	}
+
+	if (Item.GetMyTemplate().IsA('X2AmmoTemplate'))
+	{
+		// Scenario #2: Equipping an ammo utility item when a weapon is already equipped
+		AmmoItem = Item;
+	}
+	else
+	{
+		// Scenario #1
+		Items = Unit.GetAllInventoryItems();
+		foreach Items(AmmoItem)
+		{
+			if(AmmoItem.GetMyTemplate().IsA('X2AmmoTemplate'))
+			{
+				break;
+			}
+		}
+	}
+
+	`LOG("bWeaponHasAmmoUpgrade: " $bWeaponHasAmmoUpgrade, bLog, 'TLMDEBUG');
+	`LOG("HasItemOfTemplateClass: " $Unit.HasItemOfTemplateClass(class'X2AmmoTemplate'), bLog, 'TLMDEBUG');
+	`LOG("UnitHasAmmoUpgrade: " $class'X2Helper_TLM'.static.UnitHasAmmoUpgrade(Unit), bLog, 'TLMDEBUG');
+	`LOG("X2AmmoTemplate: " $Item.GetMyTemplate().IsA('X2AmmoTemplate'), bLog, 'TLMDEBUG');
+
+	// Used in Scenario #1 and #2
+	AmmoName = AmmoItem == none ? "AmmoItemNone" : AmmoItem.GetMyTemplate().GetItemFriendlyName();
+
+	// Scenario #1
+	if (bWeaponHasAmmoUpgrade && Unit.HasItemOfTemplateClass(class'X2AmmoTemplate'))
+	{
+		`LOG("Show message ammo wont take effect on weapons with ammo upgrade", bLog, 'TLMDEBUG');
+
+		tmpMessage = Repl(default.strAmmoEquippedMessage, "<WEAPON_NAME>", Item.Nickname != "" ? Item.Nickname : Item.GetMyTemplate().GetItemFriendlyName());
+		tmpMessage = Repl(tmpMessage, "<AMMO_NAME>", AmmoName);
+		tmpMessage = Repl(tmpMessage, "<AMMOUPGRADE_NAME>", AmmoUpgradeName);
+
+		class'X2StrategyElement_TLM'.static.UITLMGenericAlert(NewGameState, default.strAmmoEquipped, tmpMessage);
+		return ELR_NoInterrupt;
+	}
+
+	// Scenario #2
+	if (class'X2Helper_TLM'.static.UnitHasAmmoUpgrade(Unit, WeaponNames, AmmoUpgradeNames) && Item.GetMyTemplate().IsA('X2AmmoTemplate'))
+	{
+		`LOG("Show message ammo wont take effect on weapons with ammo upgrade", bLog, 'TLMDEBUG');
+
+		for (i = 0; i < WeaponNames.Length; i++)
+		{
+			tmpMessage = Repl(default.strAmmoUpgradeExistMessage, "<AMMO_NAME>", AmmoName);
+			tmpMessage = Repl(tmpMessage, "<WEAPON_NAME>", WeaponNames[i]);
+			tmpMessage = Repl(tmpMessage, "<AMMOUPGRADE_NAME>", AmmoUpgradeNames[i]);
+			class'X2StrategyElement_TLM'.static.UITLMGenericAlert(NewGameState, default.strAmmoEquipped, tmpMessage);
+		}
+
+		return ELR_NoInterrupt;
+	}
+
+	// Not applicable to us
+	return ELR_NoInterrupt;
 }
 
 static function EventListenerReturn OverrideNumUpgradeSlots(Object EventData, Object EventSource, XComGameState NewGameState, Name EventID, Object CallbackObject)
