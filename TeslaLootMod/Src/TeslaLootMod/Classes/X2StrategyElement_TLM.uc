@@ -118,6 +118,17 @@ static function UIItemReceived(XComGameState NewGameState, XComGameState_Item It
 	QueueDynamicPopup(PropertySet, NewGameState);
 }
 
+// A generic alert
+static function UITLMGenericAlert(XComGameState NewGameState, string strTitle, string strMessage)
+{
+	local DynamicPropertySet PropertySet;
+
+	BuildUIAlert(PropertySet, 'eAlert_TLMGeneric', None, '', "Geoscape_CrewMemberLevelledUp");
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicStringProperty(PropertySet, 'Title', strTitle);
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicStringProperty(PropertySet, 'Message', strMessage);
+	QueueDynamicPopup(PropertySet, NewGameState);
+}
+
 static function BuildUIAlert(
 	out DynamicPropertySet PropertySet, 
 	Name AlertName, 

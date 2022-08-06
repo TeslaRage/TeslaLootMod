@@ -5,6 +5,7 @@ var localized string FriendlyName;
 var config int Tier;
 var config array<RarityDeckData> Decks;
 var config string RarityColor;
+var config string RarityIcon;
 
 function array<RarityDeckData> GetDecksToRoll(X2ItemTemplate ItemTemplate, optional bool bIgnoreChance)
 {

@@ -77,6 +77,9 @@
     <Content Include="Content\UILibrary_InvCatImages.upk">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Content\UILibrary_TRRarityIcons.upk">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Localization\TeslaLootMod.int">
       <SubType>Content</SubType>
     </Content>

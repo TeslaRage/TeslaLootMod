@@ -596,6 +596,12 @@ static function PatchWeaponUpgrades()
 				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplateName);
 			}
 
+			// Make sure to add itself if not already there
+			if (WUTemplate.MutuallyExclusiveUpgrades.Find(WUTemplate.DataName) == INDEX_NONE)
+			{
+				WUTemplate.MutuallyExclusiveUpgrades.AddItem(WUTemplate.DataName);
+			}
+
 			if (PatchWeaponUpgrade.AttachmentsDonorTemplate != '')
 			{
 				DonorTemplate = X2WeaponUpgradeTemplate(ItemTemplateMan.FindItemTemplate(PatchWeaponUpgrade.AttachmentsDonorTemplate));
@@ -718,10 +724,8 @@ static function array<XComGameState_Item> GetTLMItems(optional name Category, op
 	return Items;
 }
 
-static function bool IsATLMItem(XComGameState_Item Item)
+static function bool IsATLMItem(XComGameState_Item Item, out optional XComGameState_ItemData Data)
 {
-	local XComGameState_ItemData Data;
-
 	Data = XComGameState_ItemData(Item.FindComponentObject(class'XComGameState_ItemData'));
 	if (Data != none) return true;
 
@@ -829,6 +833,54 @@ static function array<XComGameState_Unit> GetSoldiersCanEquipCat(name Category, 
 	return Units;
 }
 
+// This makes it so that weapon's ammo upgrade takes priority over equipped utility ammo
+static function PatchHotLoadAmmo()
+{
+	local X2AbilityTemplate AbilityTemplate;
+
+	AbilityTemplate = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('HotLoadAmmo');
+
+	if (AbilityTemplate != none)
+	{
+		AbilityTemplate.BuildNewGameStateFn = HotLoadAmmo_TLM_BuildGameState;
+	}
+}
+
+// Returns true if unit has ammo upgrade in one of its weapons
+// And optionally provides the weapon name and ammo upgrade name
+static function bool UnitHasAmmoUpgrade(XComGameState_Unit Unit, optional out array<string> WeaponNames, optional out array<string> AmmoUpgradeNames)
+{
+	local array<XComGameState_Item> Items;
+	local XComGameState_Item Item;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+
+	Items = Unit.GetAllInventoryItems();
+	
+	foreach Items(Item)
+	{
+		if (Item.GetMyWeaponUpgradeCount() > 0)
+		{
+			WUTemplates = Item.GetMyWeaponUpgradeTemplates();
+			foreach WUTemplates(WUTemplate)
+			{
+				if (WUTemplate.IsA('X2WeaponUpgradeTemplate_TLMAmmo'))
+				{
+					WeaponNames.AddItem(Item.Nickname == "" ? Item.GetMyTemplate().GetItemFriendlyName() : Item.Nickname);
+					AmmoUpgradeNames.AddItem(WUTemplate.GetItemFriendlyName());
+				}
+			}
+		}
+	}
+
+	if (WeaponNames.Length > 0 )
+	{
+		return true;
+	}
+
+	return false;
+}
+
 // =============
 // DELEGATES
 // =============
@@ -919,4 +971,66 @@ static function int SortByRank(XComGameState_Unit A, XComGameState_Unit B)
 	}
 
 	return 0;
+}
+
+// Copied from X2Ability_DefaultAbilitySet::HotLoadAmmo_BuildGameState with modifications
+simulated function XComGameState HotLoadAmmo_TLM_BuildGameState(XComGameStateContext Context)
+{
+	local XComGameState NewGameState;
+	local XComGameState_Unit UnitState;
+	local XComGameStateContext_Ability AbilityContext;
+	local XComGameState_Ability AbilityState;
+	local XComGameState_Item AmmoState, WeaponState, NewWeaponState;
+	local array<XComGameState_Item> UtilityItems;
+	local X2AmmoTemplate AmmoTemplate;
+	local X2WeaponTemplate WeaponTemplate;
+	local array<X2WeaponUpgradeTemplate> WUTemplates;
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local bool FoundAmmo;
+
+	NewGameState = `XCOMHISTORY.CreateNewGameState(true, Context);
+	AbilityContext = XComGameStateContext_Ability(Context);
+	AbilityState = XComGameState_Ability(`XCOMHISTORY.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
+
+	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', AbilityContext.InputContext.SourceObject.ObjectID));
+	WeaponState = AbilityState.GetSourceWeapon();
+	NewWeaponState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', WeaponState.ObjectID));
+	WeaponTemplate = X2WeaponTemplate(WeaponState.GetMyTemplate());
+
+	// Start Issue #393
+	// Reset weapon's ammo before further modificiations
+	NewWeaponState.Ammo = NewWeaponState.GetClipSize();
+	// End Issue #393
+
+	// Start of modification to original HotLoadAmmo_BuildGameState
+	WUTemplates = NewWeaponState.GetMyWeaponUpgradeTemplates();
+	foreach WUTemplates(WUTemplate)
+	{
+		if (WUTemplate.IsA('X2WeaponUpgradeTemplate_TLMAmmo'))
+		{
+			return NewGameState;
+		}
+	}
+	// End of modification to original HotLoadAmmo_BuildGameState
+
+	// Start Issue #171
+	UtilityItems = UnitState.GetAllInventoryItems(, true);
+	foreach UtilityItems(AmmoState)
+	{
+		AmmoTemplate = X2AmmoTemplate(AmmoState.GetMyTemplate());
+		// Ignore looted/droppbale ammos as well
+		if (AmmoTemplate != none && AmmoTemplate.IsWeaponValidForAmmo(WeaponTemplate) && AmmoState.InventorySlot != eInvSlot_Backpack && AmmoState.InventorySlot != eInvSlot_Loot)
+		{
+	// End Issue #171
+			FoundAmmo = true;
+			break;
+		}
+	}
+	if (FoundAmmo)
+	{
+		NewWeaponState.LoadedAmmo = AmmoState.GetReference();
+		NewWeaponState.Ammo += AmmoState.GetClipSize();
+	}
+
+	return NewGameState;
 }

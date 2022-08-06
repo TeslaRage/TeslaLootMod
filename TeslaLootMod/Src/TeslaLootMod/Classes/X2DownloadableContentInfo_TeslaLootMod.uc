@@ -27,6 +27,7 @@ static event OnPostTemplatesCreated()
 	class'X2Helper_TLM'.static.AddAbilityBonusRadius();
 	class'X2Helper_TLM'.static.PatchStandardShot();
 	class'X2Helper_TLM'.static.PatchWeaponUpgrades();
+	class'X2Helper_TLM'.static.PatchHotLoadAmmo();
 }
 
 static event OnLoadedSavedGameToStrategy()
@@ -39,7 +40,8 @@ static event OnLoadedSavedGameToTactical()
 	class'X2Helper_TLM'.static.CreateTechsMidCampaign();
 }
 
-static function bool CanAddItemToInventory_CH_Improved(
+// No longer used. Renamed to DISABLED_CanAddItemToInventory_CH_Improved
+static function bool DISABLED_CanAddItemToInventory_CH_Improved(
 	out int bCanAddItem,						// out value for XComGameState_Unit
 	const EInventorySlot Slot,					// Inventory Slot you're trying to equip the Item into
 	const X2ItemTemplate ItemTemplate,			// Item Template of the Item you're trying to equip
@@ -542,6 +544,23 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	return false;
 }
 
+static function OverrideItemImage_Improved(out array<string> imagePath, const EInventorySlot Slot, const X2ItemTemplate ItemTemplate, XComGameState_Unit UnitState, const XComGameState_Item ItemState)
+{
+	local XComGameState_ItemData Data;
+	local X2RarityTemplate RarityTemplate;
+
+	Data = none; // Compiler warning
+
+	if (class'X2Helper_TLM'.static.IsATLMItem(ItemState, Data))
+	{
+		RarityTemplate = class'X2RarityTemplateManager'.static.GetRarityTemplateManager().GetRarityTemplate(Data.RarityName);
+		if (RarityTemplate != none && RarityTemplate.RarityIcon != "")
+		{
+			imagePath.AddItem(RarityTemplate.RarityIcon);
+		}
+	}
+}
+
 // =============
 // CONSOLE COMMANDS
 // =============
@@ -832,4 +851,27 @@ exec function TLM_GiveItem(name Category, name RarityName)
 
 	`GAMERULES.SubmitGameState(NewGameState);
 	class'Helpers'.static.OutputMsg(Item.GetMyTemplateName() @"(" $Item.NickName $")" @"added to HQ inventory.");
+}
+
+exec function TLM_PrintMutualExclusives(name TemplateName)
+{
+	local X2WeaponUpgradeTemplate WUTemplate;
+	local name WUName;
+
+	WUTemplate = X2WeaponUpgradeTemplate(class'X2ItemTemplateManager'.static.GetItemTemplateManager().FindItemTemplate(TemplateName));
+
+	if (WUTemplate == none)
+	{
+		class'Helpers'.static.OutputMsg(string(TemplateName) @"is not an X2WeaponUpgradeTemplate");
+		return;
+	}
+	else
+	{
+		class'Helpers'.static.OutputMsg(string(TemplateName) @"is mutually exclusive with:");
+
+		foreach WUTemplate.MutuallyExclusiveUpgrades(WUName)
+		{
+			class'Helpers'.static.OutputMsg(string(WUName));
+		}
+	}
 }
