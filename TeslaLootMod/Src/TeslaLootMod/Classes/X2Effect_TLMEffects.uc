@@ -37,6 +37,7 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 	local float ExtraDamage;
 	local XComGameState_Item SourceWeapon;
 	local XComGameState_Unit Unit;
+	local XComGameState_Ability AbilityfromEffectState;
 	local name QualifiedEffectName;
 	local bool bLog;
 
@@ -49,6 +50,15 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 	SourceWeapon = AbilityState.GetSourceWeapon();
 	if (SourceWeapon != none && SourceWeapon.ObjectID == EffectState.ApplyEffectParameters.ItemStateObjectRef.ObjectID)
 	{
+		`LOG("AbilityState: " $AbilityState.GetMyTemplateName() @"Ability from effectstate: " $EffectState.ApplyEffectParameters.AbilityStateObjectRef.ObjectID, bLog, 'TLMDEBUG');
+		`LOG("Effectstate: " $EffectState.ObjectID, bLog, 'TLMDEBUG');
+		`LOG("BonusDamageWhenEffected: " $BonusDamageWhenEffected, bLog, 'TLMDEBUG');
+
+		AbilityfromEffectState = XComGameState_Ability(`XCOMHISTORY.GetGameStateForObjectID(EffectState.ApplyEffectParameters.AbilityStateObjectRef.ObjectID));
+		if (AbilityfromEffectState != none)
+		{
+			`LOG("AbilityfromEffectState: " $AbilityfromEffectState.GetMyTemplateName(), bLog, 'TLMDEBUG');
+		}
 
 		if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult) && DamageMultiplier != 0)
 		{
@@ -193,4 +203,9 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 			}
 		}
 	}
+}
+
+defaultproperties
+{
+	DuplicateResponse = eDupe_Ignore
 }

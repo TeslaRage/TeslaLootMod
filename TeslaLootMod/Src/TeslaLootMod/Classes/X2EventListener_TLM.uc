@@ -6,6 +6,8 @@ var config bool bAllowRemoveUpgrade;
 
 var UIArmory_WeaponUpgrade ScreenChange;
 
+`include(TeslaLootMod/Src/ModConfigMenuAPI/MCM_API_CfgHelpers.uci)
+
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
@@ -57,6 +59,8 @@ static function EventListenerReturn ItemAddedToSlot_RemoveAmmo(Object EventData,
 	local string tmpMessage, AmmoName, AmmoUpgradeName;
 	local bool bWeaponHasAmmoUpgrade, bLog;
 	local int i;
+
+	if (!GetConfig_ShowAmmoUpgradeWarning()) return ELR_NoInterrupt;
 
 	bLog = class'X2DownloadableContentInfo_TeslaLootMod'.default.bLog;
 
@@ -302,4 +306,11 @@ static function EventListenerReturn OnGetItemRange(Object EventData, Object Even
 	}
 
 	return ELR_NoInterrupt;
+}
+
+`MCM_CH_StaticVersionChecker(class'TeslaLootMod_Defaults'.default.CFG_VERSION,class'UIScreenListener_MCM'.default.CONFIG_VERSION)
+
+static function bool GetConfig_ShowAmmoUpgradeWarning()
+{
+	return `MCM_CH_GetValue(class'TeslaLootMod_Defaults'.default.AMMOUPGRADEWARNING_SETTING,class'UIScreenListener_MCM'.default.AMMOUPGRADEWARNING_CHECKBOX_VALUE);
 }
