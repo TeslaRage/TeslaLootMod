@@ -40,6 +40,9 @@ function array<BaseItemData> GetBaseItems(X2RarityTemplate RarityTemplate, XComG
 		// Requirement wise, we only want to check RequiredTechs
 		ItemRequirements.RequiredTechs = ItemTemplate.Requirements.RequiredTechs;
 
+		// PsiAmp_CV has an additional property that needs to be checked
+		class'X2Helper_TLM'.static.AppendArrays(ItemRequirements.RequiredTechs, ItemTemplate.ArmoryDisplayRequirements.RequiredTechs);
+
 		// Individually built items requirement check
 		if (!XComHQ.MeetsAllStrategyRequirements(ItemRequirements))
 		{

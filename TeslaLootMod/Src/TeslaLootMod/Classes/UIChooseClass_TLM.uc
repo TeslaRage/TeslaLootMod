@@ -64,9 +64,13 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	GetItems();
 	PopulateData();
 
-	//select first selection
+	//select first selection and make list horizontal [d-left, d-right] for controllers too
 	List.bSelectFirstAvailable = bSelectFirstAvailable;
+	
 	Navigator.SetSelected(List);
+	Navigator.HorizontalNavigation = true;
+	Navigator.LoopSelection = true;
+
 	List.Navigator.SetSelected(List);
 	List.SetSelectedIndex(0);
 
@@ -530,10 +534,9 @@ simulated function UpdateNavHelp()
 	NavHelp.ClearButtonHelp();
 	NavHelp.bIsVerticalHelp = `ISCONTROLLERACTIVE;
 
-	if(`ISCONTROLLERACTIVE && CanAffordItem(iSelectedItem) && !IsItemPurchased(iSelectedItem))
-	{
-		NavHelp.AddSelectNavHelp();
-	}
+	//As ALL TLM Loot Options should be 'valid purchases' there is no point in the above CanAfford Checks
+	//and you might as well just have this always on
+	NavHelp.AddSelectNavHelp();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
