@@ -50,11 +50,7 @@ function array<RarityDeckData> GetDecksToRoll(X2ItemTemplate ItemTemplate, optio
 		}		
 
 		// Possibility of getting the deck
-		if (!bIgnoreChance && `SYNC_RAND_STATIC(100) < Deck.Chance)
-		{
-			UpgradeDecks.AddItem(Deck);
-		}
-		else
+		if (bIgnoreChance || `SYNC_RAND_STATIC(100) < Deck.Chance)
 		{
 			UpgradeDecks.AddItem(Deck);
 		}
